@@ -3,6 +3,7 @@ import type { TranslationFeedback, TranslationError } from '../types/translation
 
 interface Props {
   feedback: TranslationFeedback;
+  originalText?: string;
   showDetailedPrompt?: boolean;
   onPromptDismiss?: () => void;
 }
@@ -165,7 +166,7 @@ function useIsMobile() {
   return isMobile;
 }
 
-export function FeedbackPanel({ feedback, showDetailedPrompt, onPromptDismiss }: Props) {
+export function FeedbackPanel({ feedback, originalText, showDetailedPrompt, onPromptDismiss }: Props) {
   const isMobile = useIsMobile();
   const [promptDismissed, setPromptDismissed] = useState(false);
   
@@ -272,7 +273,15 @@ export function FeedbackPanel({ feedback, showDetailedPrompt, onPromptDismiss }:
       <div>
         <h3 className="text-lg font-semibold text-gray-800 mb-3">Correct Translation</h3>
         <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-          <p className="text-green-800 font-medium">{feedback.correctTranslation}</p>
+          <p 
+            className="text-green-800 font-medium cursor-help"
+            title={originalText || 'Original Vietnamese sentence'}
+          >
+            {feedback.correctTranslation}
+            {originalText && (
+              <span className="ml-2 text-xs text-green-600 opacity-70">(hover to see original)</span>
+            )}
+          </p>
         </div>
       </div>
 

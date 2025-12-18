@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { createSession, getSession, submitSentenceTranslation, skipSentence } from '../api/sessionApi';
 import { ScoreBreakdown } from './ScoreBreakdown';
@@ -13,6 +13,7 @@ interface Props {
 
 export function ParagraphSession({ paragraphId }: Props) {
   const navigate = useNavigate();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [userTranslation, setUserTranslation] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -68,12 +69,33 @@ export function ParagraphSession({ paragraphId }: Props) {
     initSession();
   }, [paragraphId]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.key === 'Enter') {
+        e.preventDefault();
+        if (lastSubmission) {
+          if (lastSubmission.accuracy >= 80) {
+            handleNextSentence();
+          } else {
+            handleRetry();
+          }
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [lastSubmission]);
+
   const initSession = async () => {
     setIsLoading(true);
     setError(null);
     try {
       const newSession = await createSession(paragraphId);
       setSession(newSession);
+      if (newSession.completedTranslations) {
+        setCompletedTranslations(newSession.completedTranslations);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to start session');
     } finally {
@@ -146,6 +168,7 @@ export function ParagraphSession({ paragraphId }: Props) {
   const handleNextSentence = () => {
     setLastSubmission(null);
     setUserTranslation('');
+    setTimeout(() => textareaRef.current?.focus(), 0);
   };
 
   const handleQuit = () => {
@@ -297,6 +320,7 @@ export function ParagraphSession({ paragraphId }: Props) {
               {/* Translation Input */}
               <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
                 <textarea
+                  ref={textareaRef}
                   className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
                   rows={4}
                   placeholder="Enter your English translation here... (Only highlighted sentence, Ctrl+Enter to submit)"
@@ -339,15 +363,19 @@ export function ParagraphSession({ paragraphId }: Props) {
                         <button
                           onClick={handleNextSentence}
                           className="flex items-center gap-2 px-6 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700"
+                          title="Ctrl+Enter"
                         >
                           Next Sentence →
+                          <kbd className="ml-1 px-1.5 py-0.5 text-xs bg-green-700 rounded">Ctrl+↵</kbd>
                         </button>
                       ) : (
                         <button
                           onClick={handleRetry}
                           className="flex items-center gap-2 px-6 py-2 bg-orange-600 text-white rounded-lg font-medium hover:bg-orange-700"
+                          title="Ctrl+Enter"
                         >
                           🔄 Retry (Need 80%+)
+                          <kbd className="ml-1 px-1.5 py-0.5 text-xs bg-orange-700 rounded">Ctrl+↵</kbd>
                         </button>
                       )
                     ) : (
@@ -402,7 +430,7 @@ export function ParagraphSession({ paragraphId }: Props) {
                       overallScore: Math.round(lastSubmission.accuracy),
                     }}
                   />
-                  <FeedbackPanel feedback={lastSubmission.feedback} />
+                  <FeedbackPanel feedback={lastSubmission.feedback} originalText={lastSubmission.originalSentence} />
                 </div>
               ) : lastSubmission?.skipped ? (
                 <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">

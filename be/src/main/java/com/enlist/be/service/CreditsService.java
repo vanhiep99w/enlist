@@ -22,7 +22,7 @@ public class CreditsService {
     private static final int HINT_COST = 1;
     private static final int BONUS_CREDITS_PER_SESSION = 2;
 
-    @Transactional(readOnly = true)
+    @Transactional
     public UserCreditsResponse getUserCredits(Long userId) {
         User user = getOrCreateUser(userId);
         return UserCreditsResponse.fromEntity(user);

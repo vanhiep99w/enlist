@@ -1,13 +1,16 @@
 package com.enlist.be.dto;
 
 import com.enlist.be.entity.ParagraphSession;
+import com.enlist.be.entity.SentenceSubmission;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Data
 @Builder
@@ -29,6 +32,7 @@ public class SessionResponse {
     private String fullContent;
     private LocalDateTime startedAt;
     private LocalDateTime completedAt;
+    private Map<Integer, String> completedTranslations;
 
     public static SessionResponse fromEntity(ParagraphSession session) {
         var paragraph = session.getParagraph();
@@ -36,6 +40,17 @@ public class SessionResponse {
         String currentSentence = null;
         if (session.getCurrentSentenceIndex() < sentences.size()) {
             currentSentence = sentences.get(session.getCurrentSentenceIndex());
+        }
+
+        Map<Integer, String> completedTranslations = new HashMap<>();
+        if (session.getSubmissions() != null) {
+            for (SentenceSubmission submission : session.getSubmissions()) {
+                if (submission.getAccuracy() != null && submission.getAccuracy() >= 80 
+                        && submission.getUserTranslation() != null 
+                        && !Boolean.TRUE.equals(submission.getSkipped())) {
+                    completedTranslations.put(submission.getSentenceIndex(), submission.getUserTranslation());
+                }
+            }
         }
 
         return SessionResponse.builder()
@@ -54,6 +69,7 @@ public class SessionResponse {
                 .fullContent(paragraph.getContent())
                 .startedAt(session.getStartedAt())
                 .completedAt(session.getCompletedAt())
+                .completedTranslations(completedTranslations)
                 .build();
     }
 }

@@ -24,6 +24,7 @@ export interface Session {
   fullContent: string;
   startedAt: string;
   completedAt: string | null;
+  completedTranslations: Record<number, string>;
 }
 
 export interface SessionProgress {
