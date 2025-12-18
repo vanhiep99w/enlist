@@ -101,9 +101,15 @@ export function TranslationExercise({ exercise }: Props) {
               id="translation"
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none transition-colors"
               rows={4}
-              placeholder="Translate naturally, not word-by-word. Focus on meaning over literal translation."
+              placeholder="Translate naturally, not word-by-word. Focus on meaning over literal translation. (Ctrl+Enter to submit)"
               value={userTranslation}
               onChange={(e) => setUserTranslation(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.ctrlKey && e.key === 'Enter' && userTranslation.trim() && !isLoading && !result) {
+                  e.preventDefault();
+                  handleSubmit();
+                }
+              }}
               disabled={isLoading || result !== null}
             />
           </div>

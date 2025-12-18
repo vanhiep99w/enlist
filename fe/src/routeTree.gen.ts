@@ -9,38 +9,65 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ParagraphsRouteImport } from './routes/paragraphs'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SessionParagraphIdRouteImport } from './routes/session.$paragraphId'
 
+const ParagraphsRoute = ParagraphsRouteImport.update({
+  id: '/paragraphs',
+  path: '/paragraphs',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SessionParagraphIdRoute = SessionParagraphIdRouteImport.update({
+  id: '/session/$paragraphId',
+  path: '/session/$paragraphId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/paragraphs': typeof ParagraphsRoute
+  '/session/$paragraphId': typeof SessionParagraphIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/paragraphs': typeof ParagraphsRoute
+  '/session/$paragraphId': typeof SessionParagraphIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/paragraphs': typeof ParagraphsRoute
+  '/session/$paragraphId': typeof SessionParagraphIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/paragraphs' | '/session/$paragraphId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/paragraphs' | '/session/$paragraphId'
+  id: '__root__' | '/' | '/paragraphs' | '/session/$paragraphId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ParagraphsRoute: typeof ParagraphsRoute
+  SessionParagraphIdRoute: typeof SessionParagraphIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/paragraphs': {
+      id: '/paragraphs'
+      path: '/paragraphs'
+      fullPath: '/paragraphs'
+      preLoaderRoute: typeof ParagraphsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +75,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/session/$paragraphId': {
+      id: '/session/$paragraphId'
+      path: '/session/$paragraphId'
+      fullPath: '/session/$paragraphId'
+      preLoaderRoute: typeof SessionParagraphIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ParagraphsRoute: ParagraphsRoute,
+  SessionParagraphIdRoute: SessionParagraphIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
