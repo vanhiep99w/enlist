@@ -7,6 +7,8 @@ import com.enlist.be.entity.User;
 import com.enlist.be.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +22,7 @@ public class CreditsService {
     private static final int HINT_COST = 1;
     private static final int BONUS_CREDITS_PER_SESSION = 2;
 
+    @Transactional(readOnly = true)
     public UserCreditsResponse getUserCredits(Long userId) {
         User user = getOrCreateUser(userId);
         return UserCreditsResponse.fromEntity(user);
@@ -75,17 +78,26 @@ public class CreditsService {
         log.info("User {} earned {} credits", userId, amount);
     }
 
-    private User getOrCreateUser(Long userId) {
+    @Transactional
+    protected User getOrCreateUser(Long userId) {
         return userRepository.findById(userId)
                 .orElseGet(() -> {
-                    User newUser = User.builder()
-                            .id(userId)
-                            .username("user" + userId)
-                            .credits(10)
-                            .totalPoints(0)
-                            .sessionsCompleted(0)
-                            .build();
-                    return userRepository.save(newUser);
+                    try {
+                        User newUser = User.builder()
+                                .username("user" + userId)
+                                .credits(10)
+                                .totalPoints(0)
+                                .sessionsCompleted(0)
+                                .build();
+                        User savedUser = userRepository.saveAndFlush(newUser);
+                        log.info("Created new user with ID: {}", savedUser.getId());
+                        return savedUser;
+                    } catch (DataIntegrityViolationException | ObjectOptimisticLockingFailureException e) {
+                        log.debug("User {} was created by another transaction, fetching existing user", userId);
+                        return userRepository.findById(userId)
+                                .orElseGet(() -> userRepository.findAll().stream().findFirst()
+                                        .orElseThrow(() -> new RuntimeException("No users found in database")));
+                    }
                 });
     }
 }

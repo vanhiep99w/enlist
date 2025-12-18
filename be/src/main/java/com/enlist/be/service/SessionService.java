@@ -109,17 +109,20 @@ public class SessionService {
 
         session.setTotalPoints(session.getTotalPoints() + pointsEarned);
 
+        boolean passedThreshold = accuracy >= 80.0;
         boolean isLastSentence = session.isLastSentence();
         int nextIndex = currentIndex;
         String nextSentence = null;
 
-        if (!isLastSentence) {
-            session.advanceToNextSentence();
-            nextIndex = session.getCurrentSentenceIndex();
-            nextSentence = sentences.get(nextIndex);
-        } else {
-            session.complete();
-            creditsService.awardPointsForSession(session.getUserId(), session.getTotalPoints(), true);
+        if (passedThreshold) {
+            if (!isLastSentence) {
+                session.advanceToNextSentence();
+                nextIndex = session.getCurrentSentenceIndex();
+                nextSentence = sentences.get(nextIndex);
+            } else {
+                session.complete();
+                creditsService.awardPointsForSession(session.getUserId(), session.getTotalPoints(), true);
+            }
         }
 
         sessionRepository.save(session);

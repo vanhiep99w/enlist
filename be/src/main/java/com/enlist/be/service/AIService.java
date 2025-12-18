@@ -44,6 +44,8 @@ public class AIService {
 
     public TranslationFeedback evaluateTranslation(String originalText, String userTranslation) {
         String prompt = buildPrompt(originalText, userTranslation);
+        
+        String normalizedUser = normalizeForComparison(userTranslation);
 
         Map<String, Object> requestBody = Map.of(
                 "model", groqConfig.getModel(),
@@ -61,7 +63,14 @@ public class AIService {
                     .bodyToMono(String.class)
                     .block();
 
-            return parseResponse(response);
+            TranslationFeedback feedback = parseResponse(response);
+            
+            String normalizedCorrect = normalizeForComparison(feedback.getCorrectTranslation());
+            if (normalizedUser.equals(normalizedCorrect)) {
+                return createPerfectScoreFeedback(userTranslation);
+            }
+            
+            return feedback;
         } catch (Exception e) {
             log.error("Error calling Groq API: {}", e.getMessage(), e);
             return createDefaultFeedback();
@@ -162,11 +171,23 @@ public class AIService {
                    - "kids" is casual → "children" for formal contexts
                    - Add registerTips when word choice doesn't match expected formality level
                 
+                SCORING PHILOSOPHY - BE ENCOURAGING, NOT PUNITIVE:
+                Focus on MEANING first. If the student conveys the correct meaning, start from a high base score (85-90%%) and only deduct for errors.
+                
+                Error severity levels (deduct accordingly):
+                - IGNORE (0 points): Capitalization errors (\"i\" vs \"I\"), minor punctuation, extra spaces
+                - MINOR (-2 to -5 points): Common Vietnamese learner mistakes like article errors (\"a breakfast\" vs \"breakfast\"), slight word order differences that don't affect meaning
+                - MODERATE (-5 to -10 points): Wrong prepositions, incorrect verb tenses, collocation errors
+                - MAJOR (-10 to -20 points): Missing key words, wrong meaning, incomprehensible grammar
+                
                 Scoring guide:
-                - grammarScore: syntax, verb forms, articles, prepositions, sentence structure
-                - wordChoiceScore: vocabulary accuracy, collocations, word forms
-                - naturalnessScore: natural phrasing, tone, fluency, idiomatic expressions
+                - grammarScore: syntax, verb forms, articles, prepositions, sentence structure. Start at 95 if meaning is correct.
+                - wordChoiceScore: vocabulary accuracy, collocations, word forms. Start at 95 if words convey the meaning.
+                - naturalnessScore: natural phrasing, tone, fluency, idiomatic expressions. Start at 90 for understandable translations.
                 - overallScore: weighted average (Grammar 40%%, Word Choice 30%%, Naturalness 30%%)
+                
+                IMPORTANT: A translation that conveys the same meaning with minor errors should score 85-95%%. 
+                Only translations with significant meaning errors or major grammar issues should score below 80%%.
                 """.formatted(originalText, userTranslation);
     }
 
@@ -329,6 +350,28 @@ public class AIService {
                 .errors(List.of())
                 .suggestions(List.of("Unable to evaluate translation. Please try again."))
                 .correctTranslation("")
+                .build();
+    }
+    
+    private String normalizeForComparison(String text) {
+        if (text == null) return "";
+        return text.toLowerCase()
+                .trim()
+                .replaceAll("\\s+", " ")
+                .replaceAll("[^a-z0-9\\s]", "");
+    }
+    
+    private TranslationFeedback createPerfectScoreFeedback(String userTranslation) {
+        return TranslationFeedback.builder()
+                .scores(ScoreBreakdown.builder()
+                        .grammarScore(100)
+                        .wordChoiceScore(100)
+                        .naturalnessScore(100)
+                        .overallScore(100)
+                        .build())
+                .errors(List.of())
+                .suggestions(List.of("Perfect translation!"))
+                .correctTranslation(userTranslation)
                 .build();
     }
 }

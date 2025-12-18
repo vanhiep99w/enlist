@@ -90,6 +90,8 @@ export function ParagraphSession({ paragraphId }: Props) {
       const result = await submitSentenceTranslation(session.id, userTranslation);
       setLastSubmission(result);
       
+      const updatedSession = await getSession(session.id);
+      
       const passedThreshold = result.accuracy >= 80;
       
       if (passedThreshold) {
@@ -98,12 +100,13 @@ export function ParagraphSession({ paragraphId }: Props) {
           [result.sentenceIndex]: userTranslation
         }));
         
-        if (!result.isLastSentence) {
-          const updatedSession = await getSession(session.id);
-          setSession(updatedSession);
+        if (result.isLastSentence) {
+          setSession(prev => prev ? { ...updatedSession, status: 'COMPLETED' } : null);
         } else {
-          setSession(prev => prev ? { ...prev, status: 'COMPLETED' } : null);
+          setSession(updatedSession);
         }
+      } else {
+        setSession(updatedSession);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to submit translation');
