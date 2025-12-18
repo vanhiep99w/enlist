@@ -8,6 +8,14 @@ export interface Paragraph {
   sentences: string[];
 }
 
+export interface CompletedSentenceData {
+  correctTranslation: string;
+  userTranslation: string;
+  originalSentence: string;
+  accuracy: number;
+  errors: Array<{ type: string; quickFix?: string; correction?: string }>;
+}
+
 export interface Session {
   id: number;
   paragraphId: number;
@@ -25,6 +33,7 @@ export interface Session {
   startedAt: string;
   completedAt: string | null;
   completedTranslations: Record<number, string>;
+  completedSentenceDetails: Record<number, CompletedSentenceData>;
 }
 
 export interface SessionProgress {

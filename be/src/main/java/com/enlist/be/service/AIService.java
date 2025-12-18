@@ -43,7 +43,11 @@ public class AIService {
     }
 
     public TranslationFeedback evaluateTranslation(String originalText, String userTranslation) {
-        String prompt = buildPrompt(originalText, userTranslation);
+        return evaluateTranslation(originalText, userTranslation, null, null);
+    }
+
+    public TranslationFeedback evaluateTranslation(String originalText, String userTranslation, String paragraphContext, List<String> previousTranslations) {
+        String prompt = buildPrompt(originalText, userTranslation, paragraphContext, previousTranslations);
         
         String normalizedUser = normalizeForComparison(userTranslation);
 
@@ -77,11 +81,36 @@ public class AIService {
         }
     }
 
-    private String buildPrompt(String originalText, String userTranslation) {
+    private String buildPrompt(String originalText, String userTranslation, String paragraphContext, List<String> previousTranslations) {
+        StringBuilder contextSection = new StringBuilder();
+        
+        // Add tense detection hint based on paragraph context
+        String tenseHint = "";
+        if (paragraphContext != null && !paragraphContext.isEmpty()) {
+            contextSection.append("\n                PARAGRAPH CONTEXT (Full Vietnamese paragraph for reference):\n                ");
+            contextSection.append(paragraphContext);
+            contextSection.append("\n                ");
+            
+            // Detect if paragraph is about past events
+            String lowerContext = paragraphContext.toLowerCase();
+            if (lowerContext.contains("tháng trước") || lowerContext.contains("hôm qua") || 
+                lowerContext.contains("năm ngoái") || lowerContext.contains("tuần trước") ||
+                lowerContext.contains("đã") || lowerContext.contains("hồi")) {
+                tenseHint = "\n                ⚠️ CRITICAL: This paragraph describes PAST EVENTS. The student's translation MUST use PAST TENSE (was/were/went/had, NOT is/am/are/go/have).\n                ";
+            }
+        }
+        
+        if (previousTranslations != null && !previousTranslations.isEmpty()) {
+            contextSection.append("\n                PREVIOUS SENTENCES TRANSLATED BY STUDENT:\n                ");
+            for (int i = 0; i < previousTranslations.size(); i++) {
+                contextSection.append(String.format("%d. %s\n                ", i + 1, previousTranslations.get(i)));
+            }
+        }
+        
         return """
                 You are an English language teacher evaluating a Vietnamese-to-English translation for Vietnamese learners.
-                
-                Original Vietnamese: %s
+                %s%s
+                Original Vietnamese sentence to translate: %s
                 Student's Translation: %s
                 
                 Evaluate the translation and respond with ONLY valid JSON (no markdown, no explanation outside JSON):
@@ -105,7 +134,7 @@ public class AIService {
                     }
                   ],
                   "suggestions": ["<improvement tip 1>", ...],
-                  "correctTranslation": "<ideal English translation>",
+                  "correctTranslation": "<student's translation with all typos, spelling, grammar, and punctuation corrected - preserve their word choices when correct>",
                   "articleTips": [
                     {
                       "context": "<when this article rule applies>",
@@ -188,7 +217,14 @@ public class AIService {
                 
                 IMPORTANT: A translation that conveys the same meaning with minor errors should score 85-95%%. 
                 Only translations with significant meaning errors or major grammar issues should score below 80%%.
-                """.formatted(originalText, userTranslation);
+                
+                PARAGRAPH COHERENCE - CRITICAL:
+                If paragraph context is provided, you MUST ensure tense consistency:
+                - If the paragraph describes PAST events (e.g., "Tháng trước tôi đi...", "Hôm qua...", "Năm ngoái..."), ALL sentences should use PAST TENSE
+                - If student uses present tense for a past-context paragraph, mark as GRAMMAR error and correct to past tense
+                - The correctTranslation MUST use the appropriate tense matching the paragraph context
+                - Example: If context is about "last month's trip", "I'm in the hotel" should be corrected to "I was in the hotel"
+                """.formatted(contextSection.toString(), originalText, userTranslation);
     }
 
     private TranslationFeedback parseResponse(String response) throws JsonProcessingException {

@@ -78,7 +78,20 @@ public class SessionService {
 
         String originalSentence = sentences.get(currentIndex);
         
-        TranslationFeedback feedback = aiService.evaluateTranslation(originalSentence, request.getUserTranslation());
+        // Get paragraph context and previous translations for tense consistency
+        String paragraphContext = paragraph.getContent();
+        List<String> previousTranslations = session.getSubmissions().stream()
+                .filter(s -> !Boolean.TRUE.equals(s.getSkipped()) && s.getCorrectTranslation() != null)
+                .sorted((a, b) -> a.getSentenceIndex() - b.getSentenceIndex())
+                .map(SentenceSubmission::getCorrectTranslation)
+                .toList();
+        
+        TranslationFeedback feedback = aiService.evaluateTranslation(
+                originalSentence, 
+                request.getUserTranslation(),
+                paragraphContext,
+                previousTranslations
+        );
 
         double accuracy = calculateAccuracy(feedback);
         int pointsEarned = calculatePoints(accuracy);

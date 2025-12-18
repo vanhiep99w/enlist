@@ -4,7 +4,7 @@ import { createSession, getSession, submitSentenceTranslation, skipSentence } fr
 import { ScoreBreakdown } from './ScoreBreakdown';
 import { FeedbackPanel } from './FeedbackPanel';
 import { AchievementsPanel } from './AchievementsPanel';
-import type { Session, SentenceSubmissionResponse } from '../types/session';
+import type { Session, SentenceSubmissionResponse, CompletedSentenceData } from '../types/session';
 import type { Achievement } from '../types/user';
 
 interface Props {
@@ -20,7 +20,8 @@ export function ParagraphSession({ paragraphId }: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastSubmission, setLastSubmission] = useState<SentenceSubmissionResponse | null>(null);
-  const [completedTranslations, setCompletedTranslations] = useState<Record<number, string>>({});
+  const [completedData, setCompletedData] = useState<Record<number, CompletedSentenceData>>({});
+  const [hoveredSentence, setHoveredSentence] = useState<number | null>(null);
 
   const achievements = useMemo<Achievement[]>(() => {
     if (!session) return [];
@@ -70,6 +71,12 @@ export function ParagraphSession({ paragraphId }: Props) {
   }, [paragraphId]);
 
   useEffect(() => {
+    if (session && !isLoading && session.status !== 'COMPLETED') {
+      textareaRef.current?.focus();
+    }
+  }, [isLoading, session?.status]);
+
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.key === 'Enter') {
         e.preventDefault();
@@ -93,8 +100,10 @@ export function ParagraphSession({ paragraphId }: Props) {
     try {
       const newSession = await createSession(paragraphId);
       setSession(newSession);
-      if (newSession.completedTranslations) {
-        setCompletedTranslations(newSession.completedTranslations);
+      
+      // Load completedData from backend
+      if (newSession.completedSentenceDetails) {
+        setCompletedData(newSession.completedSentenceDetails);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to start session');
@@ -117,10 +126,21 @@ export function ParagraphSession({ paragraphId }: Props) {
       const passedThreshold = result.accuracy >= 80;
       
       if (passedThreshold) {
-        setCompletedTranslations(prev => ({
-          ...prev,
-          [result.sentenceIndex]: userTranslation
-        }));
+        const newCompletedData = {
+          ...completedData,
+          [result.sentenceIndex]: {
+            correctTranslation: result.correctTranslation || userTranslation,
+            userTranslation: userTranslation,
+            originalSentence: result.originalSentence,
+            accuracy: result.accuracy,
+            errors: result.feedback?.errors?.map(e => ({
+              type: e.type,
+              quickFix: e.quickFix,
+              correction: e.correction
+            })) || []
+          }
+        };
+        setCompletedData(newCompletedData);
         
         if (result.isLastSentence) {
           setSession(prev => prev ? { ...updatedSession, status: 'COMPLETED' } : null);
@@ -140,6 +160,7 @@ export function ParagraphSession({ paragraphId }: Props) {
   const handleRetry = () => {
     setLastSubmission(null);
     setUserTranslation('');
+    setTimeout(() => textareaRef.current?.focus(), 0);
   };
 
   const handleSkip = async () => {
@@ -158,6 +179,7 @@ export function ParagraphSession({ paragraphId }: Props) {
         setSession(prev => prev ? { ...prev, status: 'COMPLETED' } : null);
       }
       setUserTranslation('');
+      setTimeout(() => textareaRef.current?.focus(), 0);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to skip sentence');
     } finally {
@@ -183,20 +205,105 @@ export function ParagraphSession({ paragraphId }: Props) {
         {session.allSentences.map((sentence, index) => {
           const isCurrentSentence = index === session.currentSentenceIndex;
           const isCompleted = index < session.currentSentenceIndex;
-          const translation = completedTranslations[index];
+          const data = completedData[index];
           
-          if (isCompleted && translation) {
+          if (isCompleted && data) {
+            const trimmed = data.correctTranslation.trim();
+            const needsPunctuation = !/[.!?]$/.test(trimmed);
+            const displayText = needsPunctuation ? `${trimmed}.` : trimmed;
+            const hasErrors = data.errors.length > 0;
+            const userDiffersFromCorrect = data.userTranslation.toLowerCase().trim() !== data.correctTranslation.toLowerCase().trim();
+            
             return (
               <span
                 key={index}
-                className="text-green-400 cursor-help relative group"
-                title={sentence}
+                className="text-green-400 cursor-help relative inline"
+                onMouseEnter={() => setHoveredSentence(index)}
+                onMouseLeave={() => setHoveredSentence(null)}
               >
-                {translation}{' '}
-                <span className="absolute bottom-full left-0 mb-2 px-3 py-2 bg-gray-800 text-gray-300 text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 border border-gray-600 max-w-md">
-                  <span className="text-gray-500 text-xs block mb-1">Original:</span>
-                  {sentence}
+                {displayText}{' '}
+                {hoveredSentence === index && (
+                  <span className="absolute bottom-full left-0 mb-2 px-3 py-2 bg-gray-800 text-gray-300 text-sm rounded-lg z-50 border border-gray-600 w-80 whitespace-normal shadow-xl">
+                  {/* Accuracy */}
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-gray-500 text-xs">Accuracy:</span>
+                    <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${
+                      data.accuracy >= 90 ? 'bg-green-900 text-green-300' :
+                      data.accuracy >= 80 ? 'bg-yellow-900 text-yellow-300' :
+                      'bg-red-900 text-red-300'
+                    }`}>
+                      {Math.round(data.accuracy)}%
+                    </span>
+                  </div>
+                  
+                  {/* Original Vietnamese */}
+                  <div className="mb-2">
+                    <span className="text-gray-500 text-xs block">Original:</span>
+                    <span className="text-gray-300 text-xs">{data.originalSentence}</span>
+                  </div>
+                  
+                  {/* User's input if different */}
+                  {userDiffersFromCorrect && (
+                    <div className="mb-2">
+                      <span className="text-gray-500 text-xs block">Your input:</span>
+                      <span className="text-orange-400 text-xs line-through">{data.userTranslation}</span>
+                    </div>
+                  )}
+                  
+                  {/* Errors */}
+                  {hasErrors && (
+                    <div>
+                      <span className="text-gray-500 text-xs block mb-1">Corrections:</span>
+                      {data.errors.slice(0, 3).map((err, i) => (
+                        <div key={i} className="text-xs flex items-start gap-1 mb-0.5">
+                          <span className={`px-1 rounded text-[10px] ${
+                            err.type === 'GRAMMAR' ? 'bg-purple-900 text-purple-300' :
+                            err.type === 'WORD_CHOICE' ? 'bg-blue-900 text-blue-300' :
+                            'bg-orange-900 text-orange-300'
+                          }`}>
+                            {err.type === 'GRAMMAR' ? 'G' : err.type === 'WORD_CHOICE' ? 'W' : 'N'}
+                          </span>
+                          <span className="text-gray-400">{err.quickFix || err.correction}</span>
+                        </div>
+                      ))}
+                      {data.errors.length > 3 && (
+                        <span className="text-gray-500 text-xs">+{data.errors.length - 3} more</span>
+                      )}
+                    </div>
+                  )}
                 </span>
+                )}
+              </span>
+            );
+          }
+          
+          // For completed sentences without detailed data, use completedTranslations from backend
+          if (isCompleted && session.completedTranslations[index]) {
+            const translation = session.completedTranslations[index];
+            const trimmed = translation.trim();
+            const needsPunctuation = !/[.!?]$/.test(trimmed);
+            const displayText = needsPunctuation ? `${trimmed}.` : trimmed;
+            const originalSentence = session.allSentences[index];
+            
+            return (
+              <span 
+                key={index} 
+                className="text-green-400 cursor-help relative inline"
+                onMouseEnter={() => setHoveredSentence(index)}
+                onMouseLeave={() => setHoveredSentence(null)}
+              >
+                {displayText}{' '}
+                {hoveredSentence === index && (
+                  <span className="absolute bottom-full left-0 mb-2 px-3 py-2 bg-gray-800 text-gray-300 text-sm rounded-lg z-50 border border-gray-600 w-80 whitespace-normal shadow-xl">
+                    <div className="mb-2">
+                      <span className="text-gray-500 text-xs block">Original:</span>
+                      <span className="text-gray-300 text-xs">{originalSentence}</span>
+                    </div>
+                    <div className="text-gray-500 text-xs italic">
+                      (Detailed feedback not available for this sentence)
+                    </div>
+                  </span>
+                )}
               </span>
             );
           }
@@ -207,9 +314,7 @@ export function ParagraphSession({ paragraphId }: Props) {
               className={`${
                 isCurrentSentence
                   ? 'text-orange-400 font-semibold'
-                  : isCompleted
-                    ? 'text-green-400'
-                    : 'text-gray-400'
+                  : 'text-gray-400'
               }`}
             >
               {sentence}{' '}
@@ -313,7 +418,7 @@ export function ParagraphSession({ paragraphId }: Props) {
             {/* Left Column - Exercise */}
             <div className="space-y-6">
               {/* Paragraph Display */}
-              <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 overflow-visible">
                 {renderHighlightedParagraph()}
               </div>
 
