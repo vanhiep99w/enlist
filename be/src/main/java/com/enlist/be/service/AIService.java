@@ -3,6 +3,7 @@ package com.enlist.be.service;
 import com.enlist.be.config.GroqConfig;
 import com.enlist.be.dto.ArticleTip;
 import com.enlist.be.dto.CollocationHighlight;
+import com.enlist.be.dto.GoodPoint;
 import com.enlist.be.dto.ReasoningTip;
 import com.enlist.be.dto.RegisterTip;
 import com.enlist.be.dto.ScoreBreakdown;
@@ -47,6 +48,11 @@ public class AIService {
     }
 
     public TranslationFeedback evaluateTranslation(String originalText, String userTranslation, String paragraphContext, List<String> previousTranslations) {
+        // Check for gibberish/nonsense input before calling AI
+        if (isGibberishInput(userTranslation)) {
+            return createGibberishFeedback(userTranslation);
+        }
+        
         String prompt = buildPrompt(originalText, userTranslation, paragraphContext, previousTranslations);
         
         String normalizedUser = normalizeForComparison(userTranslation);
@@ -68,6 +74,9 @@ public class AIService {
                     .block();
 
             TranslationFeedback feedback = parseResponse(response);
+            
+            // Validate and fix error positions
+            validateAndFixErrorPositions(feedback, userTranslation);
             
             String normalizedCorrect = normalizeForComparison(feedback.getCorrectTranslation());
             if (normalizedUser.equals(normalizedCorrect)) {
@@ -113,6 +122,8 @@ public class AIService {
                 Original Vietnamese sentence to translate: %s
                 Student's Translation: %s
                 
+                IMPORTANT: Evaluate ONLY the student's translation of the CURRENT SENTENCE above. Do NOT translate other sentences.
+                
                 Evaluate the translation and respond with ONLY valid JSON (no markdown, no explanation outside JSON):
                 {
                   "scores": {
@@ -126,15 +137,18 @@ public class AIService {
                       "type": "GRAMMAR|WORD_CHOICE|NATURALNESS",
                       "position": "<where in sentence>",
                       "issue": "<what's wrong>",
-                      "correction": "<corrected phrase>",
+                      "correction": "<ONLY the corrected word/phrase to replace errorText - NOT the entire sentence>",
                       "explanation": "<detailed explanation in Vietnamese>",
                       "quickFix": "<one-line fix suggestion>",
                       "category": "<optional: ARTICLE|COLLOCATION|PREPOSITION|VERB_FORM|WORD_ORDER|REGISTER|null>",
-                      "learningTip": "<optional: memory tip for Vietnamese speakers>"
+                      "learningTip": "<optional: memory tip for Vietnamese speakers>",
+                      "startIndex": <character index where error starts in student's translation>,
+                      "endIndex": <character index where error ends in student's translation>,
+                      "errorText": "<exact text from student's translation that contains the error>"
                     }
                   ],
                   "suggestions": ["<improvement tip 1>", ...],
-                  "correctTranslation": "<student's translation with all typos, spelling, grammar, and punctuation corrected - preserve their word choices when correct>",
+                  "correctTranslation": "<corrected version of ONLY the student's current sentence - NOT the whole paragraph>",
                   "articleTips": [
                     {
                       "context": "<when this article rule applies>",
@@ -166,6 +180,14 @@ public class AIService {
                       "context": "<when formality matters>",
                       "explanation": "<explanation in Vietnamese about tone/register>",
                       "formalAlternatives": ["<other formal options>"]
+                    }
+                  ],
+                  "overallComment": "<1-2 sentence summary in Vietnamese: what went well, what to improve>",
+                  "goodPoints": [
+                    {
+                      "phrase": "<exact phrase from student's translation that was good>",
+                      "reason": "<why this is good, in Vietnamese>",
+                      "type": "WORD_CHOICE|GRAMMAR|NATURALNESS"
                     }
                   ]
                 }
@@ -203,20 +225,36 @@ public class AIService {
                 SCORING PHILOSOPHY - BE ENCOURAGING, NOT PUNITIVE:
                 Focus on MEANING first. If the student conveys the correct meaning, start from a high base score (85-90%%) and only deduct for errors.
                 
+                ALWAYS include goodPoints to highlight what the student did well:
+                - Good word choices that match the context
+                - Correct grammar patterns (especially articles, prepositions)
+                - Natural-sounding phrases or idiomatic expressions
+                - Include at least 1-2 goodPoints for any translation that shows genuine effort
+                
+                ⚠️ CRITICAL - DETECT NONSENSE/GIBBERISH INPUT:
+                If the student's translation is:
+                - Random letters or characters (e.g., \"abc\", \"xyz\", \"asdf\")
+                - Single words that don't form a sentence
+                - Completely unrelated to the original text
+                - Not a valid English sentence or attempt at translation
+                Then ALL scores MUST be 0-10%%. Do NOT be lenient with nonsense input.
+                
                 Error severity levels (deduct accordingly):
+                - CRITICAL (score 0-10%%): Nonsense, gibberish, random characters, or completely unrelated text
                 - IGNORE (0 points): Capitalization errors (\"i\" vs \"I\"), minor punctuation, extra spaces
                 - MINOR (-2 to -5 points): Common Vietnamese learner mistakes like article errors (\"a breakfast\" vs \"breakfast\"), slight word order differences that don't affect meaning
                 - MODERATE (-5 to -10 points): Wrong prepositions, incorrect verb tenses, collocation errors
                 - MAJOR (-10 to -20 points): Missing key words, wrong meaning, incomprehensible grammar
                 
                 Scoring guide:
-                - grammarScore: syntax, verb forms, articles, prepositions, sentence structure. Start at 95 if meaning is correct.
-                - wordChoiceScore: vocabulary accuracy, collocations, word forms. Start at 95 if words convey the meaning.
-                - naturalnessScore: natural phrasing, tone, fluency, idiomatic expressions. Start at 90 for understandable translations.
+                - grammarScore: syntax, verb forms, articles, prepositions, sentence structure. Start at 95 if meaning is correct. Score 0-10 for nonsense.
+                - wordChoiceScore: vocabulary accuracy, collocations, word forms. Start at 95 if words convey the meaning. Score 0-10 for nonsense.
+                - naturalnessScore: natural phrasing, tone, fluency, idiomatic expressions. Start at 90 for understandable translations. Score 0-10 for nonsense.
                 - overallScore: weighted average (Grammar 40%%, Word Choice 30%%, Naturalness 30%%)
                 
                 IMPORTANT: A translation that conveys the same meaning with minor errors should score 85-95%%. 
                 Only translations with significant meaning errors or major grammar issues should score below 80%%.
+                Nonsense or gibberish input MUST score below 10%%.
                 
                 PARAGRAPH COHERENCE - CRITICAL:
                 If paragraph context is provided, you MUST ensure tense consistency:
@@ -224,7 +262,23 @@ public class AIService {
                 - If student uses present tense for a past-context paragraph, mark as GRAMMAR error and correct to past tense
                 - The correctTranslation MUST use the appropriate tense matching the paragraph context
                 - Example: If context is about "last month's trip", "I'm in the hotel" should be corrected to "I was in the hotel"
-                """.formatted(contextSection.toString(), originalText, userTranslation);
+                
+                ERROR POSITION CALCULATION - CRITICAL:
+                For each error, you MUST provide accurate character positions:
+                - startIndex: 0-based index of the first character of the error in the student's translation
+                - endIndex: 0-based index of the character AFTER the last character of the error (exclusive)
+                - errorText: the exact substring from student's translation (must match translation.substring(startIndex, endIndex))
+                - correction: ONLY the replacement for errorText, NOT the entire corrected sentence
+                - Example: "I go to school" - if "go" is wrong:
+                  - startIndex=2, endIndex=4, errorText="go", correction="went" (NOT "I went to school")
+                - Example: "it have any type" - if "it have" should be "There are":
+                  - startIndex=0, endIndex=7, errorText="it have", correction="There are"
+                - For missing words (e.g., missing article), use the position where word should be inserted, with startIndex=endIndex
+                
+                ⚠️ IMPORTANT: The "correction" field must be a DIRECT REPLACEMENT for "errorText". 
+                If you replace errorText with correction in the original sentence, it should produce the correct sentence.
+                NEVER put the entire corrected sentence in the "correction" field.
+                """.formatted(contextSection.toString(), tenseHint, originalText, userTranslation);
     }
 
     private TranslationFeedback parseResponse(String response) throws JsonProcessingException {
@@ -253,6 +307,11 @@ public class AIService {
         JsonNode errorsNode = feedbackNode.path("errors");
         if (errorsNode.isArray()) {
             for (JsonNode errorNode : errorsNode) {
+                Integer startIndex = errorNode.has("startIndex") && !errorNode.path("startIndex").isNull() 
+                        ? errorNode.path("startIndex").asInt() : null;
+                Integer endIndex = errorNode.has("endIndex") && !errorNode.path("endIndex").isNull() 
+                        ? errorNode.path("endIndex").asInt() : null;
+                        
                 errors.add(TranslationError.builder()
                         .type(errorNode.path("type").asText())
                         .position(errorNode.path("position").asText())
@@ -262,6 +321,9 @@ public class AIService {
                         .quickFix(errorNode.path("quickFix").asText())
                         .category(errorNode.path("category").asText(null))
                         .learningTip(errorNode.path("learningTip").asText(null))
+                        .startIndex(startIndex)
+                        .endIndex(endIndex)
+                        .errorText(errorNode.path("errorText").asText(null))
                         .build());
             }
         }
@@ -349,6 +411,19 @@ public class AIService {
         }
 
         String correctTranslation = feedbackNode.path("correctTranslation").asText("");
+        String overallComment = feedbackNode.path("overallComment").asText(null);
+
+        List<GoodPoint> goodPoints = new ArrayList<>();
+        JsonNode goodPointsNode = feedbackNode.path("goodPoints");
+        if (goodPointsNode.isArray()) {
+            for (JsonNode pointNode : goodPointsNode) {
+                goodPoints.add(GoodPoint.builder()
+                        .phrase(pointNode.path("phrase").asText())
+                        .reason(pointNode.path("reason").asText())
+                        .type(pointNode.path("type").asText())
+                        .build());
+            }
+        }
 
         return TranslationFeedback.builder()
                 .scores(scores)
@@ -359,6 +434,8 @@ public class AIService {
                 .collocationHighlights(collocationHighlights)
                 .reasoningTips(reasoningTips)
                 .registerTips(registerTips)
+                .overallComment(overallComment)
+                .goodPoints(goodPoints)
                 .build();
     }
 
@@ -408,6 +485,135 @@ public class AIService {
                 .errors(List.of())
                 .suggestions(List.of("Perfect translation!"))
                 .correctTranslation(userTranslation)
+                .build();
+    }
+    
+    private void validateAndFixErrorPositions(TranslationFeedback feedback, String userTranslation) {
+        if (feedback.getErrors() == null) return;
+        
+        for (TranslationError error : feedback.getErrors()) {
+            Integer startIndex = error.getStartIndex();
+            Integer endIndex = error.getEndIndex();
+            String errorText = error.getErrorText();
+            
+            if (startIndex == null || endIndex == null) continue;
+            
+            // Validate indices are within bounds
+            if (startIndex < 0 || endIndex > userTranslation.length() || startIndex >= endIndex) {
+                // Try to find errorText in the user translation and fix indices
+                if (errorText != null && !errorText.isEmpty()) {
+                    int foundIndex = userTranslation.indexOf(errorText);
+                    if (foundIndex >= 0) {
+                        error.setStartIndex(foundIndex);
+                        error.setEndIndex(foundIndex + errorText.length());
+                        log.debug("Fixed error position for '{}': {} -> {}", errorText, startIndex, foundIndex);
+                    } else {
+                        // Try case-insensitive search
+                        int foundIndexIgnoreCase = userTranslation.toLowerCase().indexOf(errorText.toLowerCase());
+                        if (foundIndexIgnoreCase >= 0) {
+                            error.setStartIndex(foundIndexIgnoreCase);
+                            error.setEndIndex(foundIndexIgnoreCase + errorText.length());
+                            error.setErrorText(userTranslation.substring(foundIndexIgnoreCase, foundIndexIgnoreCase + errorText.length()));
+                        } else {
+                            // Clear invalid positions
+                            error.setStartIndex(null);
+                            error.setEndIndex(null);
+                        }
+                    }
+                } else {
+                    error.setStartIndex(null);
+                    error.setEndIndex(null);
+                }
+                continue;
+            }
+            
+            // Verify errorText matches the substring at the given positions
+            String actualText = userTranslation.substring(startIndex, endIndex);
+            if (errorText != null && !errorText.equals(actualText)) {
+                // AI provided wrong indices, try to find the actual position of errorText
+                int foundIndex = userTranslation.indexOf(errorText);
+                if (foundIndex >= 0) {
+                    error.setStartIndex(foundIndex);
+                    error.setEndIndex(foundIndex + errorText.length());
+                    log.debug("Corrected error position for '{}': was [{},{}], now [{},{}]", 
+                            errorText, startIndex, endIndex, foundIndex, foundIndex + errorText.length());
+                } else {
+                    // Try case-insensitive search
+                    int foundIndexIgnoreCase = userTranslation.toLowerCase().indexOf(errorText.toLowerCase());
+                    if (foundIndexIgnoreCase >= 0) {
+                        error.setStartIndex(foundIndexIgnoreCase);
+                        error.setEndIndex(foundIndexIgnoreCase + errorText.length());
+                        error.setErrorText(userTranslation.substring(foundIndexIgnoreCase, foundIndexIgnoreCase + errorText.length()));
+                    } else {
+                        // Keep the actual text from the given positions as errorText
+                        error.setErrorText(actualText);
+                    }
+                }
+            } else if (errorText == null) {
+                // Set errorText from the actual substring
+                error.setErrorText(actualText);
+            }
+        }
+    }
+    
+    private boolean isGibberishInput(String input) {
+        if (input == null || input.trim().isEmpty()) {
+            return true;
+        }
+        
+        String trimmed = input.trim().toLowerCase();
+        
+        // Too short to be a valid sentence (less than 2 characters)
+        if (trimmed.length() < 2) {
+            return true;
+        }
+        
+        // Common gibberish patterns
+        String[] gibberishPatterns = {"abc", "xyz", "asdf", "qwerty", "test", "aaa", "bbb", "ccc", "123", "xxx"};
+        for (String pattern : gibberishPatterns) {
+            if (trimmed.equals(pattern) || trimmed.matches("^[" + pattern.charAt(0) + "]+$")) {
+                return true;
+            }
+        }
+        
+        // Single short word (less than 4 chars) without spaces - likely not a valid translation
+        if (!trimmed.contains(" ") && trimmed.length() < 4) {
+            return true;
+        }
+        
+        // Only consonants or only the same repeated character
+        if (trimmed.matches("^[bcdfghjklmnpqrstvwxyz]+$") && trimmed.length() < 6) {
+            return true;
+        }
+        
+        // Repeated single character
+        if (trimmed.matches("^(.)\\1+$")) {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    private TranslationFeedback createGibberishFeedback(String userTranslation) {
+        return TranslationFeedback.builder()
+                .scores(ScoreBreakdown.builder()
+                        .grammarScore(0)
+                        .wordChoiceScore(0)
+                        .naturalnessScore(0)
+                        .overallScore(0)
+                        .build())
+                .errors(List.of(
+                        TranslationError.builder()
+                                .type("GRAMMAR")
+                                .position("entire input")
+                                .issue("Input không phải là một câu dịch hợp lệ")
+                                .correction("Vui lòng nhập bản dịch tiếng Anh đầy đủ")
+                                .explanation("Bạn cần nhập một câu tiếng Anh hoàn chỉnh để dịch câu tiếng Việt đã cho.")
+                                .quickFix("Hãy đọc câu tiếng Việt và dịch sang tiếng Anh")
+                                .build()
+                ))
+                .suggestions(List.of("Vui lòng nhập một bản dịch tiếng Anh hợp lệ cho câu tiếng Việt."))
+                .correctTranslation("")
                 .build();
     }
 }

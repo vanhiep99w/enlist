@@ -20,4 +20,6 @@ public class TranslationFeedback {
     private List<CollocationHighlight> collocationHighlights;
     private List<ReasoningTip> reasoningTips;
     private List<RegisterTip> registerTips;
+    private String overallComment;
+    private List<GoodPoint> goodPoints;
 }

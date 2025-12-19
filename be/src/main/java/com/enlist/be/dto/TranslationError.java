@@ -18,4 +18,7 @@ public class TranslationError {
     private String quickFix;
     private String category;
     private String learningTip;
+    private Integer startIndex;
+    private Integer endIndex;
+    private String errorText;
 }

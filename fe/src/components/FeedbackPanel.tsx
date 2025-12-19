@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import type { TranslationFeedback, TranslationError } from '../types/translation';
+import { SuggestionLine } from './SuggestionLine';
 
 interface Props {
   feedback: TranslationFeedback;
   originalText?: string;
+  userTranslation?: string;
   showDetailedPrompt?: boolean;
   onPromptDismiss?: () => void;
 }
@@ -233,7 +235,7 @@ function CollapsibleTipsSection({ feedback, isExpanded, onToggle }: CollapsibleT
   );
 }
 
-export function FeedbackPanel({ feedback, originalText, showDetailedPrompt, onPromptDismiss }: Props) {
+export function FeedbackPanel({ feedback, originalText, userTranslation, showDetailedPrompt, onPromptDismiss }: Props) {
   const [promptDismissed, setPromptDismissed] = useState(false);
   const [tipsExpanded, setTipsExpanded] = useState(false);
   
@@ -288,6 +290,18 @@ export function FeedbackPanel({ feedback, originalText, showDetailedPrompt, onPr
         </div>
       )}
 
+      {/* Suggestion Line with inline error highlighting */}
+      {userTranslation && feedback.errors.length > 0 && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+          <div className="flex items-start gap-2">
+            <span className="text-amber-600 text-sm font-medium shrink-0">📝 Your answer:</span>
+            <div className="text-sm">
+              <SuggestionLine userTranslation={userTranslation} errors={feedback.errors} />
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Correct Translation - Compact */}
       <div className="bg-green-50 border border-green-200 rounded-lg p-3">
         <div className="flex items-center justify-between gap-2">
@@ -306,6 +320,23 @@ export function FeedbackPanel({ feedback, originalText, showDetailedPrompt, onPr
         </div>
       </div>
 
+      {/* Good Points - What the student did well */}
+      {feedback.goodPoints && feedback.goodPoints.length > 0 && (
+        <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
+          <div className="flex items-start gap-2">
+            <span className="text-emerald-600 text-sm font-medium shrink-0">✨ Điểm tốt:</span>
+            <div className="flex-1 space-y-1">
+              {feedback.goodPoints.map((point, index) => (
+                <div key={index} className="text-sm">
+                  <span className="text-emerald-800 font-medium">"{point.phrase}"</span>
+                  <span className="text-emerald-700"> – {point.reason}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Errors - Compact */}
       {feedback.errors.length > 0 && (
         <div>
@@ -319,6 +350,16 @@ export function FeedbackPanel({ feedback, originalText, showDetailedPrompt, onPr
             {feedback.errors.map((error, index) => (
               <ErrorCard key={index} error={error} />
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Overall Comment (Nhận xét) */}
+      {feedback.overallComment && (
+        <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3">
+          <div className="flex items-start gap-2">
+            <span className="text-indigo-600 text-sm font-medium shrink-0">💬 Nhận xét:</span>
+            <p className="text-sm text-indigo-800">{feedback.overallComment}</p>
           </div>
         </div>
       )}

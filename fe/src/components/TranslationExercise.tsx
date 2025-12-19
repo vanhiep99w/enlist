@@ -223,6 +223,7 @@ export function TranslationExercise({ exercise }: Props) {
               <FeedbackPanel
                 feedback={result.feedback}
                 originalText={exercise.originalText}
+                userTranslation={userTranslation}
                 showDetailedPrompt={shouldShowPrompt}
                 onPromptDismiss={markPrompted}
               />

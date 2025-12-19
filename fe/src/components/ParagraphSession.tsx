@@ -535,7 +535,7 @@ export function ParagraphSession({ paragraphId }: Props) {
                       overallScore: Math.round(lastSubmission.accuracy),
                     }}
                   />
-                  <FeedbackPanel feedback={lastSubmission.feedback} originalText={lastSubmission.originalSentence} />
+                  <FeedbackPanel feedback={lastSubmission.feedback} originalText={lastSubmission.originalSentence} userTranslation={lastSubmission.userTranslation} />
                 </div>
               ) : lastSubmission?.skipped ? (
                 <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">

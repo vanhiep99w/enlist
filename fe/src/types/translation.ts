@@ -16,6 +16,9 @@ export interface TranslationError {
   quickFix: string;
   category?: ErrorCategory | null;
   learningTip?: string | null;
+  startIndex?: number | null;
+  endIndex?: number | null;
+  errorText?: string | null;
 }
 
 export interface ArticleTip {
@@ -47,6 +50,12 @@ export interface RegisterTip {
   formalAlternatives: string[];
 }
 
+export interface GoodPoint {
+  phrase: string;
+  reason: string;
+  type: 'WORD_CHOICE' | 'GRAMMAR' | 'NATURALNESS';
+}
+
 export interface TranslationFeedback {
   scores: ScoreBreakdown;
   errors: TranslationError[];
@@ -56,6 +65,8 @@ export interface TranslationFeedback {
   collocationHighlights?: CollocationHighlight[];
   reasoningTips?: ReasoningTip[];
   registerTips?: RegisterTip[];
+  overallComment?: string | null;
+  goodPoints?: GoodPoint[];
 }
 
 export interface TranslationResponse {
