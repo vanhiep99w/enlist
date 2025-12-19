@@ -304,19 +304,11 @@ export function FeedbackPanel({ feedback, originalText, userTranslation, showDet
 
       {/* Correct Translation - Compact */}
       <div className="bg-green-900/30 border border-green-700 rounded-lg p-3">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <span className="text-green-400 text-sm font-medium">✓ Correct:</span>
-            <p 
-              className="text-green-300 font-medium cursor-help"
-              title={originalText || 'Original Vietnamese sentence'}
-            >
-              {feedback.correctTranslation}
-            </p>
-          </div>
-          {originalText && (
-            <span className="text-xs text-green-500 opacity-70 shrink-0">(hover)</span>
-          )}
+        <div className="flex items-baseline gap-2">
+          <span className="text-green-400 text-sm font-medium whitespace-nowrap">✓ Correct:</span>
+          <p className="text-green-300 text-sm font-medium">
+            {feedback.correctTranslation}
+          </p>
         </div>
       </div>
 

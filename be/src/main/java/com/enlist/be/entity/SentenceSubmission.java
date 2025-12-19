@@ -60,6 +60,14 @@ public class SentenceSubmission {
     @Column(name = "submitted_at")
     private LocalDateTime submittedAt;
 
+    @Column(name = "retry_attempt")
+    @Builder.Default
+    private Integer retryAttempt = 0;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_submission_id")
+    private SentenceSubmission parentSubmission;
+
     @PrePersist
     protected void onCreate() {
         submittedAt = LocalDateTime.now();
