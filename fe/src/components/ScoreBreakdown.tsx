@@ -42,9 +42,9 @@ function getScoreStrokeColor(score: number): string {
 }
 
 function getScoreTrackColor(score: number): string {
-  if (score >= 80) return 'stroke-green-100';
-  if (score >= 60) return 'stroke-yellow-100';
-  return 'stroke-red-100';
+  if (score >= 80) return 'stroke-green-900';
+  if (score >= 60) return 'stroke-yellow-900';
+  return 'stroke-red-900';
 }
 
 interface CircularProgressProps {
@@ -111,7 +111,7 @@ function CircularProgress({
           </span>
         </div>
       </div>
-      <span className={`${isOverall ? 'text-sm font-semibold' : 'text-xs'} text-gray-600 text-center`}>
+      <span className={`${isOverall ? 'text-sm font-semibold' : 'text-xs'} text-gray-400 text-center`}>
         {label}
       </span>
       {showTooltip && !isOverall && (
@@ -126,7 +126,7 @@ function CircularProgress({
 
 export function ScoreBreakdown({ scores }: Props) {
   return (
-    <div className="bg-white rounded-lg shadow-md p-4">
+    <div className="bg-gray-800 rounded-lg border border-gray-700 p-4">
       <div className="flex items-center justify-center gap-6">
         <CircularProgress
           score={scores.overallScore}
@@ -134,7 +134,7 @@ export function ScoreBreakdown({ scores }: Props) {
           tooltip=""
           isOverall
         />
-        <div className="h-16 w-px bg-gray-200" />
+        <div className="h-16 w-px bg-gray-700" />
         <div className="flex gap-4">
           {scoreConfigs.map(({ key, label, tooltip }) => (
             <CircularProgress

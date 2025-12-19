@@ -137,7 +137,7 @@ public class AIService {
                       "type": "GRAMMAR|WORD_CHOICE|NATURALNESS",
                       "position": "<where in sentence>",
                       "issue": "<what's wrong>",
-                      "correction": "<ONLY the corrected word/phrase to replace errorText - NOT the entire sentence>",
+                      "correction": "<ONLY the corrected word/phrase to replace errorText - MUST match what's used in correctTranslation>",
                       "explanation": "<detailed explanation in Vietnamese>",
                       "quickFix": "<one-line fix suggestion>",
                       "category": "<optional: ARTICLE|COLLOCATION|PREPOSITION|VERB_FORM|WORD_ORDER|REGISTER|null>",
@@ -148,7 +148,7 @@ public class AIService {
                     }
                   ],
                   "suggestions": ["<improvement tip 1>", ...],
-                  "correctTranslation": "<corrected version of ONLY the student's current sentence - NOT the whole paragraph>",
+                  "correctTranslation": "<COMPLETE and ACCURATE translation of the original Vietnamese sentence - must capture ALL meaning from the original, not just fix student errors>",
                   "articleTips": [
                     {
                       "context": "<when this article rule applies>",
@@ -225,6 +225,14 @@ public class AIService {
                 SCORING PHILOSOPHY - BE ENCOURAGING, NOT PUNITIVE:
                 Focus on MEANING first. If the student conveys the correct meaning, start from a high base score (85-90%%) and only deduct for errors.
                 
+                ⚠️ CRITICAL - CORRECT TRANSLATION REQUIREMENTS:
+                The correctTranslation field MUST be a COMPLETE translation of the original Vietnamese sentence:
+                - Include ALL parts of the original meaning (subject, verb, object, modifiers, clauses)
+                - Do NOT just fix the student's errors - provide the FULL correct translation
+                - Example: If original is "Cuối tuần là thời gian quý báu để gia đình tôi sum họp"
+                  - WRONG: "Weekend is a valuable time" (incomplete - missing "for my family to gather")
+                  - CORRECT: "The weekend is a valuable time for my family to gather"
+                
                 ALWAYS include goodPoints to highlight what the student did well:
                 - Good word choices that match the context
                 - Correct grammar patterns (especially articles, prepositions)
@@ -243,8 +251,21 @@ public class AIService {
                 - CRITICAL (score 0-10%%): Nonsense, gibberish, random characters, or completely unrelated text
                 - IGNORE (0 points): Capitalization errors (\"i\" vs \"I\"), minor punctuation, extra spaces
                 - MINOR (-2 to -5 points): Common Vietnamese learner mistakes like article errors (\"a breakfast\" vs \"breakfast\"), slight word order differences that don't affect meaning
-                - MODERATE (-5 to -10 points): Wrong prepositions, incorrect verb tenses, collocation errors
-                - MAJOR (-10 to -20 points): Missing key words, wrong meaning, incomprehensible grammar
+                - MODERATE (-5 to -10 points): Wrong prepositions, incorrect verb tenses, collocation errors, SPELLING ERRORS
+                - MAJOR (-10 to -20 points): Missing key words, wrong meaning, incomprehensible grammar, WRONG TRANSLATION of Vietnamese cultural terms
+                
+                ⚠️ SPELLING ERRORS - MUST DETECT:
+                Always check for and mark spelling mistakes as WORD_CHOICE errors:
+                - "noddle" → "noodle", "specical" → "special", "breakfest" → "breakfast"
+                - Even if the word is close, if it's misspelled, mark it as an error
+                
+                ⚠️ VIETNAMESE FOOD & CULTURAL TERMS - TRANSLATION ACCURACY:
+                Vietnamese food names must be translated accurately:
+                - "bánh cuốn" = "rice rolls" or "steamed rice rolls" (NOT "noodles")
+                - "phở" = "pho" or "Vietnamese noodle soup"
+                - "bánh mì" = "Vietnamese sandwich" or "banh mi"
+                - "cà phê sữa đá" = "iced coffee with condensed milk" (NOT just "coffee")
+                If student uses wrong food translation (e.g., "noodles" for "bánh cuốn"), mark as WORD_CHOICE error with correct translation.
                 
                 Scoring guide:
                 - grammarScore: syntax, verb forms, articles, prepositions, sentence structure. Start at 95 if meaning is correct. Score 0-10 for nonsense.
@@ -275,9 +296,43 @@ public class AIService {
                   - startIndex=0, endIndex=7, errorText="it have", correction="There are"
                 - For missing words (e.g., missing article), use the position where word should be inserted, with startIndex=endIndex
                 
+                ⚠️ CRITICAL - SEPARATE ERRORS FOR EACH ISSUE:
+                Create INDIVIDUAL error entries for each distinct mistake. Do NOT combine multiple errors into one large span.
+                - Example: "my mother prepare the breakfast with noddle" has multiple errors:
+                  - Error 1: startIndex=10, endIndex=17, errorText="prepare", correction="prepares" (GRAMMAR: verb agreement)
+                  - Error 2: startIndex=18, endIndex=31, errorText="the breakfast", correction="a special breakfast" (WORD_CHOICE: wrong article + missing adjective)
+                  - Error 3: startIndex=37, endIndex=43, errorText="noddle", correction="rice rolls" (WORD_CHOICE: wrong translation)
+                - WRONG: Only catching some errors and missing others
+                - Each error should target the SMALLEST possible span containing just that specific mistake
+                
+                ⚠️ CATCH ALL ERRORS - DO NOT MISS ANY:
+                Compare student's translation word-by-word with correctTranslation:
+                - GRAMMAR: subject-verb agreement (prepare→prepares), tense, articles
+                - WORD_CHOICE: wrong words, missing words (like "special"), wrong translations
+                - SPELLING: typos (noddle→noodle, but use correctTranslation term)
+                If a word/phrase in student's text differs from correctTranslation, it's likely an error!
+                
                 ⚠️ IMPORTANT: The "correction" field must be a DIRECT REPLACEMENT for "errorText". 
                 If you replace errorText with correction in the original sentence, it should produce the correct sentence.
                 NEVER put the entire corrected sentence in the "correction" field.
+                
+                ⚠️⚠️⚠️ FINAL CHECK - MOST IMPORTANT ⚠️⚠️⚠️
+                Before returning your response, VERIFY that every "correction" value in the errors array 
+                appears EXACTLY in the "correctTranslation" string.
+                
+                STEP-BY-STEP PROCESS:
+                1. First, write the correctTranslation (complete, accurate translation of original Vietnamese)
+                2. For each error, check: does my "correction" value appear in correctTranslation?
+                   - YES → keep it
+                   - NO → change correction to match what's in correctTranslation
+                
+                EXAMPLE OF WRONG vs RIGHT:
+                - Original Vietnamese: "bánh cuốn và cà phê"
+                - correctTranslation: "rice rolls and coffee"
+                - Student wrote: "noddle and caffee"
+                
+                ❌ WRONG corrections: noddle→"noodle", caffee→"cafe" (these don't appear in correctTranslation!)
+                ✅ RIGHT corrections: noddle→"rice rolls", caffee→"coffee" (these match correctTranslation!)
                 """.formatted(contextSection.toString(), tenseHint, originalText, userTranslation);
     }
 
