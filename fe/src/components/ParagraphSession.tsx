@@ -3,7 +3,11 @@ import { useNavigate } from '@tanstack/react-router';
 import { createSession, getSession, submitSentenceTranslation, skipSentence } from '../api/sessionApi';
 import { ScoreBreakdown } from './ScoreBreakdown';
 import { FeedbackPanel } from './FeedbackPanel';
+import { TypingIndicator } from './TypingIndicator';
+import { DictionaryModal } from './DictionaryModal';
+import { SentenceTooltip } from './SentenceTooltip';
 import { AchievementsPanel } from './AchievementsPanel';
+import { SuccessAnimation } from './SuccessAnimation';
 import type { Session, SentenceSubmissionResponse, CompletedSentenceData } from '../types/session';
 import type { Achievement } from '../types/user';
 
@@ -22,6 +26,8 @@ export function ParagraphSession({ paragraphId }: Props) {
   const [lastSubmission, setLastSubmission] = useState<SentenceSubmissionResponse | null>(null);
   const [completedData, setCompletedData] = useState<Record<number, CompletedSentenceData>>({});
   const [hoveredSentence, setHoveredSentence] = useState<number | null>(null);
+  const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
+  const [showDictionary, setShowDictionary] = useState(false);
 
   const achievements = useMemo<Achievement[]>(() => {
     if (!session) return [];
@@ -126,6 +132,7 @@ export function ParagraphSession({ paragraphId }: Props) {
       const passedThreshold = result.accuracy >= 80;
       
       if (passedThreshold) {
+        setShowSuccessAnimation(true);
         const newCompletedData = {
           ...completedData,
           [result.sentenceIndex]: {
@@ -223,7 +230,7 @@ export function ParagraphSession({ paragraphId }: Props) {
               >
                 {displayText}{' '}
                 {hoveredSentence === index && (
-                  <span className="absolute bottom-full left-0 mb-2 px-3 py-2 bg-gray-800 text-gray-300 text-sm rounded-lg z-50 border border-gray-600 w-80 whitespace-normal shadow-xl">
+                  <SentenceTooltip>
                   {/* Accuracy */}
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-gray-500 text-xs">Accuracy:</span>
@@ -271,7 +278,7 @@ export function ParagraphSession({ paragraphId }: Props) {
                       )}
                     </div>
                   )}
-                </span>
+                </SentenceTooltip>
                 )}
               </span>
             );
@@ -294,7 +301,7 @@ export function ParagraphSession({ paragraphId }: Props) {
               >
                 {displayText}{' '}
                 {hoveredSentence === index && (
-                  <span className="absolute bottom-full left-0 mb-2 px-3 py-2 bg-gray-800 text-gray-300 text-sm rounded-lg z-50 border border-gray-600 w-80 whitespace-normal shadow-xl">
+                  <SentenceTooltip>
                     <div className="mb-2">
                       <span className="text-gray-500 text-xs block">Original:</span>
                       <span className="text-gray-300 text-xs">{originalSentence}</span>
@@ -302,7 +309,7 @@ export function ParagraphSession({ paragraphId }: Props) {
                     <div className="text-gray-500 text-xs italic">
                       (Detailed feedback not available for this sentence)
                     </div>
-                  </span>
+                  </SentenceTooltip>
                 )}
               </span>
             );
@@ -358,6 +365,13 @@ export function ParagraphSession({ paragraphId }: Props) {
 
   return (
     <div className="min-h-screen bg-gray-900">
+      {/* Success Animation */}
+      <SuccessAnimation
+        show={showSuccessAnimation}
+        accuracy={lastSubmission?.accuracy || 0}
+        onComplete={() => setShowSuccessAnimation(false)}
+      />
+      
       {/* Header */}
       <div className="bg-gray-800 border-b border-gray-700 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -511,7 +525,10 @@ export function ParagraphSession({ paragraphId }: Props) {
             <div className="space-y-6">
               {/* Dictionary & Accuracy */}
               <div className="flex gap-4">
-                <button className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-gray-300 hover:bg-gray-700">
+                <button 
+                  onClick={() => setShowDictionary(true)}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-gray-300 hover:bg-gray-700"
+                >
                   📖 Dictionary
                 </button>
                 <div className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg">
@@ -525,7 +542,12 @@ export function ParagraphSession({ paragraphId }: Props) {
               </div>
 
               {/* Feedback Panel */}
-              {lastSubmission?.feedback ? (
+              {isSubmitting ? (
+                <TypingIndicator 
+                  message="AI is thinking..." 
+                  submessage="Analyzing your translation" 
+                />
+              ) : lastSubmission?.feedback ? (
                 <div className="space-y-4">
                   <ScoreBreakdown
                     scores={{
@@ -554,6 +576,7 @@ export function ParagraphSession({ paragraphId }: Props) {
           </div>
         )}
       </div>
+      <DictionaryModal isOpen={showDictionary} onClose={() => setShowDictionary(false)} />
     </div>
   );
 }

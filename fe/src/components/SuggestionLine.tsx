@@ -17,7 +17,7 @@ export function SuggestionLine({ userTranslation, errors }: Props) {
   );
 
   if (errorsWithPositions.length === 0) {
-    return <span className="text-gray-800">{userTranslation}</span>;
+    return <span className="text-amber-200">{userTranslation}</span>;
   }
 
   const sortedErrors = [...errorsWithPositions].sort(
@@ -63,13 +63,13 @@ export function SuggestionLine({ userTranslation, errors }: Props) {
           <span key={index} className="inline">
             <span className="text-red-500 line-through">{segment.text}</span>
             {segment.correction && (
-              <span className="text-green-600 font-medium ml-0.5">
+              <span className="text-green-400 font-medium ml-0.5">
                 ({segment.correction})
               </span>
             )}
           </span>
         ) : (
-          <span key={index} className="text-gray-800">
+          <span key={index} className="text-amber-200">
             {segment.text}
           </span>
         )

@@ -11,9 +11,15 @@ export function Header() {
           </Link>
           <nav className="flex items-center gap-4">
             <Link
+              to="/"
+              className="text-gray-300 hover:text-white transition-colors [&.active]:text-yellow-400"
+              activeOptions={{ exact: true }}
+            >
+              Practice
+            </Link>
+            <Link
               to="/paragraphs"
-              className="text-gray-300 hover:text-white transition-colors"
-              activeProps={{ className: 'text-yellow-400' }}
+              className="text-gray-300 hover:text-white transition-colors [&.active]:text-yellow-400"
             >
               Paragraphs
             </Link>

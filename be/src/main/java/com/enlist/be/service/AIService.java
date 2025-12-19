@@ -148,7 +148,7 @@ public class AIService {
                     }
                   ],
                   "suggestions": ["<improvement tip 1>", ...],
-                  "correctTranslation": "<corrected version of ONLY the student's current sentence - NOT the whole paragraph>",
+                  "correctTranslation": "<COMPLETE and ACCURATE translation of the original Vietnamese sentence - must capture ALL meaning from the original, not just fix student errors>",
                   "articleTips": [
                     {
                       "context": "<when this article rule applies>",
@@ -224,6 +224,14 @@ public class AIService {
                 
                 SCORING PHILOSOPHY - BE ENCOURAGING, NOT PUNITIVE:
                 Focus on MEANING first. If the student conveys the correct meaning, start from a high base score (85-90%%) and only deduct for errors.
+                
+                ⚠️ CRITICAL - CORRECT TRANSLATION REQUIREMENTS:
+                The correctTranslation field MUST be a COMPLETE translation of the original Vietnamese sentence:
+                - Include ALL parts of the original meaning (subject, verb, object, modifiers, clauses)
+                - Do NOT just fix the student's errors - provide the FULL correct translation
+                - Example: If original is "Cuối tuần là thời gian quý báu để gia đình tôi sum họp"
+                  - WRONG: "Weekend is a valuable time" (incomplete - missing "for my family to gather")
+                  - CORRECT: "The weekend is a valuable time for my family to gather"
                 
                 ALWAYS include goodPoints to highlight what the student did well:
                 - Good word choices that match the context

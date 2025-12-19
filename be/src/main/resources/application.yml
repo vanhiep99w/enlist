@@ -2,7 +2,7 @@ spring:
   application:
     name: language-learning-api
   datasource:
-    url: jdbc:postgresql://localhost:5432/language_learning
+    url: ${DB_CONNECT_URL:jdbc:postgresql://localhost:5432/language_learning}
     username: ${DB_USERNAME:hieptran}
     password: ${DB_PASSWORD:123456}
   jpa:
