@@ -51,6 +51,15 @@ public class DailyGoalService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found: " + userId));
 
+        if (user.getDailyGoal() == null) {
+            user.setDailyGoal(10);
+            userRepository.save(user);
+        }
+        if (user.getDailyProgressCount() == null) {
+            user.setDailyProgressCount(0);
+            userRepository.save(user);
+        }
+
         resetProgressIfNeeded(user);
 
         Map<String, Object> progress = new HashMap<>();

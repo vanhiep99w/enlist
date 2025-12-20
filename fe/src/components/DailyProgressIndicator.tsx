@@ -8,10 +8,6 @@ export function DailyProgressIndicator() {
   const [progress, setProgress] = useState<DailyProgress | null>(null);
   const userId = 1;
 
-  useEffect(() => {
-    loadProgress();
-  }, []);
-
   const loadProgress = async () => {
     try {
       const data = await getDailyProgress(userId);
@@ -20,6 +16,9 @@ export function DailyProgressIndicator() {
       console.error('Failed to load daily progress:', error);
     }
   };
+  useEffect(() => {
+    loadProgress();
+  }, []);
 
   if (!progress) return null;
 
@@ -86,10 +85,7 @@ export function DailyProgressIndicator() {
             >
               {progressCount}
             </motion.span>
-            <span
-              className="text-sm font-medium"
-              style={{ color: 'var(--color-text-secondary)' }}
-            >
+            <span className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>
               / {dailyGoal}
             </span>
           </div>
@@ -114,7 +110,7 @@ export function DailyProgressIndicator() {
               : '0 0 8px var(--glow-accent)',
           }}
         />
-        
+
         {percentage >= 100 && (
           <>
             {[...Array(5)].map((_, i) => (
