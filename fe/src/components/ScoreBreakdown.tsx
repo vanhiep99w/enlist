@@ -30,15 +30,17 @@ const scoreConfigs: ScoreConfig[] = [
 ];
 
 function getScoreColor(score: number): string {
-  if (score >= 80) return 'var(--color-primary)';
-  if (score >= 60) return 'var(--color-accent)';
-  return 'var(--color-text-muted)';
+  if (score >= 90) return 'var(--color-primary)';  // Excellent
+  if (score >= 80) return 'var(--color-primary-light)';  // Good
+  if (score >= 60) return 'var(--color-accent)';  // Average
+  return 'var(--color-text-muted)';  // Poor
 }
 
 function getScoreStrokeColor(score: number): string {
-  if (score >= 80) return 'var(--color-primary)';
-  if (score >= 60) return 'var(--color-accent)';
-  return 'var(--color-text-muted)';
+  if (score >= 90) return 'var(--color-primary)';  // Excellent
+  if (score >= 80) return 'var(--color-primary-light)';  // Good
+  if (score >= 60) return 'var(--color-accent)';  // Average
+  return 'var(--color-text-muted)';  // Poor
 }
 
 function getScoreTrackColor(): string {

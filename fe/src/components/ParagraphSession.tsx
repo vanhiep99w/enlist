@@ -646,8 +646,8 @@ export function ParagraphSession({ paragraphId }: Props) {
                 <div className="flex items-center justify-between mt-3">
                   <button
                     onClick={handleQuit}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg hover:opacity-80 text-sm"
-                    style={{ backgroundColor: 'var(--color-surface-light)', color: 'var(--color-text-secondary)' }}
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg border hover:opacity-80 text-sm transition-all"
+                    style={{ backgroundColor: 'var(--color-surface)', color: 'var(--color-text-secondary)', borderColor: 'var(--color-border)' }}
                   >
                     ← Quit
                   </button>
@@ -656,8 +656,8 @@ export function ParagraphSession({ paragraphId }: Props) {
                     <button
                       onClick={handleSkip}
                       disabled={isSubmitting || session.totalCredits <= 0}
-                      className="flex items-center gap-1.5 px-3 py-2 rounded-lg hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                      style={{ backgroundColor: 'var(--color-surface-light)', color: 'var(--color-text-secondary)' }}
+                      className="flex items-center gap-1.5 px-3 py-2 rounded-lg border hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed text-sm transition-all"
+                      style={{ backgroundColor: 'var(--color-surface)', color: 'var(--color-text-secondary)', borderColor: 'var(--color-border)' }}
                     >
                       💡 Hint
                     </button>
@@ -688,8 +688,12 @@ export function ParagraphSession({ paragraphId }: Props) {
                         <Tooltip content={<span className="flex items-center gap-2"><kbd className="px-1.5 py-0.5 rounded text-xs" style={{ backgroundColor: 'var(--color-surface-light)' }}>Ctrl+↵</kbd> Try again</span>}>
                           <button
                             onClick={handleRetry}
-                            className="flex items-center gap-2 px-4 py-2 bg-orange-600 rounded-lg font-medium hover:bg-orange-700 text-sm"
-                            style={{ color: 'var(--color-text-primary)' }}
+                            className="flex items-center gap-2 px-4 py-2 rounded-lg border font-medium transition-all text-sm"
+                            style={{ 
+                              backgroundColor: 'var(--color-accent)', 
+                              color: 'var(--color-text-primary)',
+                              borderColor: 'var(--color-accent-dark)'
+                            }}
                           >
                             🔄 Retry (80%+)
                           </button>
