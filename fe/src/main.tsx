@@ -33,7 +33,19 @@ if (rootElement && !rootElement.innerHTML) {
   root.render(
     <StrictMode>
       <RouterProvider router={router} />
-      <Toaster position="top-right" richColors closeButton />
+      <Toaster 
+        position="bottom-right" 
+        toastOptions={{
+          style: {
+            background: 'var(--color-surface-elevated)',
+            border: '1px solid var(--color-border)',
+            color: 'var(--color-text-primary)',
+            fontFamily: 'var(--font-body)',
+          },
+          className: 'toast-custom',
+        }}
+        closeButton
+      />
     </StrictMode>
   );
 }

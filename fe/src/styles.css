@@ -797,3 +797,85 @@ code {
   background-color: rgba(var(--color-primary-rgb), 0.45);
   color: var(--color-text-primary);
 }
+
+/* ==========================================
+   Toast Notifications (Sonner)
+   ========================================== */
+
+[data-sonner-toast] {
+  background: var(--color-surface-elevated) !important;
+  border: 1px solid var(--color-border) !important;
+  box-shadow: 0 8px 32px -8px rgba(0, 0, 0, 0.4), 
+              0 0 0 1px rgba(var(--color-primary-rgb), 0.1) !important;
+  backdrop-filter: blur(12px);
+}
+
+[data-sonner-toast][data-type="success"] {
+  border-color: var(--color-success) !important;
+  box-shadow: 0 8px 32px -8px rgba(34, 197, 94, 0.3),
+              0 0 0 1px rgba(34, 197, 94, 0.2) !important;
+}
+
+[data-sonner-toast][data-type="error"] {
+  border-color: var(--color-error) !important;
+  box-shadow: 0 8px 32px -8px rgba(239, 68, 68, 0.3),
+              0 0 0 1px rgba(239, 68, 68, 0.2) !important;
+}
+
+[data-sonner-toast][data-type="warning"] {
+  border-color: var(--color-warning) !important;
+  box-shadow: 0 8px 32px -8px rgba(234, 179, 8, 0.3),
+              0 0 0 1px rgba(234, 179, 8, 0.2) !important;
+}
+
+[data-sonner-toast] [data-title] {
+  color: var(--color-text-primary);
+  font-weight: 600;
+  font-family: var(--font-display);
+}
+
+[data-sonner-toast] [data-description] {
+  color: var(--color-text-secondary);
+  font-family: var(--font-body);
+}
+
+[data-sonner-toast] [data-button] {
+  background: var(--color-primary);
+  color: var(--color-surface-dark);
+  border: none;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+
+[data-sonner-toast] [data-button]:hover {
+  background: var(--color-primary-light);
+  transform: scale(1.02);
+}
+
+[data-sonner-toast] [data-close-button] {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  transition: all 0.15s ease;
+}
+
+[data-sonner-toast] [data-close-button]:hover {
+  background: var(--color-surface-light);
+  border-color: var(--color-text-muted);
+  color: var(--color-text-primary);
+}
+
+/* Success icon color */
+[data-sonner-toast][data-type="success"] [data-icon] {
+  color: var(--color-success);
+}
+
+/* Error icon color */
+[data-sonner-toast][data-type="error"] [data-icon] {
+  color: var(--color-error);
+}
+
+/* Warning icon color */
+[data-sonner-toast][data-type="warning"] [data-icon] {
+  color: var(--color-warning);
+}
