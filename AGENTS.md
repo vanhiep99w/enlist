@@ -2,12 +2,15 @@
 
 ## Commands
 
-- **Backend (be/)**: `./mvnw spring-boot:run` | Build: `./mvnw clean package` | Test: `./mvnw test` | Single test: `./mvnw test -Dtest=ClassName#methodName`
+- **Backend (be/)**: `./mvnw spring-boot:run` | Build: `./mvnw clean package` | Test: `./mvnw test` | Single test: `./mvnw test -Dtest=ClassName#methodName` | Checkstyle: `./mvnw checkstyle:check`
 - **Frontend (fe/)**: `bun run dev` | Build: `bun run build` | Test: `bun run test` | Single test: `bun run test -- path/to/file.test.ts`
 - **Frontend Quality**: Before completing ANY FE task, MUST run:
   1. `cd fe && bun run lint:fix` (auto-fix linting issues)
   2. `cd fe && bun run lint` (verify no remaining issues)
   3. Only mark task as complete if lint passes with 0 errors/warnings
+- **Backend Quality**: Before completing ANY BE task, MUST run:
+  1. `cd be && ./mvnw checkstyle:check` (verify Java code style compliance)
+  2. Only mark task as complete if checkstyle passes or violations are documented
 
 ## Architecture
 
@@ -30,6 +33,28 @@
 - **Naming**: camelCase (JS/TS), PascalCase (components/classes), snake_case (DB columns)
 - **Error Handling**: Backend custom exceptions; frontend try/catch with error states
 - **Database**: Do NOT create actual Foreign Keys (FK) in the database - use application-level references only
+- **Commits**: Follow conventional commits format:
+  - `feat:` New features
+  - `fix:` Bug fixes
+  - `docs:` Documentation changes
+  - `style:` Formatting, missing semicolons, etc.
+  - `refactor:` Code restructuring without behavior change
+  - `perf:` Performance improvements
+  - `test:` Adding or updating tests
+  - `build:` Build system or dependency changes
+  - `ci:` CI/CD configuration
+  - `chore:` Maintenance tasks
+  - Example: `feat: add React Query integration for API calls`
+
+## Release Process
+
+- **Versioning**: Automated via semantic-release based on conventional commits
+- **Release Commands**:
+  - `bun run release:dry` - Test release process without publishing
+  - `bun run release` - Create new release (auto-generates version, CHANGELOG.md, Git tag)
+- **Workflow**: Commits trigger semantic-release to analyze changes and auto-bump version (major/minor/patch)
+- **CHANGELOG**: Automatically generated in CHANGELOG.md from commit messages
+- **GitHub Integration**: Releases published to GitHub Releases with auto-generated notes
 
 ## Frontend Design Rule (CRITICAL)
 
