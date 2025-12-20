@@ -1,11 +1,11 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 /* Design System Variables */
 :root {
   /* Typography */
   --font-display: 'Outfit', system-ui, sans-serif;
   --font-body: 'DM Sans', system-ui, sans-serif;
-  
+
   /* Semantic colors - consistent across themes */
   --color-success: #22c55e;
   --color-warning: #eab308;
@@ -25,41 +25,43 @@
 /* ==========================================
    MIDNIGHT THEME - Deep space vibes (default dark)
    ========================================== */
-:root, [data-theme="midnight"] {
+:root,
+[data-theme='midnight'] {
   /* Primary: Electric violet with cyan spark */
   --color-primary: #a78bfa;
   --color-primary-light: #c4b5fd;
   --color-primary-dark: #8b5cf6;
+  --color-primary-rgb: 167, 139, 250;
   --color-accent: #22d3ee;
   --color-accent-light: #67e8f9;
   --color-accent-dark: #06b6d4;
-  
+
   /* Surfaces: Deep space blacks with purple undertone */
   --color-surface-dark: #0a0a0f;
   --color-surface: #12121a;
   --color-surface-light: #1e1e2a;
   --color-surface-elevated: #262636;
-  
+
   /* RGB variants for rgba() usage */
   --color-surface-rgb: 18, 18, 26;
   --color-surface-dark-rgb: 10, 10, 15;
   --color-surface-elevated-rgb: 38, 38, 54;
   --color-border-rgb: 51, 65, 85;
-  
+
   /* Text: Cool silver tones */
   --color-text-primary: #f8fafc;
   --color-text-secondary: #94a3b8;
   --color-text-muted: #64748b;
   --color-border: #334155;
-  
+
   /* Theme-specific glow colors for effects */
   --glow-primary: rgba(167, 139, 250, 0.35);
   --glow-accent: rgba(34, 211, 238, 0.25);
-  
+
   /* Semi-transparent card backgrounds */
   --color-card-translucent: rgba(18, 18, 26, 0.5);
   --color-card-solid: #1e1e2a;
-  
+
   /* shadcn/ui compatible variables */
   --background: 222 14% 8%;
   --foreground: 210 40% 98%;
@@ -86,41 +88,42 @@
 /* ==========================================
    SUNRISE THEME - Warm & cozy (warm dark)
    ========================================== */
-[data-theme="sunrise"] {
+[data-theme='sunrise'] {
   /* Primary: Rich amber/gold warmth */
   --color-primary: #fbbf24;
   --color-primary-light: #fcd34d;
   --color-primary-dark: #f59e0b;
+  --color-primary-rgb: 251, 191, 36;
   --color-accent: #fb923c;
   --color-accent-light: #fdba74;
   --color-accent-dark: #f97316;
-  
+
   /* Surfaces: Warm charcoal with brown undertone */
   --color-surface-dark: #1a1410;
   --color-surface: #241c16;
   --color-surface-light: #32271f;
   --color-surface-elevated: #3d3028;
-  
+
   /* RGB variants for rgba() usage */
   --color-surface-rgb: 36, 28, 22;
   --color-surface-dark-rgb: 26, 20, 16;
   --color-surface-elevated-rgb: 61, 48, 40;
   --color-border-rgb: 92, 77, 61;
-  
+
   /* Text: Cream and warm grays */
   --color-text-primary: #fef3c7;
   --color-text-secondary: #d6c9a8;
   --color-text-muted: #a69882;
   --color-border: #5c4d3d;
-  
+
   /* Theme-specific glow colors */
   --glow-primary: rgba(251, 191, 36, 0.35);
   --glow-accent: rgba(251, 146, 60, 0.25);
-  
+
   /* Semi-transparent card backgrounds */
   --color-card-translucent: rgba(36, 28, 22, 0.5);
   --color-card-solid: #32271f;
-  
+
   /* shadcn/ui compatible variables */
   --background: 25 28% 12%;
   --foreground: 45 85% 92%;
@@ -147,41 +150,42 @@
 /* ==========================================
    ARCTIC THEME - Cool & crisp (cold dark)
    ========================================== */
-[data-theme="arctic"] {
+[data-theme='arctic'] {
   /* Primary: Icy cyan with blue depth */
   --color-primary: #38bdf8;
   --color-primary-light: #7dd3fc;
   --color-primary-dark: #0ea5e9;
+  --color-primary-rgb: 56, 189, 248;
   --color-accent: #a5b4fc;
   --color-accent-light: #c7d2fe;
   --color-accent-dark: #818cf8;
-  
+
   /* Surfaces: Cool slate with blue undertone */
   --color-surface-dark: #0c1220;
   --color-surface: #111827;
   --color-surface-light: #1e293b;
   --color-surface-elevated: #273548;
-  
+
   /* RGB variants for rgba() usage */
   --color-surface-rgb: 17, 24, 39;
   --color-surface-dark-rgb: 12, 18, 32;
   --color-surface-elevated-rgb: 39, 53, 72;
   --color-border-rgb: 59, 89, 152;
-  
+
   /* Text: Ice white to steel gray */
   --color-text-primary: #f0f9ff;
   --color-text-secondary: #93c5fd;
   --color-text-muted: #60a5fa;
   --color-border: #3b5998;
-  
+
   /* Theme-specific glow colors */
   --glow-primary: rgba(56, 189, 248, 0.35);
   --glow-accent: rgba(165, 180, 252, 0.25);
-  
+
   /* Semi-transparent card backgrounds */
   --color-card-translucent: rgba(17, 24, 39, 0.5);
   --color-card-solid: #1e293b;
-  
+
   /* shadcn/ui compatible variables */
   --background: 215 28% 17%;
   --foreground: 199 100% 97%;
@@ -208,41 +212,42 @@
 /* ==========================================
    DESERT THEME - Light & warm (warm light)
    ========================================== */
-[data-theme="desert"] {
+[data-theme='desert'] {
   /* Primary: Terracotta and warm earth tones */
   --color-primary: #dc8b3b;
   --color-primary-light: #e8a86c;
   --color-primary-dark: #c2702b;
+  --color-primary-rgb: 220, 139, 59;
   --color-accent: #c45f4a;
   --color-accent-light: #db7e6a;
   --color-accent-dark: #a54d3a;
-  
+
   /* Surfaces: Warm sand and cream - softer tones */
   --color-surface-dark: #e8ddd0;
   --color-surface: #f0e8dc;
   --color-surface-light: #f5ede3;
   --color-surface-elevated: #ddd2c4;
-  
+
   /* RGB variants for rgba() usage */
   --color-surface-rgb: 240, 232, 220;
   --color-surface-dark-rgb: 232, 221, 208;
   --color-surface-elevated-rgb: 221, 210, 196;
   --color-border-rgb: 200, 186, 168;
-  
+
   /* Text: Rich browns - slightly darker for better contrast */
   --color-text-primary: #1f1812;
   --color-text-secondary: #4a3d2e;
   --color-text-muted: #7a6b58;
   --color-border: #c8baa8;
-  
+
   /* Theme-specific glow colors */
   --glow-primary: rgba(220, 139, 59, 0.25);
   --glow-accent: rgba(196, 95, 74, 0.2);
-  
+
   /* Semi-transparent card backgrounds */
   --color-card-translucent: rgba(237, 228, 216, 0.7);
   --color-card-solid: #ede4d8;
-  
+
   /* shadcn/ui compatible variables */
   --background: 30 20% 98%;
   --foreground: 25 30% 15%;
@@ -271,7 +276,10 @@ html.theme-transition,
 html.theme-transition *,
 html.theme-transition *::before,
 html.theme-transition *::after {
-  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.2s ease !important;
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    color 0.2s ease !important;
 }
 
 /* Typography Base Styles */
@@ -284,7 +292,12 @@ html.theme-transition *::after {
 }
 
 /* Apply display font to all headings */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-display);
   letter-spacing: -0.02em;
 }
@@ -316,7 +329,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 @keyframes bounce-once {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
   }
   50% {
@@ -346,13 +360,12 @@ body {
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-    monospace;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
 
 /* Gradient mesh background for hero sections */
 .hero-gradient {
-  background: 
+  background:
     radial-gradient(ellipse 80% 50% at 20% 40%, rgba(245, 158, 11, 0.15) 0%, transparent 50%),
     radial-gradient(ellipse 60% 40% at 80% 20%, rgba(6, 182, 212, 0.12) 0%, transparent 50%),
     radial-gradient(ellipse 40% 60% at 50% 90%, rgba(245, 158, 11, 0.08) 0%, transparent 50%),
@@ -390,7 +403,12 @@ code {
 
 /* Gradient text utility */
 .text-gradient-primary {
-  background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-primary) 50%, var(--color-primary-dark) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-primary-light) 0%,
+    var(--color-primary) 50%,
+    var(--color-primary-dark) 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -453,25 +471,55 @@ code {
 }
 
 /* Stagger delay utilities */
-.stagger-1 { animation-delay: 0.1s; }
-.stagger-2 { animation-delay: 0.15s; }
-.stagger-3 { animation-delay: 0.2s; }
-.stagger-4 { animation-delay: 0.25s; }
-.stagger-5 { animation-delay: 0.3s; }
-.stagger-6 { animation-delay: 0.35s; }
+.stagger-1 {
+  animation-delay: 0.1s;
+}
+.stagger-2 {
+  animation-delay: 0.15s;
+}
+.stagger-3 {
+  animation-delay: 0.2s;
+}
+.stagger-4 {
+  animation-delay: 0.25s;
+}
+.stagger-5 {
+  animation-delay: 0.3s;
+}
+.stagger-6 {
+  animation-delay: 0.35s;
+}
 
 /* Card cascade - for grid items */
-.card-cascade > *:nth-child(1) { animation-delay: 0.1s; }
-.card-cascade > *:nth-child(2) { animation-delay: 0.15s; }
-.card-cascade > *:nth-child(3) { animation-delay: 0.2s; }
-.card-cascade > *:nth-child(4) { animation-delay: 0.25s; }
-.card-cascade > *:nth-child(5) { animation-delay: 0.3s; }
-.card-cascade > *:nth-child(6) { animation-delay: 0.35s; }
+.card-cascade > *:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.card-cascade > *:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.card-cascade > *:nth-child(3) {
+  animation-delay: 0.2s;
+}
+.card-cascade > *:nth-child(4) {
+  animation-delay: 0.25s;
+}
+.card-cascade > *:nth-child(5) {
+  animation-delay: 0.3s;
+}
+.card-cascade > *:nth-child(6) {
+  animation-delay: 0.35s;
+}
 
 /* Section reveal delays */
-.section-delay-1 { animation-delay: 0.2s; }
-.section-delay-2 { animation-delay: 0.4s; }
-.section-delay-3 { animation-delay: 0.6s; }
+.section-delay-1 {
+  animation-delay: 0.2s;
+}
+.section-delay-2 {
+  animation-delay: 0.4s;
+}
+.section-delay-3 {
+  animation-delay: 0.6s;
+}
 
 /* ==========================================
    Skeleton Loaders
@@ -531,21 +579,24 @@ code {
 
 /* Card lift + glow effect */
 .hover-lift {
-  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), 
-              box-shadow 0.2s ease;
+  transition:
+    transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.2s ease;
 }
 
 .hover-lift:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.3),
-              0 0 0 1px var(--color-accent);
+  box-shadow:
+    0 12px 24px -8px rgba(0, 0, 0, 0.3),
+    0 0 0 1px var(--color-accent);
 }
 
 /* Subtle card hover for lists */
 .hover-card {
-  transition: transform 0.15s ease, 
-              box-shadow 0.15s ease,
-              border-color 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .hover-card:hover {
@@ -555,8 +606,9 @@ code {
 
 /* Button press effect */
 .hover-button {
-  transition: transform 0.1s ease, 
-              box-shadow 0.15s ease;
+  transition:
+    transform 0.1s ease,
+    box-shadow 0.15s ease;
 }
 
 .hover-button:hover {
@@ -570,8 +622,9 @@ code {
 
 /* Icon button effect */
 .hover-icon {
-  transition: transform 0.15s ease, 
-              color 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    color 0.15s ease;
 }
 
 .hover-icon:hover {
@@ -604,7 +657,8 @@ code {
 
 /* Pulse effect for interactive elements */
 @keyframes pulse-glow {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4);
   }
   50% {
@@ -618,7 +672,8 @@ code {
 
 /* Flame animation for streak */
 @keyframes flame {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1) rotate(-2deg);
   }
   25% {
@@ -642,7 +697,8 @@ code {
    ========================================== */
 
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
   }
   50% {
@@ -651,7 +707,8 @@ code {
 }
 
 @keyframes sparkle {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.3;
     transform: scale(0.8);
   }
@@ -662,7 +719,8 @@ code {
 }
 
 @keyframes gentle-pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.6;
   }
   50% {
@@ -724,4 +782,18 @@ code {
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: var(--color-border);
+}
+
+/* ==========================================
+   Text Selection Highlight
+   ========================================== */
+
+::selection {
+  background-color: rgba(var(--color-primary-rgb), 0.45);
+  color: var(--color-text-primary);
+}
+
+::-moz-selection {
+  background-color: rgba(var(--color-primary-rgb), 0.45);
+  color: var(--color-text-primary);
 }

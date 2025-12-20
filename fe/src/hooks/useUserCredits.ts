@@ -26,18 +26,21 @@ export function useUserCredits(userId: number = DEFAULT_USER_ID) {
     fetchCredits();
   }, [fetchCredits]);
 
-  const spend = useCallback(async (amount: number = 1, reason: string = 'hint') => {
-    try {
-      const result = await spendCredits({ userId, amount, reason });
-      if (result.success) {
-        setCredits(prev => prev ? { ...prev, credits: result.remainingCredits } : null);
+  const spend = useCallback(
+    async (amount: number = 1, reason: string = 'hint') => {
+      try {
+        const result = await spendCredits({ userId, amount, reason });
+        if (result.success) {
+          setCredits((prev) => (prev ? { ...prev, credits: result.remainingCredits } : null));
+        }
+        return result;
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to spend credits');
+        return { success: false, remainingCredits: credits?.credits || 0, message: 'Error' };
       }
-      return result;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to spend credits');
-      return { success: false, remainingCredits: credits?.credits || 0, message: 'Error' };
-    }
-  }, [userId, credits?.credits]);
+    },
+    [userId, credits?.credits]
+  );
 
   const refresh = useCallback(() => {
     fetchCredits();

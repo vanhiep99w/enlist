@@ -16,14 +16,14 @@ export function DictionaryModal({ isOpen, onClose }: Props) {
 
   const handleSearch = async () => {
     if (!query.trim()) return;
-    
+
     setIsLoading(true);
     setNotFound(false);
     setResult(null);
-    
+
     const entry = await lookupWord(query);
     setIsLoading(false);
-    
+
     if (entry) {
       setResult(entry);
     } else {
@@ -39,15 +39,15 @@ export function DictionaryModal({ isOpen, onClose }: Props) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px] bg-card/95 backdrop-blur-xl border-primary/20 shadow-2xl">
+      <DialogContent className="bg-card/95 border-primary/20 shadow-2xl backdrop-blur-xl sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-2xl font-display text-foreground">
-            <BookOpen className="w-6 h-6 text-primary" />
+          <DialogTitle className="font-display text-foreground flex items-center gap-2 text-2xl">
+            <BookOpen className="text-primary h-6 w-6" />
             Dictionary Lookup
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4 mt-4">
+        <div className="mt-4 space-y-4">
           <div className="relative">
             <input
               type="text"
@@ -55,60 +55,62 @@ export function DictionaryModal({ isOpen, onClose }: Props) {
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Enter a word..."
-              className="w-full px-4 py-3 pl-11 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+              className="bg-background border-border text-foreground placeholder:text-muted-foreground focus:ring-primary/50 w-full rounded-lg border px-4 py-3 pl-11 transition-all focus:ring-2 focus:outline-none"
               autoFocus
             />
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <Search className="text-muted-foreground absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
           </div>
 
           <button
             onClick={handleSearch}
             disabled={isLoading || !query.trim()}
-            className="w-full px-4 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:shadow-lg hover:shadow-primary/20"
+            className="bg-primary text-primary-foreground hover:shadow-primary/20 w-full rounded-lg px-4 py-3 font-medium transition-all hover:opacity-90 hover:shadow-lg active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isLoading ? 'Searching...' : 'Search'}
           </button>
 
-          <div className="min-h-[200px] max-h-[400px] overflow-y-auto custom-scrollbar">
+          <div className="custom-scrollbar max-h-[400px] min-h-[200px] overflow-y-auto">
             {isLoading && (
               <div className="flex items-center justify-center py-12">
-                <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+                <div className="border-primary/30 border-t-primary h-8 w-8 animate-spin rounded-full border-4" />
               </div>
             )}
-            
+
             {notFound && (
-              <div className="text-center py-12">
+              <div className="py-12 text-center">
                 <p className="text-muted-foreground text-lg">No definition found</p>
-                <p className="text-muted-foreground/60 text-sm mt-2">Try a different word</p>
+                <p className="text-muted-foreground/60 mt-2 text-sm">Try a different word</p>
               </div>
             )}
-            
+
             {result && (
-              <div className="space-y-6 p-4 bg-secondary/30 rounded-lg border border-border/50">
+              <div className="bg-secondary/30 border-border/50 space-y-6 rounded-lg border p-4">
                 <div className="space-y-3">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-3">
-                        <h3 className="text-2xl font-display font-bold text-primary">{result.word}</h3>
-                        <button className="p-2 rounded-full hover:bg-primary/10 transition-colors group">
-                          <Volume2 className="w-4 h-4 text-muted-foreground group-hover:text-primary" />
+                        <h3 className="font-display text-primary text-2xl font-bold">
+                          {result.word}
+                        </h3>
+                        <button className="hover:bg-primary/10 group rounded-full p-2 transition-colors">
+                          <Volume2 className="text-muted-foreground group-hover:text-primary h-4 w-4" />
                         </button>
                       </div>
-                      <p className="text-sm text-accent font-medium mt-1">{result.partOfSpeech}</p>
+                      <p className="text-accent mt-1 text-sm font-medium">{result.partOfSpeech}</p>
                     </div>
                   </div>
-                  
-                  <div className="pt-2 border-t border-border/50">
-                    <p className="text-lg text-foreground leading-relaxed">{result.translation}</p>
+
+                  <div className="border-border/50 border-t pt-2">
+                    <p className="text-foreground text-lg leading-relaxed">{result.translation}</p>
                   </div>
-                  
+
                   {result.example && (
-                    <div className="mt-4 p-4 rounded-lg bg-background/50 border-l-4 border-accent">
-                      <p className="text-sm italic text-muted-foreground leading-relaxed">
+                    <div className="bg-background/50 border-accent mt-4 rounded-lg border-l-4 p-4">
+                      <p className="text-muted-foreground text-sm leading-relaxed italic">
                         "{result.example}"
                       </p>
                       {result.exampleTranslation && (
-                        <p className="text-sm text-muted-foreground/80 mt-2 leading-relaxed">
+                        <p className="text-muted-foreground/80 mt-2 text-sm leading-relaxed">
                           → {result.exampleTranslation}
                         </p>
                       )}
@@ -117,12 +119,12 @@ export function DictionaryModal({ isOpen, onClose }: Props) {
                 </div>
               </div>
             )}
-            
+
             {!isLoading && !notFound && !result && (
-              <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                <BookOpen className="w-16 h-16 mb-4 opacity-30" />
+              <div className="text-muted-foreground flex flex-col items-center justify-center py-12">
+                <BookOpen className="mb-4 h-16 w-16 opacity-30" />
                 <p className="text-lg">Search for any word</p>
-                <p className="text-sm opacity-60 mt-1">Translations and definitions</p>
+                <p className="mt-1 text-sm opacity-60">Translations and definitions</p>
               </div>
             )}
           </div>

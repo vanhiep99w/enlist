@@ -28,9 +28,7 @@ const shortcutGroups: ShortcutGroup[] = [
   },
   {
     title: 'Navigation',
-    shortcuts: [
-      { keys: ['Esc'], description: 'Close modal / dialog' },
-    ],
+    shortcuts: [{ keys: ['Esc'], description: 'Close modal / dialog' }],
   },
 ];
 
@@ -38,59 +36,78 @@ export function KeyboardShortcutsModal({ isOpen, onClose }: Props) {
   if (!isOpen) return null;
 
   return (
-    <div 
-      className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
       onClick={onClose}
     >
-      <div 
-        className="rounded-xl w-full max-w-md overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200"
-        style={{ backgroundColor: 'var(--color-surface)', borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--color-border)' }}
+      <div
+        className="animate-in fade-in zoom-in-95 w-full max-w-md overflow-hidden rounded-xl shadow-2xl duration-200"
+        style={{
+          backgroundColor: 'var(--color-surface)',
+          borderWidth: '1px',
+          borderStyle: 'solid',
+          borderColor: 'var(--color-border)',
+        }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div 
+        <div
           className="flex items-center justify-between px-6 py-4"
-          style={{ borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: 'var(--color-border)' }}
+          style={{
+            borderBottomWidth: '1px',
+            borderBottomStyle: 'solid',
+            borderBottomColor: 'var(--color-border)',
+          }}
         >
-          <h2 className="text-lg font-semibold flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
+          <h2
+            className="flex items-center gap-2 text-lg font-semibold"
+            style={{ color: 'var(--color-text-primary)' }}
+          >
             <span>⌨️</span>
             Keyboard Shortcuts
           </h2>
-          <button 
+          <button
             onClick={onClose}
-            className="hover:opacity-80 transition-colors"
+            className="transition-colors hover:opacity-80"
             style={{ color: 'var(--color-text-secondary)' }}
           >
             ✕
           </button>
         </div>
 
-        <div className="px-6 py-4 space-y-6">
+        <div className="space-y-6 px-6 py-4">
           {shortcutGroups.map((group) => (
             <div key={group.title}>
-              <h3 
-                className="text-sm font-medium uppercase tracking-wider mb-3"
+              <h3
+                className="mb-3 text-sm font-medium tracking-wider uppercase"
                 style={{ color: 'var(--color-text-secondary)' }}
               >
                 {group.title}
               </h3>
               <div className="space-y-2">
                 {group.shortcuts.map((shortcut, idx) => (
-                  <div 
-                    key={idx}
-                    className="flex items-center justify-between py-2"
-                  >
-                    <span style={{ color: 'var(--color-text-secondary)' }}>{shortcut.description}</span>
+                  <div key={idx} className="flex items-center justify-between py-2">
+                    <span style={{ color: 'var(--color-text-secondary)' }}>
+                      {shortcut.description}
+                    </span>
                     <div className="flex items-center gap-1">
                       {shortcut.keys.map((key, keyIdx) => (
                         <span key={keyIdx} className="flex items-center gap-1">
-                          <kbd 
-                            className="px-2 py-1 rounded text-sm font-mono min-w-[2rem] text-center"
-                            style={{ backgroundColor: 'var(--color-surface-dark)', borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
+                          <kbd
+                            className="min-w-[2rem] rounded px-2 py-1 text-center font-mono text-sm"
+                            style={{
+                              backgroundColor: 'var(--color-surface-dark)',
+                              borderWidth: '1px',
+                              borderStyle: 'solid',
+                              borderColor: 'var(--color-border)',
+                              color: 'var(--color-text-primary)',
+                            }}
                           >
                             {key}
                           </kbd>
                           {keyIdx < shortcut.keys.length - 1 && (
-                            <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>+</span>
+                            <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                              +
+                            </span>
                           )}
                         </span>
                       ))}
@@ -102,15 +119,30 @@ export function KeyboardShortcutsModal({ isOpen, onClose }: Props) {
           ))}
         </div>
 
-        <div 
+        <div
           className="px-6 py-4"
-          style={{ backgroundColor: 'var(--color-surface-dark)', opacity: 0.5, borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: 'var(--color-border)' }}
+          style={{
+            backgroundColor: 'var(--color-surface-dark)',
+            opacity: 0.5,
+            borderTopWidth: '1px',
+            borderTopStyle: 'solid',
+            borderTopColor: 'var(--color-border)',
+          }}
         >
-          <p className="text-xs text-center" style={{ color: 'var(--color-text-muted)' }}>
-            Press <kbd 
-              className="px-1.5 py-0.5 rounded text-xs"
-              style={{ backgroundColor: 'var(--color-surface)', borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--color-border)' }}
-            >Esc</kbd> or click outside to close
+          <p className="text-center text-xs" style={{ color: 'var(--color-text-muted)' }}>
+            Press{' '}
+            <kbd
+              className="rounded px-1.5 py-0.5 text-xs"
+              style={{
+                backgroundColor: 'var(--color-surface)',
+                borderWidth: '1px',
+                borderStyle: 'solid',
+                borderColor: 'var(--color-border)',
+              }}
+            >
+              Esc
+            </kbd>{' '}
+            or click outside to close
           </p>
         </div>
       </div>

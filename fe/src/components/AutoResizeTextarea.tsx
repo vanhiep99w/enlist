@@ -109,7 +109,7 @@ export const AutoResizeTextarea = forwardRef<AutoResizeTextareaRef, AutoResizeTe
     };
 
     return (
-      <div className="relative group">
+      <div className="group relative">
         <Textarea
           ref={textareaRef}
           id={id}
@@ -119,7 +119,7 @@ export const AutoResizeTextarea = forwardRef<AutoResizeTextareaRef, AutoResizeTe
           placeholder={placeholder}
           disabled={disabled}
           className={cn(
-            'resize-none rounded-b-none backdrop-blur-sm transition-all duration-200 overflow-hidden',
+            'resize-none overflow-hidden rounded-b-none backdrop-blur-sm transition-all duration-200',
             showCharCount ? 'border-b-0' : ''
           )}
           style={{
@@ -130,15 +130,15 @@ export const AutoResizeTextarea = forwardRef<AutoResizeTextareaRef, AutoResizeTe
         {showCharCount && (
           <div
             className={cn(
-              'flex items-center justify-between px-4 py-2 bg-card/50 backdrop-blur-sm border border-t-0 border-border rounded-b-lg transition-all duration-300',
+              'bg-card/50 border-border flex items-center justify-between rounded-b-lg border border-t-0 px-4 py-2 backdrop-blur-sm transition-all duration-300',
               disabled && 'opacity-50'
             )}
           >
-            <div className="flex items-center gap-3 flex-1">
-              <div className="flex-1 h-1 rounded-full overflow-hidden max-w-32 bg-muted">
+            <div className="flex flex-1 items-center gap-3">
+              <div className="bg-muted h-1 max-w-32 flex-1 overflow-hidden rounded-full">
                 <div
                   className={cn(
-                    'h-full transition-all duration-500 ease-out rounded-full',
+                    'h-full rounded-full transition-all duration-500 ease-out',
                     getProgressColorClass()
                   )}
                   style={{ width: `${getProgressWidth()}%` }}
@@ -148,7 +148,7 @@ export const AutoResizeTextarea = forwardRef<AutoResizeTextareaRef, AutoResizeTe
               {getHintText() && (
                 <span
                   className={cn(
-                    'text-xs font-medium tracking-wide uppercase transition-all duration-300 animate-in fade-in slide-in-from-left-2',
+                    'animate-in fade-in slide-in-from-left-2 text-xs font-medium tracking-wide uppercase transition-all duration-300',
                     getCounterColorClass()
                   )}
                 >
@@ -160,14 +160,14 @@ export const AutoResizeTextarea = forwardRef<AutoResizeTextareaRef, AutoResizeTe
             <div className="flex items-baseline gap-1.5">
               <span
                 className={cn(
-                  'font-mono text-sm tabular-nums font-medium transition-colors duration-300',
+                  'font-mono text-sm font-medium tabular-nums transition-colors duration-300',
                   getCounterColorClass()
                 )}
               >
                 {charCount}
               </span>
-              <span className="text-xs font-medium text-muted-foreground">/</span>
-              <span className="text-xs font-mono tabular-nums text-muted-foreground">
+              <span className="text-muted-foreground text-xs font-medium">/</span>
+              <span className="text-muted-foreground font-mono text-xs tabular-nums">
                 {optimalRange.max}
               </span>
             </div>

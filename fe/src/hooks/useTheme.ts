@@ -20,10 +20,10 @@ const THEME_KEY = 'enlist-theme';
 
 function getInitialTheme(): Theme {
   if (typeof window === 'undefined') return 'midnight';
-  
+
   const stored = localStorage.getItem(THEME_KEY);
-  if (stored && THEMES.some(t => t.id === stored)) return stored as Theme;
-  
+  if (stored && THEMES.some((t) => t.id === stored)) return stored as Theme;
+
   return window.matchMedia('(prefers-color-scheme: light)').matches ? 'desert' : 'midnight';
 }
 
@@ -39,25 +39,25 @@ export function useTheme() {
   const setTheme = useCallback((newTheme: Theme) => {
     const root = document.documentElement;
     root.classList.add('theme-transition');
-    
+
     setThemeState(newTheme);
-    
+
     setTimeout(() => {
       root.classList.remove('theme-transition');
     }, 300);
   }, []);
 
   const cycleTheme = useCallback(() => {
-    const currentIndex = THEMES.findIndex(t => t.id === theme);
+    const currentIndex = THEMES.findIndex((t) => t.id === theme);
     const nextIndex = (currentIndex + 1) % THEMES.length;
     setTheme(THEMES[nextIndex].id);
   }, [theme, setTheme]);
 
-  const currentThemeInfo = THEMES.find(t => t.id === theme)!;
+  const currentThemeInfo = THEMES.find((t) => t.id === theme)!;
 
-  return { 
-    theme, 
-    setTheme, 
+  return {
+    theme,
+    setTheme,
     cycleTheme,
     currentThemeInfo,
     themes: THEMES,

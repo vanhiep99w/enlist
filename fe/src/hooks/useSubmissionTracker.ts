@@ -35,7 +35,7 @@ export function useSubmissionTracker(): SubmissionTracker {
   }, [hasBeenPrompted]);
 
   const incrementCount = useCallback(() => {
-    setSubmissionCount(prev => prev + 1);
+    setSubmissionCount((prev) => prev + 1);
   }, []);
 
   const markPrompted = useCallback(() => {

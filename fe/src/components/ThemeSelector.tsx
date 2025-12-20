@@ -3,10 +3,10 @@ import { Moon, Sunrise, Snowflake, Sun } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 const themeIcons: Record<Theme, React.ReactNode> = {
-  midnight: <Moon className="w-4 h-4" />,
-  sunrise: <Sunrise className="w-4 h-4" />,
-  arctic: <Snowflake className="w-4 h-4" />,
-  desert: <Sun className="w-4 h-4" />,
+  midnight: <Moon className="h-4 w-4" />,
+  sunrise: <Sunrise className="h-4 w-4" />,
+  arctic: <Snowflake className="h-4 w-4" />,
+  desert: <Sun className="h-4 w-4" />,
 };
 
 const themeLabels: Record<Theme, string> = {
@@ -30,13 +30,13 @@ export function ThemeSelector() {
 
   return (
     <Select value={theme} onValueChange={(value) => setTheme(value as Theme)}>
-      <SelectTrigger className="w-[140px] bg-secondary/50 border-border/30 hover:border-primary/50 focus:ring-primary/30 transition-all">
+      <SelectTrigger className="bg-secondary/50 border-border/30 hover:border-primary/50 focus:ring-primary/30 w-[140px] transition-all">
         <SelectValue />
       </SelectTrigger>
-      <SelectContent className="bg-card/95 backdrop-blur-xl border-primary/20">
+      <SelectContent className="bg-card/95 border-primary/20 backdrop-blur-xl">
         {themes.map((t) => (
-          <SelectItem 
-            key={t} 
+          <SelectItem
+            key={t}
             value={t}
             className="focus:bg-primary/15 focus:text-primary cursor-pointer"
           >

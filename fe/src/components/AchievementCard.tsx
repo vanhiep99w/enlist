@@ -24,29 +24,31 @@ export function AchievementCard({ achievement, isNew = false }: Props) {
     <Card
       className={cn(
         'relative text-center transition-all duration-300',
-        isNew && 'ring-2 ring-yellow-400 animate-pulse'
+        isNew && 'animate-pulse ring-2 ring-yellow-400'
       )}
     >
       {isNew && (
-        <div className="absolute -top-2 -right-2 bg-yellow-400 text-gray-900 text-xs font-bold px-2 py-0.5 rounded-full">
+        <div className="absolute -top-2 -right-2 rounded-full bg-yellow-400 px-2 py-0.5 text-xs font-bold text-gray-900">
           NEW!
         </div>
       )}
       <CardContent className="p-4">
-        <div className="text-3xl mb-2">{icon}</div>
-        <div className="text-sm font-medium text-card-foreground">{achievement.title}</div>
+        <div className="mb-2 text-3xl">{icon}</div>
+        <div className="text-card-foreground text-sm font-medium">{achievement.title}</div>
         {achievement.description && (
-          <div className="text-xs mt-1 text-muted-foreground">{achievement.description}</div>
+          <div className="text-muted-foreground mt-1 text-xs">{achievement.description}</div>
         )}
         {hasProgress && (
           <div className="mt-2">
-            <div className="h-1.5 rounded-full overflow-hidden bg-muted">
+            <div className="bg-muted h-1.5 overflow-hidden rounded-full">
               <div
                 className="h-full bg-green-500 transition-all duration-300"
-                style={{ width: `${Math.min(100, (achievement.progress! / achievement.target!) * 100)}%` }}
+                style={{
+                  width: `${Math.min(100, (achievement.progress! / achievement.target!) * 100)}%`,
+                }}
               />
             </div>
-            <div className="text-xs mt-1 text-muted-foreground">
+            <div className="text-muted-foreground mt-1 text-xs">
               {achievement.progress}/{achievement.target}
             </div>
           </div>

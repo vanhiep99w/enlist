@@ -12,13 +12,11 @@ export function TooltipWrapper({ content, children, position = 'top' }: Props) {
     <TooltipProvider delayDuration={200}>
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className="inline-block">
-            {children}
-          </div>
+          <div className="inline-block">{children}</div>
         </TooltipTrigger>
-        <TooltipContent 
+        <TooltipContent
           side={position}
-          className="bg-card/95 backdrop-blur-xl border-primary/20 text-foreground shadow-2xl"
+          className="bg-card/95 border-primary/20 text-foreground shadow-2xl backdrop-blur-xl"
         >
           {content}
         </TooltipContent>

@@ -50,31 +50,47 @@ export function TranslationExercise({ exercise }: Props) {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="mx-auto max-w-7xl p-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Left Column - Translation Exercise */}
         <div
-          className="rounded-lg p-6 h-fit lg:sticky lg:top-6"
-          style={{ backgroundColor: 'var(--color-surface)', borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--color-border)' }}
+          className="h-fit rounded-lg p-6 lg:sticky lg:top-6"
+          style={{
+            backgroundColor: 'var(--color-surface)',
+            borderWidth: '1px',
+            borderStyle: 'solid',
+            borderColor: 'var(--color-border)',
+          }}
         >
-          <h2 className="text-xl font-bold mb-4" style={{ color: 'var(--color-text-primary)' }}>Translation Exercise</h2>
+          <h2 className="mb-4 text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
+            Translation Exercise
+          </h2>
 
           {exercise.context && (
-            <div className="mb-4 text-sm italic" style={{ color: 'var(--color-text-secondary)' }}>Context: {exercise.context}</div>
+            <div className="mb-4 text-sm italic" style={{ color: 'var(--color-text-secondary)' }}>
+              Context: {exercise.context}
+            </div>
           )}
 
           <div className="mb-6">
-            <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
+            <label
+              className="mb-2 block text-sm font-medium"
+              style={{ color: 'var(--color-text-secondary)' }}
+            >
               Translate from Vietnamese:
             </label>
-            <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-4">
-              <p className="text-lg text-blue-300 font-medium">{exercise.originalText}</p>
+            <div className="rounded-lg border border-blue-700 bg-blue-900/30 p-4">
+              <p className="text-lg font-medium text-blue-300">{exercise.originalText}</p>
             </div>
           </div>
 
           <div className="mb-4">
-            <div className="flex items-center gap-2 mb-2">
-              <label htmlFor="translation" className="block text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+            <div className="mb-2 flex items-center gap-2">
+              <label
+                htmlFor="translation"
+                className="block text-sm font-medium"
+                style={{ color: 'var(--color-text-secondary)' }}
+              >
                 Your English Translation:
               </label>
               <div className="group relative">
@@ -93,11 +109,14 @@ export function TranslationExercise({ exercise }: Props) {
                   />
                 </svg>
                 <div
-                  className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity w-64 pointer-events-none z-10"
-                  style={{ backgroundColor: 'var(--color-surface-dark)', color: 'var(--color-text-primary)' }}
+                  className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 w-64 -translate-x-1/2 rounded-lg px-3 py-2 text-xs opacity-0 transition-opacity group-hover:opacity-100"
+                  style={{
+                    backgroundColor: 'var(--color-surface-dark)',
+                    color: 'var(--color-text-primary)',
+                  }}
                 >
-                  <p className="font-medium mb-1">Translation Tips:</p>
-                  <ul className="list-disc list-inside space-y-0.5">
+                  <p className="mb-1 font-medium">Translation Tips:</p>
+                  <ul className="list-inside list-disc space-y-0.5">
                     <li>Paraphrasing is acceptable</li>
                     <li>Focus on conveying the meaning</li>
                     <li>Natural English is preferred over literal translation</li>
@@ -115,7 +134,13 @@ export function TranslationExercise({ exercise }: Props) {
               value={userTranslation}
               onChange={(e) => setUserTranslation(e.target.value)}
               onKeyDown={(e) => {
-                if (e.ctrlKey && e.key === 'Enter' && userTranslation.trim() && !isLoading && !result) {
+                if (
+                  e.ctrlKey &&
+                  e.key === 'Enter' &&
+                  userTranslation.trim() &&
+                  !isLoading &&
+                  !result
+                ) {
                   e.preventDefault();
                   handleSubmit();
                 }
@@ -128,7 +153,7 @@ export function TranslationExercise({ exercise }: Props) {
           </div>
 
           {error && (
-            <div className="mb-4 p-3 bg-red-900/50 border border-red-700 rounded-lg text-red-300 text-sm">
+            <div className="mb-4 rounded-lg border border-red-700 bg-red-900/50 p-3 text-sm text-red-300">
               {error}
             </div>
           )}
@@ -138,13 +163,13 @@ export function TranslationExercise({ exercise }: Props) {
               <button
                 onClick={handleSubmit}
                 disabled={isLoading || !userTranslation.trim()}
-                className="flex-1 bg-blue-600 py-3 px-6 rounded-lg font-medium hover:bg-blue-700 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-blue-600 px-6 py-3 font-medium transition-colors hover:bg-blue-700 disabled:cursor-not-allowed"
                 style={{ color: 'var(--color-text-primary)' }}
               >
                 {isLoading ? (
                   <>
                     <svg
-                      className="animate-spin h-5 w-5"
+                      className="h-5 w-5 animate-spin"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"
@@ -172,8 +197,11 @@ export function TranslationExercise({ exercise }: Props) {
             ) : (
               <button
                 onClick={handleReset}
-                className="flex-1 py-3 px-6 rounded-lg font-medium hover:opacity-80 transition-colors"
-                style={{ backgroundColor: 'var(--color-surface-elevated)', color: 'var(--color-text-primary)' }}
+                className="flex-1 rounded-lg px-6 py-3 font-medium transition-colors hover:opacity-80"
+                style={{
+                  backgroundColor: 'var(--color-surface-elevated)',
+                  color: 'var(--color-text-primary)',
+                }}
               >
                 Try Again
               </button>
@@ -185,11 +213,16 @@ export function TranslationExercise({ exercise }: Props) {
         <div className="space-y-6">
           {!result && !isLoading && (
             <div
-              className="rounded-lg p-6 flex flex-col items-center justify-center min-h-[300px] text-center"
-              style={{ backgroundColor: 'var(--color-surface)', borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--color-border)' }}
+              className="flex min-h-[300px] flex-col items-center justify-center rounded-lg p-6 text-center"
+              style={{
+                backgroundColor: 'var(--color-surface)',
+                borderWidth: '1px',
+                borderStyle: 'solid',
+                borderColor: 'var(--color-border)',
+              }}
             >
               <svg
-                className="h-16 w-16 mb-4"
+                className="mb-4 h-16 w-16"
                 style={{ color: 'var(--color-text-muted)' }}
                 fill="none"
                 viewBox="0 0 24 24"
@@ -202,7 +235,12 @@ export function TranslationExercise({ exercise }: Props) {
                   d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
                 />
               </svg>
-              <h3 className="text-lg font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>Awaiting Your Translation</h3>
+              <h3
+                className="mb-2 text-lg font-medium"
+                style={{ color: 'var(--color-text-secondary)' }}
+              >
+                Awaiting Your Translation
+              </h3>
               <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
                 Submit your translation to receive detailed feedback and scoring
               </p>
@@ -210,14 +248,11 @@ export function TranslationExercise({ exercise }: Props) {
           )}
 
           {isLoading && (
-            <TypingIndicator 
-              message="AI is thinking..." 
-              submessage="Evaluating your translation" 
-            />
+            <TypingIndicator message="AI is thinking..." submessage="Evaluating your translation" />
           )}
 
           {result && (
-            <div className="space-y-6 animate-in fade-in duration-300">
+            <div className="animate-in fade-in space-y-6 duration-300">
               <ScoreBreakdown scores={result.feedback.scores} />
               <FeedbackPanel
                 feedback={result.feedback}

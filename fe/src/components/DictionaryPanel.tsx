@@ -28,9 +28,7 @@ export const DictionaryPanel = ({ isOpen, onClose, userId }: DictionaryPanelProp
       const query = searchQuery.toLowerCase();
       setFilteredWords(
         words.filter(
-          (w) =>
-            w.word.toLowerCase().includes(query) ||
-            w.translation.toLowerCase().includes(query)
+          (w) => w.word.toLowerCase().includes(query) || w.translation.toLowerCase().includes(query)
         )
       );
     } else {
@@ -82,15 +80,15 @@ export const DictionaryPanel = ({ isOpen, onClose, userId }: DictionaryPanelProp
     <>
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300 z-40 ${
-          isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        className={`fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-opacity duration-300 ${
+          isOpen ? 'opacity-100' : 'pointer-events-none opacity-0'
         }`}
         onClick={onClose}
       />
 
       {/* Slide-out Panel */}
       <div
-        className={`fixed top-0 right-0 h-full w-full sm:w-[480px] shadow-2xl transform transition-transform duration-300 ease-out z-50 ${
+        className={`fixed top-0 right-0 z-50 h-full w-full transform shadow-2xl transition-transform duration-300 ease-out sm:w-[480px] ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
         style={{
@@ -100,22 +98,25 @@ export const DictionaryPanel = ({ isOpen, onClose, userId }: DictionaryPanelProp
       >
         {/* Header */}
         <div
-          className="relative px-6 py-5 border-b"
+          className="relative border-b px-6 py-5"
           style={{
             borderColor: 'rgba(255, 255, 255, 0.1)',
             background: 'linear-gradient(180deg, rgba(139, 92, 246, 0.1) 0%, transparent 100%)',
           }}
         >
-          <div className="flex items-center justify-between mb-4">
+          <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div
-                className="w-10 h-10 rounded-lg flex items-center justify-center"
+                className="flex h-10 w-10 items-center justify-center rounded-lg"
                 style={{ background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)' }}
               >
-                <BookOpen className="w-5 h-5 text-white" />
+                <BookOpen className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-white" style={{ fontFamily: 'ui-serif, Georgia, serif' }}>
+                <h2
+                  className="text-xl font-bold text-white"
+                  style={{ fontFamily: 'ui-serif, Georgia, serif' }}
+                >
                   My Dictionary
                 </h2>
                 <p className="text-xs text-white/50">{words.length} words saved</p>
@@ -123,22 +124,22 @@ export const DictionaryPanel = ({ isOpen, onClose, userId }: DictionaryPanelProp
             </div>
             <button
               onClick={onClose}
-              className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+              className="rounded-lg p-2 transition-colors hover:bg-white/10"
               style={{ color: 'rgba(255, 255, 255, 0.7)' }}
             >
-              <X className="w-5 h-5" />
+              <X className="h-5 w-5" />
             </button>
           </div>
 
           {/* Search */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
+            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-white/40" />
             <input
               type="text"
               placeholder="Search words..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-lg text-sm outline-none transition-all"
+              className="w-full rounded-lg py-2.5 pr-4 pl-10 text-sm transition-all outline-none"
               style={{
                 backgroundColor: 'rgba(0, 0, 0, 0.3)',
                 border: '1px solid rgba(255, 255, 255, 0.1)',
@@ -149,15 +150,17 @@ export const DictionaryPanel = ({ isOpen, onClose, userId }: DictionaryPanelProp
         </div>
 
         {/* Word List */}
-        <div className="h-[calc(100%-160px)] overflow-y-auto px-4 py-4 space-y-2">
+        <div className="h-[calc(100%-160px)] space-y-2 overflow-y-auto px-4 py-4">
           {isLoading ? (
-            <div className="flex items-center justify-center h-32">
-              <div className="animate-spin rounded-full h-8 w-8 border-2 border-purple-500 border-t-transparent" />
+            <div className="flex h-32 items-center justify-center">
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-purple-500 border-t-transparent" />
             </div>
           ) : filteredWords.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-32 text-white/40">
-              <Sparkles className="w-12 h-12 mb-3 opacity-50" />
-              <p className="text-sm">{searchQuery ? 'No words found' : 'Start building your vocabulary!'}</p>
+            <div className="flex h-32 flex-col items-center justify-center text-white/40">
+              <Sparkles className="mb-3 h-12 w-12 opacity-50" />
+              <p className="text-sm">
+                {searchQuery ? 'No words found' : 'Start building your vocabulary!'}
+              </p>
             </div>
           ) : (
             filteredWords.map((word) => (
@@ -165,16 +168,19 @@ export const DictionaryPanel = ({ isOpen, onClose, userId }: DictionaryPanelProp
                 key={word.id}
                 className={cn(
                   'group cursor-pointer transition-all hover:scale-[1.02]',
-                  selectedWord?.id === word.id 
-                    ? 'bg-purple-900/20 border-purple-500/40' 
+                  selectedWord?.id === word.id
+                    ? 'border-purple-500/40 bg-purple-900/20'
                     : 'bg-card/5 border-border/10'
                 )}
                 onClick={() => setSelectedWord(word)}
               >
                 <CardContent className="p-4">
-                  <div className="flex items-start justify-between mb-2">
+                  <div className="mb-2 flex items-start justify-between">
                     <div className="flex-1">
-                      <h3 className="font-bold text-lg text-white mb-1" style={{ fontFamily: 'ui-serif, Georgia, serif' }}>
+                      <h3
+                        className="mb-1 text-lg font-bold text-white"
+                        style={{ fontFamily: 'ui-serif, Georgia, serif' }}
+                      >
                         {word.word}
                       </h3>
                       <p className="text-sm text-white/70">{word.translation}</p>
@@ -184,19 +190,21 @@ export const DictionaryPanel = ({ isOpen, onClose, userId }: DictionaryPanelProp
                         e.stopPropagation();
                         handleDelete(word.id);
                       }}
-                      className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-red-500/20 transition-all"
+                      className="rounded-lg p-1.5 opacity-0 transition-all group-hover:opacity-100 hover:bg-red-500/20"
                       style={{ color: '#ef4444' }}
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
 
                   {word.context && (
-                    <p className="text-xs italic text-white/40 mb-2 line-clamp-2">"{word.context}"</p>
+                    <p className="mb-2 line-clamp-2 text-xs text-white/40 italic">
+                      "{word.context}"
+                    </p>
                   )}
 
                   <div className="flex items-center gap-2 text-xs text-white/30">
-                    <Calendar className="w-3 h-3" />
+                    <Calendar className="h-3 w-3" />
                     <span>{formatDate(word.createdAt)}</span>
                   </div>
                 </CardContent>
@@ -207,7 +215,7 @@ export const DictionaryPanel = ({ isOpen, onClose, userId }: DictionaryPanelProp
 
         {/* Footer Stats */}
         <div
-          className="absolute bottom-0 left-0 right-0 px-6 py-4 border-t"
+          className="absolute right-0 bottom-0 left-0 border-t px-6 py-4"
           style={{
             borderColor: 'rgba(255, 255, 255, 0.1)',
             background: 'linear-gradient(0deg, rgba(139, 92, 246, 0.1) 0%, transparent 100%)',
@@ -215,7 +223,9 @@ export const DictionaryPanel = ({ isOpen, onClose, userId }: DictionaryPanelProp
         >
           <div className="flex items-center justify-between text-xs text-white/50">
             <span>Keep learning! 📚</span>
-            <span>{filteredWords.length} of {words.length}</span>
+            <span>
+              {filteredWords.length} of {words.length}
+            </span>
           </div>
         </div>
       </div>

@@ -7,9 +7,9 @@ import { TopicDropdown } from './TopicDropdown';
 
 const DIFFICULTIES = ['Beginner', 'Intermediate', 'Advanced'];
 const DIFFICULTY_TO_API: Record<string, string> = {
-  'Beginner': 'EASY',
-  'Intermediate': 'MEDIUM', 
-  'Advanced': 'HARD',
+  Beginner: 'EASY',
+  Intermediate: 'MEDIUM',
+  Advanced: 'HARD',
 };
 const DEFAULT_PAGE_SIZE = 12;
 
@@ -19,13 +19,13 @@ export function ParagraphList() {
   const [topics, setTopics] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Filter states
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('');
   const [selectedTopic, setSelectedTopic] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  
+
   // Pagination states
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
@@ -101,7 +101,9 @@ export function ParagraphList() {
 
   const hasActiveFilters = selectedDifficulty || selectedTopic || searchQuery;
 
-  const getDifficultyStyles = (difficulty: string): { badge: string; accent: string; badgeStyle?: React.CSSProperties } => {
+  const getDifficultyStyles = (
+    difficulty: string
+  ): { badge: string; accent: string; badgeStyle?: React.CSSProperties } => {
     switch (difficulty?.toLowerCase()) {
       case 'beginner':
         return {
@@ -145,46 +147,33 @@ export function ParagraphList() {
     return (
       <div
         key={paragraph.id}
-        className={`
-          group relative animate-fade-up
-          ${isFeatured ? 'md:col-span-2 md:row-span-2' : ''}
-          ${isLongContent(paragraph.content) && !isFeatured ? 'md:row-span-2' : ''}
-        `}
+        className={`group animate-fade-up relative ${isFeatured ? 'md:col-span-2 md:row-span-2' : ''} ${isLongContent(paragraph.content) && !isFeatured ? 'md:row-span-2' : ''} `}
         style={{ animationDelay: `${0.1 + index * 0.05}s` }}
         onClick={() => handleStartSession(paragraph.id)}
       >
         {/* Decorative background element for featured/advanced cards */}
         {(isFeatured || showAccentGlow) && (
-          <div 
-            className={`
-              absolute -inset-1 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300
-              ${showAccentGlow ? 'bg-gradient-to-br from-cyan-500/20 to-transparent' : 'bg-gradient-to-br from-amber-500/20 to-transparent'}
-            `}
+          <div
+            className={`absolute -inset-1 rounded-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100 ${showAccentGlow ? 'bg-gradient-to-br from-cyan-500/20 to-transparent' : 'bg-gradient-to-br from-amber-500/20 to-transparent'} `}
           />
         )}
 
         {/* Main card */}
         <div
-          className={`
-            relative h-full bg-[var(--color-surface)] rounded-xl border-l-4 
-            border border-[var(--color-border)] overflow-hidden
-            hover-lift cursor-pointer
-            ${styles.accent}
-            ${showAccentGlow ? 'ring-1 ring-cyan-500/20' : ''}
-          `}
+          className={`hover-lift relative h-full cursor-pointer overflow-hidden rounded-xl border border-l-4 border-[var(--color-border)] bg-[var(--color-surface)] ${styles.accent} ${showAccentGlow ? 'ring-1 ring-cyan-500/20' : ''} `}
         >
           {/* Geometric decorative element */}
           {isFeatured && (
-            <div className="absolute top-0 right-0 w-32 h-32 opacity-10">
-              <svg viewBox="0 0 100 100" className="w-full h-full text-amber-500">
+            <div className="absolute top-0 right-0 h-32 w-32 opacity-10">
+              <svg viewBox="0 0 100 100" className="h-full w-full text-amber-500">
                 <circle cx="80" cy="20" r="60" fill="currentColor" />
               </svg>
             </div>
           )}
 
           {showAccentGlow && !isFeatured && (
-            <div className="absolute bottom-0 right-0 w-20 h-20 opacity-10">
-              <svg viewBox="0 0 100 100" className="w-full h-full text-cyan-500">
+            <div className="absolute right-0 bottom-0 h-20 w-20 opacity-10">
+              <svg viewBox="0 0 100 100" className="h-full w-full text-cyan-500">
                 <polygon points="100,100 100,40 40,100" fill="currentColor" />
               </svg>
             </div>
@@ -193,56 +182,65 @@ export function ParagraphList() {
           <div className={`relative p-6 ${isFeatured ? 'md:p-8' : ''}`}>
             {/* Topic badge */}
             {paragraph.topic && (
-              <span className="inline-block px-3 py-1 bg-[var(--color-surface-elevated)] text-[var(--color-text-muted)] text-xs font-medium rounded-full mb-4">
+              <span className="mb-4 inline-block rounded-full bg-[var(--color-surface-elevated)] px-3 py-1 text-xs font-medium text-[var(--color-text-muted)]">
                 {paragraph.topic}
               </span>
             )}
 
             {/* Title */}
-            <h3 className={`
-              font-display font-semibold text-[var(--color-text-primary)] mb-3
-              ${isFeatured ? 'text-2xl md:text-3xl' : 'text-lg'}
-              ${!isFeatured ? 'line-clamp-2' : ''}
-            `}>
+            <h3
+              className={`font-display mb-3 font-semibold text-[var(--color-text-primary)] ${isFeatured ? 'text-2xl md:text-3xl' : 'text-lg'} ${!isFeatured ? 'line-clamp-2' : ''} `}
+            >
               {paragraph.title}
             </h3>
 
             {/* Difficulty badge */}
-            <span 
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full border ${styles.badge} mb-4`}
+            <span
+              className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${styles.badge} mb-4`}
               style={styles.badgeStyle}
             >
               {showAccentGlow && (
-                <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-current" />
               )}
               {paragraph.difficulty}
             </span>
 
             {/* Content preview */}
-            <p className={`
-              text-[var(--color-text-secondary)] mb-6
-              ${isFeatured ? 'text-base line-clamp-4 md:line-clamp-6' : 'text-sm line-clamp-3'}
-            `}>
+            <p
+              className={`mb-6 text-[var(--color-text-secondary)] ${isFeatured ? 'line-clamp-4 text-base md:line-clamp-6' : 'line-clamp-3 text-sm'} `}
+            >
               {paragraph.content}
             </p>
 
             {/* Footer */}
             <div className="flex items-center justify-between">
-              <span className="text-[var(--color-text-muted)] text-sm flex items-center gap-2">
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <span className="flex items-center gap-2 text-sm text-[var(--color-text-muted)]">
+                <svg
+                  className="h-4 w-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
                   <path d="M4 6h16M4 12h16M4 18h10" strokeLinecap="round" />
                 </svg>
                 {paragraph.sentenceCount} sentences
               </span>
-              <button className={`
-                flex items-center gap-2 font-medium transition-colors
-                ${isFeatured 
-                  ? 'px-4 py-2 rounded-lg bg-[var(--color-primary)] text-black hover:bg-[var(--color-primary-light)]' 
-                  : 'text-[var(--color-primary)] hover:text-[var(--color-primary-light)]'
-                }
-              `}>
+              <button
+                className={`flex items-center gap-2 font-medium transition-colors ${
+                  isFeatured
+                    ? 'rounded-lg bg-[var(--color-primary)] px-4 py-2 text-black hover:bg-[var(--color-primary-light)]'
+                    : 'text-[var(--color-primary)] hover:text-[var(--color-primary-light)]'
+                } `}
+              >
                 {isFeatured ? 'Start Practice' : 'Start'}
-                <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg
+                  className="h-4 w-4 transition-transform group-hover:translate-x-1"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
                   <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
@@ -256,29 +254,29 @@ export function ParagraphList() {
   const paragraphs = paragraphData?.content || [];
 
   return (
-    <div className="min-h-screen bg-[var(--color-surface-dark)] py-8 px-4">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-[var(--color-surface-dark)] px-4 py-8">
+      <div className="mx-auto max-w-6xl">
         {/* Header */}
-        <div className="mb-10 animate-fade-up">
-          <h1 className="font-display text-4xl font-bold text-[var(--color-text-primary)] mb-2">
+        <div className="animate-fade-up mb-10">
+          <h1 className="font-display mb-2 text-4xl font-bold text-[var(--color-text-primary)]">
             Paragraph <span className="text-gradient-primary">Translation</span>
           </h1>
-          <p className="text-[var(--color-text-secondary)] text-lg">
+          <p className="text-lg text-[var(--color-text-secondary)]">
             Choose a paragraph to practice sentence-by-sentence translation
           </p>
         </div>
 
         {/* Filters */}
-        <div className="space-y-4 mb-8 animate-fade-up stagger-2 relative z-20">
+        <div className="animate-fade-up stagger-2 relative z-20 mb-8 space-y-4">
           {/* Search and Topic Filter Row */}
-          <div className="flex gap-3 relative z-20">
+          <div className="relative z-20 flex gap-3">
             {/* Search Input */}
-            <div className="flex-1 relative">
-              <svg 
-                className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-text-muted)]" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
+            <div className="relative flex-1">
+              <svg
+                className="absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-[var(--color-text-muted)]"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
                 strokeWidth="2"
               >
                 <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" />
@@ -288,23 +286,26 @@ export function ParagraphList() {
                 placeholder="Search paragraphs..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-10 pl-12 pr-4 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl 
-                  text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)]
-                  focus:ring-2 focus:ring-[var(--color-primary)]/50 focus:border-[var(--color-primary)] transition-all"
+                className="h-10 w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] pr-4 pl-12 text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] transition-all focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/50"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-[var(--color-text-muted)] 
-                    hover:text-[var(--color-text-primary)] transition-colors"
+                  className="absolute top-1/2 right-4 -translate-y-1/2 p-1 text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text-primary)]"
                 >
-                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <svg
+                    className="h-4 w-4"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
                     <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" />
                   </svg>
                 </button>
               )}
             </div>
-            
+
             {/* Topic Dropdown */}
             <TopicDropdown
               topics={topics}
@@ -315,10 +316,10 @@ export function ParagraphList() {
 
           {/* Difficulty Buttons Row */}
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[var(--color-text-muted)] text-sm mr-2">Difficulty:</span>
+            <span className="mr-2 text-sm text-[var(--color-text-muted)]">Difficulty:</span>
             <button
               onClick={() => handleDifficultyChange('')}
-              className={`px-4 py-2.5 rounded-xl font-medium transition-all hover-button ${
+              className={`hover-button rounded-xl px-4 py-2.5 font-medium transition-all ${
                 selectedDifficulty === ''
                   ? 'bg-[var(--color-primary)] text-black'
                   : 'bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-light)]'
@@ -330,7 +331,7 @@ export function ParagraphList() {
               <button
                 key={diff}
                 onClick={() => handleDifficultyChange(diff)}
-                className={`px-4 py-2.5 rounded-xl font-medium transition-all hover-button ${
+                className={`hover-button rounded-xl px-4 py-2.5 font-medium transition-all ${
                   selectedDifficulty === diff
                     ? 'bg-[var(--color-primary)] text-black'
                     : 'bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-light)]'
@@ -339,15 +340,20 @@ export function ParagraphList() {
                 {diff}
               </button>
             ))}
-            
+
             {/* Clear Filters Button */}
             {hasActiveFilters && (
               <button
                 onClick={clearFilters}
-                className="ml-auto flex items-center gap-2 px-3 py-2 text-sm text-[var(--color-text-muted)] 
-                  hover:text-[var(--color-text-primary)] transition-colors"
+                className="ml-auto flex items-center gap-2 px-3 py-2 text-sm text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text-primary)]"
               >
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg
+                  className="h-4 w-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
                   <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" />
                 </svg>
                 Clear filters
@@ -358,20 +364,26 @@ export function ParagraphList() {
 
         {/* Loading */}
         {isLoading && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {/* Featured skeleton */}
-            <div className="md:col-span-2 md:row-span-2 skeleton rounded-xl h-80" />
+            <div className="skeleton h-80 rounded-xl md:col-span-2 md:row-span-2" />
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="skeleton rounded-xl h-48" />
+              <div key={i} className="skeleton h-48 rounded-xl" />
             ))}
           </div>
         )}
 
         {/* Error */}
         {error && (
-          <div className="bg-rose-900/30 border border-rose-700/50 rounded-xl p-4 text-rose-300 mb-6 animate-fade-up">
+          <div className="animate-fade-up mb-6 rounded-xl border border-rose-700/50 bg-rose-900/30 p-4 text-rose-300">
             <div className="flex items-center gap-3">
-              <svg className="w-5 h-5 text-rose-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg
+                className="h-5 w-5 text-rose-400"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
                 <circle cx="12" cy="12" r="10" />
                 <path d="M12 8v4M12 16h.01" strokeLinecap="round" />
               </svg>
@@ -383,27 +395,35 @@ export function ParagraphList() {
         {/* Paragraph Grid - Asymmetric Layout */}
         {!isLoading && !error && (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-min">
+            <div className="grid auto-rows-min grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
               {paragraphs.length === 0 ? (
-                <div className="col-span-full text-center py-16">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[var(--color-surface)] mb-4">
-                    <svg className="w-8 h-8 text-[var(--color-text-muted)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <div className="col-span-full py-16 text-center">
+                  <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-surface)]">
+                    <svg
+                      className="h-8 w-8 text-[var(--color-text-muted)]"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                    >
                       <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" />
                     </svg>
                   </div>
-                  <p className="text-[var(--color-text-muted)] text-lg">No paragraphs found</p>
-                  <p className="text-[var(--color-text-muted)] text-sm mt-1">Try adjusting your filters</p>
+                  <p className="text-lg text-[var(--color-text-muted)]">No paragraphs found</p>
+                  <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+                    Try adjusting your filters
+                  </p>
                   {hasActiveFilters && (
                     <button
                       onClick={clearFilters}
-                      className="mt-4 px-4 py-2 text-sm text-[var(--color-primary)] hover:text-[var(--color-primary-light)] transition-colors"
+                      className="mt-4 px-4 py-2 text-sm text-[var(--color-primary)] transition-colors hover:text-[var(--color-primary-light)]"
                     >
                       Clear all filters
                     </button>
                   )}
                 </div>
               ) : (
-                paragraphs.map((paragraph, index) => 
+                paragraphs.map((paragraph, index) =>
                   renderCard(paragraph, index, index === 0 && currentPage === 0)
                 )
               )}

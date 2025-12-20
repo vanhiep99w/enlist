@@ -5,9 +5,15 @@ export function CreditsDisplay() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center gap-4 animate-pulse">
-        <div className="h-6 w-20 rounded" style={{ backgroundColor: 'var(--color-surface-light)' }} />
-        <div className="h-6 w-20 rounded" style={{ backgroundColor: 'var(--color-surface-light)' }} />
+      <div className="flex animate-pulse items-center gap-4">
+        <div
+          className="h-6 w-20 rounded"
+          style={{ backgroundColor: 'var(--color-surface-light)' }}
+        />
+        <div
+          className="h-6 w-20 rounded"
+          style={{ backgroundColor: 'var(--color-surface-light)' }}
+        />
       </div>
     );
   }
@@ -16,29 +22,50 @@ export function CreditsDisplay() {
 
   return (
     <div className="flex items-center gap-4">
-      <div 
-        className="flex items-center gap-2 h-10 px-3 rounded-lg"
-        style={{ backgroundColor: 'var(--color-surface)', borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--color-border)' }}
+      <div
+        className="flex h-10 items-center gap-2 rounded-lg px-3"
+        style={{
+          backgroundColor: 'var(--color-surface)',
+          borderWidth: '1px',
+          borderStyle: 'solid',
+          borderColor: 'var(--color-border)',
+        }}
       >
         <span className="text-lg">💰</span>
         <span className="font-medium text-yellow-400">{credits.credits}</span>
-        <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>credits</span>
+        <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+          credits
+        </span>
       </div>
-      <div 
-        className="flex items-center gap-2 h-10 px-3 rounded-lg"
-        style={{ backgroundColor: 'var(--color-surface)', borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--color-border)' }}
+      <div
+        className="flex h-10 items-center gap-2 rounded-lg px-3"
+        style={{
+          backgroundColor: 'var(--color-surface)',
+          borderWidth: '1px',
+          borderStyle: 'solid',
+          borderColor: 'var(--color-border)',
+        }}
       >
         <span className="text-lg">⭐</span>
         <span className="font-medium text-yellow-400">{credits.totalPoints}</span>
-        <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>points</span>
+        <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+          points
+        </span>
       </div>
-      <div 
-        className="flex items-center gap-2 h-10 px-3 rounded-lg"
-        style={{ backgroundColor: 'var(--color-surface)', borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--color-border)' }}
+      <div
+        className="flex h-10 items-center gap-2 rounded-lg px-3"
+        style={{
+          backgroundColor: 'var(--color-surface)',
+          borderWidth: '1px',
+          borderStyle: 'solid',
+          borderColor: 'var(--color-border)',
+        }}
       >
         <span className="text-lg">📚</span>
         <span className="font-medium text-green-400">{credits.sessionsCompleted}</span>
-        <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>sessions</span>
+        <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+          sessions
+        </span>
       </div>
     </div>
   );

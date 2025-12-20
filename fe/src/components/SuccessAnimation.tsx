@@ -9,14 +9,16 @@ interface Props {
 
 export function SuccessAnimation({ show, accuracy, onComplete }: Props) {
   const [isVisible, setIsVisible] = useState(false);
-  const [particles, setParticles] = useState<Array<{ id: number; x: number; y: number; color: string }>>([]);
+  const [particles, setParticles] = useState<
+    Array<{ id: number; x: number; y: number; color: string }>
+  >([]);
   const { playSuccessSound, playPerfectSound } = useSoundEffects();
   const hasPlayedRef = useRef(false);
 
   useEffect(() => {
     if (show) {
       setIsVisible(true);
-      
+
       if (!hasPlayedRef.current) {
         hasPlayedRef.current = true;
         if (accuracy >= 95) {
@@ -25,13 +27,15 @@ export function SuccessAnimation({ show, accuracy, onComplete }: Props) {
           playSuccessSound();
         }
       }
-      
+
       // Generate confetti particles
       const newParticles = Array.from({ length: 12 }, (_, i) => ({
         id: i,
         x: Math.random() * 100,
         y: Math.random() * 100,
-        color: ['#22c55e', '#3b82f6', '#eab308', '#a855f7', '#ec4899'][Math.floor(Math.random() * 5)],
+        color: ['#22c55e', '#3b82f6', '#eab308', '#a855f7', '#ec4899'][
+          Math.floor(Math.random() * 5)
+        ],
       }));
       setParticles(newParticles);
 
@@ -59,12 +63,12 @@ export function SuccessAnimation({ show, accuracy, onComplete }: Props) {
   const message = getMessage();
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center">
+    <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center">
       {/* Confetti particles */}
       {particles.map((particle) => (
         <div
           key={particle.id}
-          className="absolute w-3 h-3 rounded-full animate-confetti"
+          className="animate-confetti absolute h-3 w-3 rounded-full"
           style={{
             left: `${particle.x}%`,
             top: `${particle.y}%`,
@@ -75,11 +79,11 @@ export function SuccessAnimation({ show, accuracy, onComplete }: Props) {
       ))}
 
       {/* Success badge */}
-      <div className="animate-success-pop bg-green-500 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3">
-        <span className="text-3xl animate-bounce-once">{message.emoji}</span>
+      <div className="animate-success-pop flex items-center gap-3 rounded-2xl bg-green-500 px-6 py-4 text-white shadow-2xl">
+        <span className="animate-bounce-once text-3xl">{message.emoji}</span>
         <div>
           <div className="text-xl font-bold">{message.text}</div>
-          <div className="text-green-100 text-sm">{accuracy}% accuracy</div>
+          <div className="text-sm text-green-100">{accuracy}% accuracy</div>
         </div>
       </div>
     </div>

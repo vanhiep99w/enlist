@@ -9,6 +9,9 @@ export async function getUserCredits(userId: number): Promise<UserCredits> {
 }
 
 export async function spendCredits(request: SpendCreditsRequest): Promise<SpendCreditsResponse> {
-  const response = await axios.post<SpendCreditsResponse>(`${API_BASE}/users/credits/spend`, request);
+  const response = await axios.post<SpendCreditsResponse>(
+    `${API_BASE}/users/credits/spend`,
+    request
+  );
   return response.data;
 }

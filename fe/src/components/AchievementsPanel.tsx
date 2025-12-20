@@ -16,29 +16,15 @@ export function AchievementsPanel({ achievements, newAchievements = [] }: Props)
         </CardHeader>
         <CardContent className="flex flex-col items-center py-6">
           <svg
-            className="w-24 h-24 mb-4"
+            className="mb-4 h-24 w-24"
             viewBox="0 0 100 100"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
             {/* Trophy base */}
-            <rect
-              x="35"
-              y="75"
-              width="30"
-              height="8"
-              rx="2"
-              fill="#52525b"
-            />
-            <rect
-              x="42"
-              y="65"
-              width="16"
-              height="12"
-              rx="2"
-              fill="#71717a"
-            />
-            
+            <rect x="35" y="75" width="30" height="8" rx="2" fill="#52525b" />
+            <rect x="42" y="65" width="16" height="12" rx="2" fill="#71717a" />
+
             {/* Trophy cup */}
             <path
               className="animate-gentle-pulse"
@@ -52,10 +38,10 @@ export function AchievementsPanel({ achievements, newAchievements = [] }: Props)
               strokeWidth="2"
               fill="none"
             />
-            
+
             {/* Trophy rim */}
             <ellipse cx="50" cy="25" rx="22" ry="6" fill="#d97706" />
-            
+
             {/* Left handle */}
             <path
               d="M30 30 C20 30 18 40 22 48 C26 54 30 52 30 48"
@@ -64,7 +50,7 @@ export function AchievementsPanel({ achievements, newAchievements = [] }: Props)
               fill="none"
               strokeLinecap="round"
             />
-            
+
             {/* Right handle */}
             <path
               d="M70 30 C80 30 82 40 78 48 C74 54 70 52 70 48"
@@ -73,20 +59,34 @@ export function AchievementsPanel({ achievements, newAchievements = [] }: Props)
               fill="none"
               strokeLinecap="round"
             />
-            
+
             {/* Star decoration on trophy */}
             <polygon
               className="animate-sparkle"
               points="50,35 52,41 58,41 53,45 55,51 50,47 45,51 47,45 42,41 48,41"
               fill="#fef3c7"
             />
-            
+
             {/* Sparkle effects */}
             <circle className="animate-sparkle" cx="25" cy="18" r="2" fill="#06b6d4" />
             <circle className="animate-sparkle-delayed" cx="75" cy="15" r="2.5" fill="#06b6d4" />
-            <circle className="animate-sparkle-slow" cx="80" cy="60" r="2" fill="#f59e0b" opacity="0.7" />
-            <circle className="animate-sparkle" cx="20" cy="55" r="1.5" fill="#fbbf24" opacity="0.6" />
-            
+            <circle
+              className="animate-sparkle-slow"
+              cx="80"
+              cy="60"
+              r="2"
+              fill="#f59e0b"
+              opacity="0.7"
+            />
+            <circle
+              className="animate-sparkle"
+              cx="20"
+              cy="55"
+              r="1.5"
+              fill="#fbbf24"
+              opacity="0.6"
+            />
+
             {/* Small stars */}
             <polygon
               className="animate-sparkle-delayed"
@@ -101,8 +101,10 @@ export function AchievementsPanel({ achievements, newAchievements = [] }: Props)
               opacity="0.7"
             />
           </svg>
-          <p className="font-medium mb-1 text-muted-foreground">No achievements yet</p>
-          <p className="text-sm text-center text-muted-foreground">Complete sessions to earn your first trophy!</p>
+          <p className="text-muted-foreground mb-1 font-medium">No achievements yet</p>
+          <p className="text-muted-foreground text-center text-sm">
+            Complete sessions to earn your first trophy!
+          </p>
         </CardContent>
       </Card>
     );

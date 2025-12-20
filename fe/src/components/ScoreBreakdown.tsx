@@ -30,17 +30,17 @@ const scoreConfigs: ScoreConfig[] = [
 ];
 
 function getScoreColor(score: number): string {
-  if (score >= 90) return 'var(--color-primary)';  // Excellent
-  if (score >= 80) return 'var(--color-primary-light)';  // Good
-  if (score >= 60) return 'var(--color-accent)';  // Average
-  return 'var(--color-text-muted)';  // Poor
+  if (score >= 90) return 'var(--color-primary)'; // Excellent
+  if (score >= 80) return 'var(--color-primary-light)'; // Good
+  if (score >= 60) return 'var(--color-accent)'; // Average
+  return 'var(--color-text-muted)'; // Poor
 }
 
 function getScoreStrokeColor(score: number): string {
-  if (score >= 90) return 'var(--color-primary)';  // Excellent
-  if (score >= 80) return 'var(--color-primary-light)';  // Good
-  if (score >= 60) return 'var(--color-accent)';  // Average
-  return 'var(--color-text-muted)';  // Poor
+  if (score >= 90) return 'var(--color-primary)'; // Excellent
+  if (score >= 80) return 'var(--color-primary-light)'; // Good
+  if (score >= 60) return 'var(--color-accent)'; // Average
+  return 'var(--color-text-muted)'; // Poor
 }
 
 function getScoreTrackColor(): string {
@@ -93,9 +93,9 @@ function CircularProgress({
       const progress = Math.min(elapsed / duration, 1);
       const easeOut = 1 - Math.pow(1 - progress, 3);
       const currentValue = Math.round(startValue + (endValue - startValue) * easeOut);
-      
+
       setDisplayScore(currentValue);
-      
+
       if (progress < 1) {
         requestAnimationFrame(animate);
       }
@@ -111,16 +111,12 @@ function CircularProgress({
 
   return (
     <div
-      className="flex flex-col items-center gap-1 relative"
+      className="relative flex flex-col items-center gap-1"
       onMouseEnter={() => setShowTooltip(true)}
       onMouseLeave={() => setShowTooltip(false)}
     >
       <div className="relative">
-        <svg
-          width={actualSize}
-          height={actualSize}
-          className="transform -rotate-90"
-        >
+        <svg width={actualSize} height={actualSize} className="-rotate-90 transform">
           <circle
             cx={actualSize / 2}
             cy={actualSize / 2}
@@ -145,24 +141,27 @@ function CircularProgress({
           />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className={`${isOverall ? 'text-xl' : 'text-sm'} font-bold tabular-nums`} style={{ color: getScoreColor(score) }}>
+          <span
+            className={`${isOverall ? 'text-xl' : 'text-sm'} font-bold tabular-nums`}
+            style={{ color: getScoreColor(score) }}
+          >
             {displayScore}%
           </span>
         </div>
       </div>
-      <span 
+      <span
         className={`${isOverall ? 'text-sm font-semibold' : 'text-xs'} text-center`}
         style={{ color: 'var(--color-text-secondary)' }}
       >
         {label}
       </span>
       {showTooltip && !isOverall && (
-        <div 
-          className="absolute -top-2 left-1/2 -translate-x-1/2 -translate-y-full z-10 text-xs rounded py-1.5 px-2.5 max-w-[180px] text-center whitespace-normal"
+        <div
+          className="absolute -top-2 left-1/2 z-10 max-w-[180px] -translate-x-1/2 -translate-y-full rounded px-2.5 py-1.5 text-center text-xs whitespace-normal"
           style={{ backgroundColor: 'var(--color-surface)', color: 'var(--color-text-primary)' }}
         >
           {tooltip}
-          <div 
+          <div
             className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent"
             style={{ borderTopColor: 'var(--color-surface)' }}
           />
@@ -174,8 +173,8 @@ function CircularProgress({
 
 export function ScoreBreakdown({ scores }: Props) {
   return (
-    <div 
-      className="rounded-lg p-4 border-2"
+    <div
+      className="rounded-lg border p-4"
       style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
     >
       <div className="flex items-center justify-center gap-6">

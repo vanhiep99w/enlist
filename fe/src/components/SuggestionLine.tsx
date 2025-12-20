@@ -63,9 +63,7 @@ export function SuggestionLine({ userTranslation, errors }: Props) {
           <span key={index} className="inline">
             <span className="text-red-500 line-through">{segment.text}</span>
             {segment.correction && (
-              <span className="text-green-400 font-medium ml-0.5">
-                ({segment.correction})
-              </span>
+              <span className="ml-0.5 font-medium text-green-400">({segment.correction})</span>
             )}
           </span>
         ) : (

@@ -36,15 +36,11 @@ export interface SaveWordRequest {
 }
 
 export const translateWord = async (word: string): Promise<WordTranslation> => {
-  const response = await axios.post<WordTranslation>(
-    `${API_BASE_URL}/api/translate/word`,
-    word,
-    {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    }
-  );
+  const response = await axios.post<WordTranslation>(`${API_BASE_URL}/api/translate/word`, word, {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
   return response.data;
 };
 
@@ -52,7 +48,10 @@ export const lookupWord = async (word: string): Promise<WordTranslation> => {
   return translateWord(word);
 };
 
-export const saveWordToDictionary = async (userId: number, request: SaveWordRequest): Promise<DictionaryWord> => {
+export const saveWordToDictionary = async (
+  userId: number,
+  request: SaveWordRequest
+): Promise<DictionaryWord> => {
   const response = await axios.post<DictionaryWord>(
     `${API_BASE_URL}/api/dictionary/save?userId=${userId}`,
     request
@@ -67,7 +66,10 @@ export const getUserDictionary = async (userId: number): Promise<DictionaryWord[
   return response.data;
 };
 
-export const getSessionDictionary = async (userId: number, sessionId: number): Promise<DictionaryWord[]> => {
+export const getSessionDictionary = async (
+  userId: number,
+  sessionId: number
+): Promise<DictionaryWord[]> => {
   const response = await axios.get<DictionaryWord[]>(
     `${API_BASE_URL}/api/dictionary/session/${userId}/${sessionId}`
   );

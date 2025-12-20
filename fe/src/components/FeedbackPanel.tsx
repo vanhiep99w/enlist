@@ -31,11 +31,11 @@ const errorTypeLabels: Record<TranslationError['type'], string> = {
 function QuickErrorCard({ error }: { error: TranslationError }) {
   return (
     <Card>
-      <CardContent className="flex items-center gap-2 py-1.5 px-2 p-0">
+      <CardContent className="flex items-center gap-2 p-0 px-2 py-1.5">
         <Badge className={cn('text-xs font-medium', errorTypeBadgeColors[error.type])}>
           {errorTypeLabels[error.type]}
         </Badge>
-        <span className="text-sm truncate text-muted-foreground">
+        <span className="text-muted-foreground truncate text-sm">
           {error.quickFix || error.correction}
         </span>
       </CardContent>
@@ -45,38 +45,44 @@ function QuickErrorCard({ error }: { error: TranslationError }) {
 
 function DetailedErrorCard({ error }: { error: TranslationError }) {
   return (
-    <Card>
-      <CardContent className="p-3">
-        <div className="flex items-start gap-2">
-          <Badge className={cn('text-xs font-medium shrink-0', errorTypeBadgeColors[error.type])}>
-            {errorTypeLabels[error.type]}
-          </Badge>
-          <div className="flex-1 min-w-0 text-sm">
-            <p className="font-medium text-card-foreground">{error.issue}</p>
-            <p className="mt-1 text-muted-foreground">
-              <span className="font-medium">Fix:</span>{' '}
-              <span className="text-green-400">{error.correction}</span>
-            </p>
-            {error.explanation && (
-              <p className="mt-1 text-xs text-muted-foreground">{error.explanation}</p>
-            )}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+    <div
+      className="flex items-start gap-2 rounded-lg border p-3"
+      style={{
+        backgroundColor: 'var(--color-surface)',
+        border: '1px solid var(--color-border)',
+      }}
+    >
+      <Badge className={cn('shrink-0 text-xs font-medium', errorTypeBadgeColors[error.type])}>
+        {errorTypeLabels[error.type]}
+      </Badge>
+      <div className="min-w-0 flex-1 text-sm">
+        <p className="text-card-foreground font-medium">{error.issue}</p>
+        <p className="text-muted-foreground mt-1">
+          <span className="font-medium">Fix:</span>{' '}
+          <span className="text-green-400">{error.correction}</span>
+        </p>
+        {error.explanation && (
+          <p className="text-muted-foreground mt-1 text-xs">{error.explanation}</p>
+        )}
+      </div>
+    </div>
   );
 }
 
-function ModeToggle({ mode, onChange }: { mode: FeedbackMode; onChange: (mode: FeedbackMode) => void }) {
+function ModeToggle({
+  mode,
+  onChange,
+}: {
+  mode: FeedbackMode;
+  onChange: (mode: FeedbackMode) => void;
+}) {
   return (
-    <div className="flex items-center gap-1 rounded p-0.5 bg-muted">
+    <div className="bg-muted flex items-center gap-1 rounded p-0.5">
       <button
         onClick={() => onChange('quick')}
         className={cn(
-          'px-2 py-1 text-xs font-medium rounded transition-all',
-          mode === 'quick' 
-            ? 'bg-background text-foreground shadow-sm' 
-            : 'text-muted-foreground'
+          'rounded px-2 py-1 text-xs font-medium transition-all',
+          mode === 'quick' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground'
         )}
       >
         Quick
@@ -84,10 +90,8 @@ function ModeToggle({ mode, onChange }: { mode: FeedbackMode; onChange: (mode: F
       <button
         onClick={() => onChange('detailed')}
         className={cn(
-          'px-2 py-1 text-xs font-medium rounded transition-all',
-          mode === 'detailed'
-            ? 'bg-background text-foreground shadow-sm'
-            : 'text-muted-foreground'
+          'rounded px-2 py-1 text-xs font-medium transition-all',
+          mode === 'detailed' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground'
         )}
       >
         Detailed
@@ -103,7 +107,7 @@ interface CollapsibleTipsSectionProps {
 }
 
 function CollapsibleTipsSection({ feedback, isExpanded, onToggle }: CollapsibleTipsSectionProps) {
-  const hasTips = 
+  const hasTips =
     (feedback.articleTips && feedback.articleTips.length > 0) ||
     (feedback.collocationHighlights && feedback.collocationHighlights.length > 0) ||
     (feedback.reasoningTips && feedback.reasoningTips.length > 0) ||
@@ -112,7 +116,7 @@ function CollapsibleTipsSection({ feedback, isExpanded, onToggle }: CollapsibleT
 
   if (!hasTips) return null;
 
-  const tipCount = 
+  const tipCount =
     (feedback.articleTips?.length || 0) +
     (feedback.collocationHighlights?.length || 0) +
     (feedback.reasoningTips?.length || 0) +
@@ -123,16 +127,18 @@ function CollapsibleTipsSection({ feedback, isExpanded, onToggle }: CollapsibleT
     <Card className="overflow-hidden">
       <button
         onClick={onToggle}
-        className="w-full flex items-center justify-between p-3 transition-colors"
-        style={{ 
-          backgroundColor: 'var(--color-surface-elevated)',
-          borderBottom: '1px solid var(--color-border)'
+        className="flex w-full items-center justify-between p-3 transition-colors"
+        style={{
+          backgroundColor: 'var(--color-surface)',
+          borderBottom: '1px solid var(--color-border)',
         }}
       >
         <div className="flex items-center gap-2">
           <span className="text-lg">📖</span>
-          <span className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>Learning Tips</span>
-          <Badge className="bg-primary/20 text-primary border border-primary/30 text-xs">
+          <span className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
+            Learning Tips
+          </span>
+          <Badge className="bg-primary/20 text-primary border-primary/30 border text-xs">
             {tipCount}
           </Badge>
         </div>
@@ -146,9 +152,14 @@ function CollapsibleTipsSection({ feedback, isExpanded, onToggle }: CollapsibleT
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
       </button>
-      
-      <div className={cn('transition-all duration-300', isExpanded ? 'max-h-[2000px]' : 'max-h-0 overflow-hidden')}>
-        <CardContent className="p-3 space-y-3 bg-card">
+
+      <div
+        className={cn(
+          'transition-all duration-300',
+          isExpanded ? 'max-h-[2000px]' : 'max-h-0 overflow-hidden'
+        )}
+      >
+        <CardContent className="bg-card space-y-3 p-3">
           {/* Article Tips */}
           {feedback.articleTips && feedback.articleTips.length > 0 && (
             <div className="space-y-2">
@@ -156,10 +167,13 @@ function CollapsibleTipsSection({ feedback, isExpanded, onToggle }: CollapsibleT
                 <span>📚</span> Article Tips
               </div>
               {feedback.articleTips.map((tip, index) => (
-                <div key={index} className="bg-purple-900/30 border border-purple-800 rounded p-2 text-xs">
+                <div
+                  key={index}
+                  className="rounded border border-purple-800 bg-purple-900/30 p-2 text-xs"
+                >
                   <p className="font-medium text-purple-300">{tip.context}</p>
-                  <p className="text-purple-400 mt-0.5">{tip.rule}</p>
-                  <p className="text-purple-500 mt-1 italic">Ex: {tip.example}</p>
+                  <p className="mt-0.5 text-purple-400">{tip.rule}</p>
+                  <p className="mt-1 text-purple-500 italic">Ex: {tip.example}</p>
                 </div>
               ))}
             </div>
@@ -172,13 +186,16 @@ function CollapsibleTipsSection({ feedback, isExpanded, onToggle }: CollapsibleT
                 <span>🔗</span> Collocations
               </div>
               {feedback.collocationHighlights.map((coll, index) => (
-                <div key={index} className="bg-blue-900/30 border border-blue-800 rounded p-2 text-xs">
+                <div
+                  key={index}
+                  className="rounded border border-blue-800 bg-blue-900/30 p-2 text-xs"
+                >
                   <div className="flex items-center gap-1.5">
                     <span className="text-red-400 line-through">{coll.incorrect}</span>
                     <span className="text-muted-foreground">→</span>
-                    <span className="text-green-400 font-medium">{coll.correct}</span>
+                    <span className="font-medium text-green-400">{coll.correct}</span>
                   </div>
-                  <p className="text-blue-400 mt-1">{coll.explanation}</p>
+                  <p className="mt-1 text-blue-400">{coll.explanation}</p>
                 </div>
               ))}
             </div>
@@ -191,13 +208,16 @@ function CollapsibleTipsSection({ feedback, isExpanded, onToggle }: CollapsibleT
                 <span>💡</span> Reasoning Words
               </div>
               {feedback.reasoningTips.map((tip, index) => (
-                <div key={index} className="bg-amber-900/30 border border-amber-800 rounded p-2 text-xs">
+                <div
+                  key={index}
+                  className="rounded border border-amber-800 bg-amber-900/30 p-2 text-xs"
+                >
                   <div className="flex items-center gap-1.5">
                     <span className="text-red-400 line-through">{tip.incorrectWord}</span>
                     <span className="text-muted-foreground">→</span>
-                    <span className="text-green-400 font-medium">{tip.correctWord}</span>
+                    <span className="font-medium text-green-400">{tip.correctWord}</span>
                   </div>
-                  <p className="text-amber-400 mt-1">{tip.explanation}</p>
+                  <p className="mt-1 text-amber-400">{tip.explanation}</p>
                 </div>
               ))}
             </div>
@@ -210,15 +230,18 @@ function CollapsibleTipsSection({ feedback, isExpanded, onToggle }: CollapsibleT
                 <span>🎭</span> Tone & Register
               </div>
               {feedback.registerTips.map((tip, index) => (
-                <div key={index} className="bg-rose-900/30 border border-rose-800 rounded p-2 text-xs">
+                <div
+                  key={index}
+                  className="rounded border border-rose-800 bg-rose-900/30 p-2 text-xs"
+                >
                   <div className="flex items-center gap-1.5">
                     <span className="text-muted-foreground">Casual:</span>
                     <span className="text-rose-400">{tip.casualWord}</span>
                     <span className="text-muted-foreground">→</span>
                     <span className="text-muted-foreground">Formal:</span>
-                    <span className="text-green-400 font-medium">{tip.formalWord}</span>
+                    <span className="font-medium text-green-400">{tip.formalWord}</span>
                   </div>
-                  <p className="text-rose-400 mt-1">{tip.explanation}</p>
+                  <p className="mt-1 text-rose-400">{tip.explanation}</p>
                 </div>
               ))}
             </div>
@@ -227,12 +250,12 @@ function CollapsibleTipsSection({ feedback, isExpanded, onToggle }: CollapsibleT
           {/* Suggestions */}
           {feedback.suggestions && feedback.suggestions.length > 0 && (
             <div className="space-y-1">
-              <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+              <div className="text-muted-foreground flex items-center gap-1.5 text-xs font-medium">
                 <span>✨</span> Suggestions
               </div>
               {feedback.suggestions.map((suggestion, index) => (
-                <div key={index} className="flex items-start gap-1.5 text-xs text-muted-foreground">
-                  <span className="text-blue-400 mt-0.5">•</span>
+                <div key={index} className="text-muted-foreground flex items-start gap-1.5 text-xs">
+                  <span className="mt-0.5 text-blue-400">•</span>
                   <span>{suggestion}</span>
                 </div>
               ))}
@@ -244,10 +267,15 @@ function CollapsibleTipsSection({ feedback, isExpanded, onToggle }: CollapsibleT
   );
 }
 
-export function FeedbackPanel({ feedback, userTranslation, showDetailedPrompt, onPromptDismiss }: Props) {
+export function FeedbackPanel({
+  feedback,
+  userTranslation,
+  showDetailedPrompt,
+  onPromptDismiss,
+}: Props) {
   const [promptDismissed, setPromptDismissed] = useState(false);
   const [tipsExpanded, setTipsExpanded] = useState(false);
-  
+
   const [mode, setMode] = useState<FeedbackMode>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem(FEEDBACK_MODE_KEY);
@@ -274,10 +302,10 @@ export function FeedbackPanel({ feedback, userTranslation, showDetailedPrompt, o
   const ErrorCard = mode === 'quick' ? QuickErrorCard : DetailedErrorCard;
 
   return (
-    <Card className="p-4 space-y-3">
+    <Card className="space-y-3 border p-4" style={{ borderColor: 'var(--color-border)' }}>
       {/* Onboarding Prompt - Compact */}
       {showDetailedPrompt && !promptDismissed && mode === 'quick' && (
-        <div className="bg-blue-900/50 border border-blue-700 rounded-lg p-3 flex items-center justify-between gap-3">
+        <div className="flex items-center justify-between gap-3 rounded-lg border border-blue-700 bg-blue-900/50 p-3">
           <div className="flex items-center gap-2 text-sm">
             <span className="text-blue-400">⚡</span>
             <span className="text-blue-300">Ready for detailed feedback?</span>
@@ -285,13 +313,13 @@ export function FeedbackPanel({ feedback, userTranslation, showDetailedPrompt, o
           <div className="flex gap-2">
             <button
               onClick={handleEnableDetailed}
-              className="px-2 py-1 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700"
+              className="rounded bg-blue-600 px-2 py-1 text-xs font-medium text-white hover:bg-blue-700"
             >
               Enable
             </button>
             <button
               onClick={handleDismissPrompt}
-              className="text-blue-400 text-xs hover:text-blue-300"
+              className="text-xs text-blue-400 hover:text-blue-300"
             >
               Later
             </button>
@@ -301,12 +329,20 @@ export function FeedbackPanel({ feedback, userTranslation, showDetailedPrompt, o
 
       {/* Suggestion Line with inline error highlighting */}
       {userTranslation && feedback.errors.length > 0 && (
-        <div className="border rounded-lg p-3" style={{ 
-          backgroundColor: 'var(--color-surface-elevated)',
-          borderColor: 'var(--color-border)'
-        }}>
+        <div
+          className="rounded-lg border p-3"
+          style={{
+            backgroundColor: 'var(--color-surface)',
+            borderColor: 'var(--color-border)',
+          }}
+        >
           <div className="flex items-start gap-2">
-            <span className="text-sm font-medium shrink-0" style={{ color: 'var(--color-text-primary)' }}>📝 Your answer:</span>
+            <span
+              className="shrink-0 text-sm font-medium"
+              style={{ color: 'var(--color-text-primary)' }}
+            >
+              📝 Your answer:
+            </span>
             <div className="text-sm">
               <SuggestionLine userTranslation={userTranslation} errors={feedback.errors} />
             </div>
@@ -315,12 +351,20 @@ export function FeedbackPanel({ feedback, userTranslation, showDetailedPrompt, o
       )}
 
       {/* Correct Translation - Compact */}
-      <div className="border rounded-lg p-3" style={{
-        backgroundColor: 'var(--color-surface-elevated)',
-        borderColor: 'var(--color-border)'
-      }}>
+      <div
+        className="rounded-lg border p-3"
+        style={{
+          backgroundColor: 'var(--color-surface)',
+          borderColor: 'var(--color-border)',
+        }}
+      >
         <div className="flex items-baseline gap-2">
-          <span className="text-sm font-medium whitespace-nowrap" style={{ color: 'var(--color-primary)' }}>✓ Correct:</span>
+          <span
+            className="text-sm font-medium whitespace-nowrap"
+            style={{ color: 'var(--color-primary)' }}
+          >
+            ✓ Correct:
+          </span>
           <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
             {feedback.correctTranslation}
           </p>
@@ -329,13 +373,13 @@ export function FeedbackPanel({ feedback, userTranslation, showDetailedPrompt, o
 
       {/* Good Points - What the student did well */}
       {feedback.goodPoints && feedback.goodPoints.length > 0 && (
-        <div className="bg-emerald-900/30 border border-emerald-700 rounded-lg p-3">
+        <div className="rounded-lg border border-emerald-700 bg-emerald-900/30 p-3">
           <div className="flex items-start gap-2">
-            <span className="text-emerald-400 text-sm font-medium shrink-0">✨ Điểm tốt:</span>
+            <span className="shrink-0 text-sm font-medium text-emerald-400">✨ Điểm tốt:</span>
             <div className="flex-1 space-y-1">
               {feedback.goodPoints.map((point, index) => (
                 <div key={index} className="text-sm">
-                  <span className="text-emerald-300 font-medium">"{point.phrase}"</span>
+                  <span className="font-medium text-emerald-300">"{point.phrase}"</span>
                   <span className="text-emerald-400"> – {point.reason}</span>
                 </div>
               ))}
@@ -347,8 +391,8 @@ export function FeedbackPanel({ feedback, userTranslation, showDetailedPrompt, o
       {/* Errors - Compact */}
       {feedback.errors.length > 0 && (
         <div>
-          <div className="flex items-center justify-between gap-2 mb-2">
-            <span className="text-sm font-medium text-muted-foreground">
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <span className="text-muted-foreground text-sm font-medium">
               Errors ({feedback.errors.length})
             </span>
             <ModeToggle mode={mode} onChange={setMode} />
@@ -363,22 +407,32 @@ export function FeedbackPanel({ feedback, userTranslation, showDetailedPrompt, o
 
       {/* Overall Comment (Nhận xét) */}
       {feedback.overallComment && (
-        <div className="border rounded-lg p-3" style={{
-          backgroundColor: 'var(--color-surface-elevated)',
-          borderColor: 'var(--color-border)'
-        }}>
+        <div
+          className="rounded-lg border p-3"
+          style={{
+            backgroundColor: 'var(--color-surface)',
+            borderColor: 'var(--color-border)',
+          }}
+        >
           <div className="flex items-start gap-2">
-            <span className="text-sm font-medium shrink-0" style={{ color: 'var(--color-text-primary)' }}>💬 Nhận xét:</span>
-            <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>{feedback.overallComment}</p>
+            <span
+              className="shrink-0 text-sm font-medium"
+              style={{ color: 'var(--color-text-primary)' }}
+            >
+              💬 Nhận xét:
+            </span>
+            <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+              {feedback.overallComment}
+            </p>
           </div>
         </div>
       )}
 
       {/* Learning Tips - Collapsible, collapsed by default */}
-      <CollapsibleTipsSection 
-        feedback={feedback} 
-        isExpanded={tipsExpanded} 
-        onToggle={() => setTipsExpanded(!tipsExpanded)} 
+      <CollapsibleTipsSection
+        feedback={feedback}
+        isExpanded={tipsExpanded}
+        onToggle={() => setTipsExpanded(!tipsExpanded)}
       />
     </Card>
   );

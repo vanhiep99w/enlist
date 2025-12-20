@@ -13,7 +13,10 @@ let audioContext: AudioContext | null = null;
 function getAudioContext(): AudioContext | null {
   if (typeof window === 'undefined') return null;
   if (!audioContext) {
-    audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+    audioContext = new (
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
+    )();
   }
   return audioContext;
 }
@@ -55,7 +58,7 @@ function playPerfectFanfare(): void {
   playTone(523.25, 0.12, 'sine', 0.1);
   playTone(659.25, 0.12, 'sine', 0.1, 0.08);
   playTone(783.99, 0.12, 'sine', 0.1, 0.16);
-  playTone(1046.50, 0.3, 'sine', 0.12, 0.24);
+  playTone(1046.5, 0.3, 'sine', 0.12, 0.24);
   playTone(783.99, 0.1, 'triangle', 0.06, 0.24);
   playTone(659.25, 0.1, 'triangle', 0.06, 0.24);
 }

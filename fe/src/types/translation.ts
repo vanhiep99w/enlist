@@ -5,7 +5,13 @@ export interface ScoreBreakdown {
   overallScore: number;
 }
 
-export type ErrorCategory = 'ARTICLE' | 'COLLOCATION' | 'PREPOSITION' | 'VERB_FORM' | 'WORD_ORDER' | 'REGISTER';
+export type ErrorCategory =
+  | 'ARTICLE'
+  | 'COLLOCATION'
+  | 'PREPOSITION'
+  | 'VERB_FORM'
+  | 'WORD_ORDER'
+  | 'REGISTER';
 
 export interface TranslationError {
   type: 'GRAMMAR' | 'WORD_CHOICE' | 'NATURALNESS';
