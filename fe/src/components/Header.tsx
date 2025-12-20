@@ -37,6 +37,13 @@ export function Header() {
             >
               Paragraphs
             </Link>
+            <Link
+              to="/leaderboard"
+              className="hover-underline transition-colors [&.active]:text-amber-500"
+              style={{ color: 'var(--color-text-secondary)' }}
+            >
+              Leaderboard
+            </Link>
           </nav>
         </div>
         <div className="flex items-center gap-3">

@@ -50,6 +50,17 @@ public class User {
     @Column(name = "last_progress_reset_date")
     private LocalDate lastProgressResetDate;
 
+    @Column(name = "current_streak")
+    @Builder.Default
+    private Integer currentStreak = 0;
+
+    @Column(name = "longest_streak")
+    @Builder.Default
+    private Integer longestStreak = 0;
+
+    @Column(name = "last_activity_date")
+    private LocalDate lastActivityDate;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

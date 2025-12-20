@@ -1,24 +1,8 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'motion/react';
-import { getDailyProgress } from '../api/userApi';
-import type { DailyProgress } from '../types/user';
-
-interface StreakData {
-  currentStreak: number;
-  longestStreak: number;
-  weekDays: boolean[];
-  lastActivityDate?: string;
-}
-
-const MOCK_STREAK_DATA: StreakData = {
-  currentStreak: 3,
-  longestStreak: 7,
-  weekDays: [true, true, true, false, false, false, false],
-  lastActivityDate: new Date().toISOString(),
-};
-
-const DAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+import { getDailyProgress, getStreak } from '../api/userApi';
+import type { DailyProgress, StreakData } from '../types/user';
 
 function getMilestoneMessage(streak: number): string | null {
   if (streak >= 100) return '🏆 Century!';
@@ -124,50 +108,6 @@ function StreakTooltip({
           </span>
         </div>
 
-        {/* Week visualization */}
-        <div
-          className="pt-2"
-          style={{
-            borderTopWidth: '1px',
-            borderTopStyle: 'solid',
-            borderTopColor: 'var(--color-border)',
-          }}
-        >
-          <div className="mb-1 flex items-center justify-between">
-            {DAY_LABELS.map((label, idx) => (
-              <span
-                key={idx}
-                className="w-4 text-center text-[10px]"
-                style={{ color: 'var(--color-text-muted)' }}
-              >
-                {label}
-              </span>
-            ))}
-          </div>
-          <div className="flex items-center justify-between">
-            {data.weekDays.map((active, idx) => (
-              <div
-                key={idx}
-                className={`flex h-4 w-4 items-center justify-center rounded-full ${
-                  active ? 'border border-amber-500 bg-amber-500/20' : ''
-                }`}
-                style={
-                  !active
-                    ? {
-                        backgroundColor: 'var(--color-surface-light)',
-                        borderWidth: '1px',
-                        borderStyle: 'solid',
-                        borderColor: 'var(--color-border)',
-                      }
-                    : undefined
-                }
-              >
-                {active && <span className="text-[8px]">🔥</span>}
-              </div>
-            ))}
-          </div>
-        </div>
-
         {/* Milestone */}
         {milestone && (
           <div
@@ -191,8 +131,8 @@ export function StreakDisplay() {
   const [showTooltip, setShowTooltip] = useState(false);
   const [tooltipPos, setTooltipPos] = useState({ top: 0, left: 0 });
   const [dailyProgress, setDailyProgress] = useState<DailyProgress | null>(null);
+  const [streakData, setStreakData] = useState<StreakData | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const data = MOCK_STREAK_DATA;
   const userId = 1;
 
   const loadDailyProgress = useCallback(async () => {
@@ -204,12 +144,25 @@ export function StreakDisplay() {
     }
   }, [userId]);
 
+  const loadStreak = useCallback(async () => {
+    try {
+      const streak = await getStreak(userId);
+      setStreakData(streak);
+    } catch (error) {
+      console.error('Failed to load streak:', error);
+    }
+  }, [userId]);
+
   useEffect(() => {
     loadDailyProgress();
-  }, [loadDailyProgress]);
+    loadStreak();
+  }, [loadDailyProgress, loadStreak]);
 
-  const milestone = getMilestoneMessage(data.currentStreak);
-  const isActiveToday = data.weekDays[0];
+  if (!streakData) {
+    return null;
+  }
+
+  const milestone = getMilestoneMessage(streakData.currentStreak);
 
   const handleMouseEnter = () => {
     if (containerRef.current) {
@@ -287,28 +240,16 @@ export function StreakDisplay() {
       {/* Separator */}
       <div className="h-4 w-px" style={{ backgroundColor: 'var(--color-border)' }} />
 
-      {/* Week grid */}
-      <div className="flex items-center gap-0.5">
-        {data.weekDays.map((active, idx) => (
-          <div
-            key={idx}
-            className={`h-2 w-2 rounded-full transition-all duration-200 ${
-              active ? 'bg-amber-500 shadow-sm shadow-amber-500/50' : ''
-            }`}
-            style={!active ? { backgroundColor: 'var(--color-surface-elevated)' } : undefined}
-            title={DAY_LABELS[idx]}
-          />
-        ))}
-      </div>
-
       {/* Current streak count */}
-      <span className="text-sm font-bold text-amber-500 tabular-nums">{data.currentStreak}</span>
+      <span className="text-sm font-bold text-amber-500 tabular-nums">
+        {streakData.currentStreak}
+      </span>
 
       {/* Tooltip - rendered via portal to document.body */}
       {showTooltip && (
         <StreakTooltip
           position={tooltipPos}
-          data={data}
+          data={streakData}
           milestone={milestone}
           dailyProgress={dailyProgress}
         />

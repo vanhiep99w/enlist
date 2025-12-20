@@ -10,12 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ParagraphsRouteImport } from './routes/paragraphs'
+import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SessionParagraphIdRouteImport } from './routes/session.$paragraphId'
 
 const ParagraphsRoute = ParagraphsRouteImport.update({
   id: '/paragraphs',
   path: '/paragraphs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LeaderboardRoute = LeaderboardRouteImport.update({
+  id: '/leaderboard',
+  path: '/leaderboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -31,30 +37,39 @@ const SessionParagraphIdRoute = SessionParagraphIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/leaderboard': typeof LeaderboardRoute
   '/paragraphs': typeof ParagraphsRoute
   '/session/$paragraphId': typeof SessionParagraphIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/leaderboard': typeof LeaderboardRoute
   '/paragraphs': typeof ParagraphsRoute
   '/session/$paragraphId': typeof SessionParagraphIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/leaderboard': typeof LeaderboardRoute
   '/paragraphs': typeof ParagraphsRoute
   '/session/$paragraphId': typeof SessionParagraphIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/paragraphs' | '/session/$paragraphId'
+  fullPaths: '/' | '/leaderboard' | '/paragraphs' | '/session/$paragraphId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/paragraphs' | '/session/$paragraphId'
-  id: '__root__' | '/' | '/paragraphs' | '/session/$paragraphId'
+  to: '/' | '/leaderboard' | '/paragraphs' | '/session/$paragraphId'
+  id:
+    | '__root__'
+    | '/'
+    | '/leaderboard'
+    | '/paragraphs'
+    | '/session/$paragraphId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  LeaderboardRoute: typeof LeaderboardRoute
   ParagraphsRoute: typeof ParagraphsRoute
   SessionParagraphIdRoute: typeof SessionParagraphIdRoute
 }
@@ -66,6 +81,13 @@ declare module '@tanstack/react-router' {
       path: '/paragraphs'
       fullPath: '/paragraphs'
       preLoaderRoute: typeof ParagraphsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/leaderboard': {
+      id: '/leaderboard'
+      path: '/leaderboard'
+      fullPath: '/leaderboard'
+      preLoaderRoute: typeof LeaderboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -87,6 +109,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  LeaderboardRoute: LeaderboardRoute,
   ParagraphsRoute: ParagraphsRoute,
   SessionParagraphIdRoute: SessionParagraphIdRoute,
 }

@@ -42,3 +42,15 @@ export interface DailyProgress {
   percentage: number;
   lastResetDate: string;
 }
+
+export interface StreakData {
+  currentStreak: number;
+  longestStreak: number;
+}
+
+export interface UserAchievement {
+  id: number;
+  userId: number;
+  achievementId: number;
+  unlockedAt: string;
+}
