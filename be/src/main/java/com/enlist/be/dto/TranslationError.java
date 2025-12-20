@@ -14,10 +14,8 @@ public class TranslationError {
     private String position;
     private String issue;
     private String correction;
-    private String explanation;
     private String quickFix;
     private String category;
-    private String learningTip;
     private Integer startIndex;
     private Integer endIndex;
     private String errorText;

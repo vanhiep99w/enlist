@@ -16,10 +16,5 @@ public class TranslationFeedback {
     private List<TranslationError> errors;
     private List<String> suggestions;
     private String correctTranslation;
-    private List<ArticleTip> articleTips;
-    private List<CollocationHighlight> collocationHighlights;
-    private List<ReasoningTip> reasoningTips;
-    private List<RegisterTip> registerTips;
-    private String overallComment;
     private List<GoodPoint> goodPoints;
 }

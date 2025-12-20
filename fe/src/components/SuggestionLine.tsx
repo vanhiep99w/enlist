@@ -13,7 +13,7 @@ interface TextSegment {
 
 export function SuggestionLine({ userTranslation, errors }: Props) {
   const errorsWithPositions = errors.filter(
-    (e) => e.startIndex != null && e.endIndex != null && e.startIndex < e.endIndex
+    (e) => e.startIndex != null && e.endIndex != null
   );
 
   if (errorsWithPositions.length === 0) {
@@ -40,11 +40,21 @@ export function SuggestionLine({ userTranslation, errors }: Props) {
       });
     }
 
-    segments.push({
-      text: userTranslation.slice(start, end),
-      isError: true,
-      correction: error.correction,
-    });
+    // Missing word (insertion point)
+    if (start === end) {
+      segments.push({
+        text: '',
+        isError: true,
+        correction: error.correction,
+      });
+    } else {
+      // Regular error (replacement)
+      segments.push({
+        text: userTranslation.slice(start, end),
+        isError: true,
+        correction: error.correction,
+      });
+    }
 
     currentIndex = end;
   }
@@ -61,9 +71,11 @@ export function SuggestionLine({ userTranslation, errors }: Props) {
       {segments.map((segment, index) =>
         segment.isError ? (
           <span key={index} className="inline">
-            <span className="text-red-500 line-through">{segment.text}</span>
+            {segment.text && <span className="text-red-500 line-through">{segment.text}</span>}
             {segment.correction && (
-              <span className="ml-0.5 font-medium text-green-400">({segment.correction})</span>
+              <span className="ml-0.5 font-medium text-green-400">
+                {segment.text ? `(${segment.correction})` : `[+${segment.correction}]`}
+              </span>
             )}
           </span>
         ) : (

@@ -21,7 +21,7 @@ export function TranslationExercise({ exercise }: Props) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<TranslationResponse | null>(null);
-  const { shouldShowPrompt, incrementCount, markPrompted } = useSubmissionTracker();
+  const { incrementCount } = useSubmissionTracker();
 
   const handleSubmit = async () => {
     if (!userTranslation.trim()) {
@@ -257,8 +257,6 @@ export function TranslationExercise({ exercise }: Props) {
               <FeedbackPanel
                 feedback={result.feedback}
                 userTranslation={userTranslation}
-                showDetailedPrompt={shouldShowPrompt}
-                onPromptDismiss={markPrompted}
               />
             </div>
           )}
