@@ -1,45 +1,75 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Volume2, BookmarkPlus, X, Check, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { ttsService } from '../services/ttsService';
+import { useTranslateWord, useSaveWord } from '../hooks/useDictionary';
 
 interface WordPopupProps {
   word: string;
+  position: { x: number; y: number };
+  onClose: () => void;
+  sessionId?: number;
+  context: string | null;
+  userId?: number;
+}
+
+interface WordData {
   translation?: string;
   partOfSpeech?: string;
   example?: string;
   exampleTranslation?: string;
-  position: { x: number; y: number };
-  onClose: () => void;
-  onAddToDictionary: (word: string, translation: string, context?: string) => void;
-  isLoading?: boolean;
 }
 
 export const WordPopup = ({
   word,
-  translation,
-  partOfSpeech,
-  example,
-  exampleTranslation,
   position,
   onClose,
-  onAddToDictionary,
-  isLoading = false,
+  sessionId,
+  context,
+  userId = 1, // TODO: Get actual userId
 }: WordPopupProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
   const [open, setOpen] = useState(true);
+  const [wordData, setWordData] = useState<WordData>({});
+
+  const translateWordMutation = useTranslateWord();
+  const saveWordMutation = useSaveWord();
+
+  // Load word translation on mount
+  useEffect(() => {
+    const loadTranslation = async () => {
+      try {
+        const result = await translateWordMutation.mutateAsync({ word, context });
+        setWordData({
+          translation: result.translation,
+          partOfSpeech: result.partOfSpeech,
+          example: result.example,
+          exampleTranslation: result.exampleTranslation,
+        });
+      } catch (error) {
+        console.error('Failed to translate word:', error);
+        toast.error('Translation failed', {
+          description: 'Could not translate the selected word. Please try again.',
+        });
+        onClose();
+      }
+    };
+
+    loadTranslation();
+  }, [word, context]);
 
   const handlePlayAudio = async (e?: React.MouseEvent) => {
     e?.stopPropagation();
     e?.preventDefault();
 
+    if (!wordData.translation) return;
+
     setIsPlaying(true);
+
     try {
-      await ttsService.speakWithFallback(word, {
-        pitch: 0,
-        voice: 'en-US-Standard-C',
-      });
+      await ttsService.speakWithFallback(wordData.translation);
     } catch (error) {
       console.error('Failed to play audio:', error);
     } finally {
@@ -47,14 +77,33 @@ export const WordPopup = ({
     }
   };
 
-  const handleAddToDictionary = () => {
-    if (!translation) return;
-    onAddToDictionary(word, translation, example);
-    setIsAdded(true);
-    setTimeout(() => {
-      setOpen(false);
-      onClose();
-    }, 1200);
+  const handleAddToDictionary = async () => {
+    if (!wordData.translation) return;
+
+    try {
+      await saveWordMutation.mutateAsync({
+        userId,
+        request: {
+          word,
+          translation: wordData.translation,
+          context: wordData.example,
+          sessionId,
+        },
+      });
+      toast.success('Saved to dictionary', {
+        description: `"${word}" has been added to your personal dictionary`,
+      });
+      setIsAdded(true);
+      setTimeout(() => {
+        setOpen(false);
+        onClose();
+      }, 1200);
+    } catch (error) {
+      console.error('Failed to save word:', error);
+      toast.error('Failed to save word', {
+        description: 'Could not add word to dictionary. Please try again.',
+      });
+    }
   };
 
   const getPartOfSpeechConfig = (pos?: string) => {
@@ -79,7 +128,8 @@ export const WordPopup = ({
     return { color: 'text-primary', bg: 'bg-primary/15', label: pos };
   };
 
-  const posConfig = getPartOfSpeechConfig(partOfSpeech);
+  const posConfig = getPartOfSpeechConfig(wordData.partOfSpeech);
+  const isLoading = translateWordMutation.isPending;
 
   return (
     <>
@@ -154,7 +204,7 @@ export const WordPopup = ({
                     </div>
                   ) : (
                     <p className="text-muted-foreground text-sm leading-relaxed font-medium">
-                      {translation || 'No translation available'}
+                      {wordData.translation || 'No translation available'}
                     </p>
                   )}
                 </div>
@@ -166,14 +216,14 @@ export const WordPopup = ({
                       <div className="bg-muted/30 h-3 w-3/4 animate-pulse rounded-full" />
                       <div className="bg-muted/20 h-3 w-2/3 animate-pulse rounded-full" />
                     </div>
-                  ) : example ? (
+                  ) : wordData.example ? (
                     <div className="space-y-1">
                       <p className="text-muted-foreground/70 line-clamp-2 text-xs italic">
-                        "{example}"
+                        "{wordData.example}"
                       </p>
-                      {exampleTranslation && (
+                      {wordData.exampleTranslation && (
                         <p className="text-muted-foreground/50 line-clamp-2 text-xs">
-                          "{exampleTranslation}"
+                          "{wordData.exampleTranslation}"
                         </p>
                       )}
                     </div>

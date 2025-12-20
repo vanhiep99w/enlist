@@ -2,13 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { BookOpen } from 'lucide-react';
 import { toast } from 'sonner';
-import {
-  createSession,
-  getSession,
-  submitSentenceTranslation,
-  skipSentence,
-} from '../api/sessionApi';
-import { translateWord, saveWordToDictionary } from '../api/dictionaryApi';
 import { ScoreBreakdown } from './ScoreBreakdown';
 import { FeedbackPanel } from './FeedbackPanel';
 import { TypingIndicator } from './TypingIndicator';
@@ -22,7 +15,13 @@ import { Tooltip } from './Tooltip';
 import { TooltipProvider } from './ui/tooltip';
 import { AutoResizeTextarea, type AutoResizeTextareaRef } from './AutoResizeTextarea';
 import { useTextSelection } from '../hooks/useTextSelection';
-import type { Session, SentenceSubmissionResponse, CompletedSentenceData } from '../types/session';
+import {
+  useCreateSession,
+  useSession,
+  useSubmitSentenceTranslation,
+  useSkipSentence,
+} from '../hooks/useSession';
+import type { SentenceSubmissionResponse, CompletedSentenceData } from '../types/session';
 
 const SIDEBAR_COLLAPSED_KEY = 'sidebarCollapsed';
 
@@ -33,11 +32,21 @@ interface Props {
 export function ParagraphSession({ paragraphId }: Props) {
   const navigate = useNavigate();
   const textareaRef = useRef<AutoResizeTextareaRef>(null);
-  const [session, setSession] = useState<Session | null>(null);
+
+  // React Query hooks
+  const createSessionMutation = useCreateSession();
+  const [sessionId, setSessionId] = useState<number | null>(null);
+  const {
+    data: session,
+    isLoading,
+    error: sessionError,
+    refetch: refetchSession,
+  } = useSession(sessionId || 0);
+  const submitTranslationMutation = useSubmitSentenceTranslation();
+  const skipSentenceMutation = useSkipSentence();
+
+  // Local state
   const [userTranslation, setUserTranslation] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [lastSubmission, setLastSubmission] = useState<SentenceSubmissionResponse | null>(null);
   const [retryingSubmission, setRetryingSubmission] = useState<SentenceSubmissionResponse | null>(
     null
@@ -50,14 +59,8 @@ export function ParagraphSession({ paragraphId }: Props) {
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [wordPopup, setWordPopup] = useState<{
     word: string;
-    translation?: string;
-    partOfSpeech?: string;
-    example?: string;
-    exampleTranslation?: string;
     position: { x: number; y: number };
-    isLoading?: boolean;
   } | null>(null);
-  const [isTranslatingWord, setIsTranslatingWord] = useState(false);
   const paragraphRef = useRef<HTMLDivElement>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -65,6 +68,9 @@ export function ParagraphSession({ paragraphId }: Props) {
     }
     return false;
   });
+
+  const error = sessionError?.message || null;
+  const isSubmitting = submitTranslationMutation.isPending || skipSentenceMutation.isPending;
 
   const toggleSidebar = () => {
     setSidebarCollapsed((prev) => {
@@ -74,7 +80,24 @@ export function ParagraphSession({ paragraphId }: Props) {
     });
   };
 
+  // Initialize session
   useEffect(() => {
+    const initSession = async () => {
+      try {
+        const newSession = await createSessionMutation.mutateAsync({ paragraphId });
+        setSessionId(newSession.id);
+
+        // Load completedData from backend
+        if (newSession.completedSentenceDetails) {
+          setCompletedData(newSession.completedSentenceDetails);
+        }
+      } catch (err) {
+        toast.error('Failed to start session', {
+          description: err instanceof Error ? err.message : 'Unknown error',
+        });
+      }
+    };
+
     initSession();
   }, [paragraphId]);
 
@@ -148,101 +171,30 @@ export function ParagraphSession({ paragraphId }: Props) {
   useTextSelection({
     containerRef: paragraphRef as React.RefObject<HTMLElement>,
     minLength: 2,
-    onSelect: async (sel) => {
-      if (isTranslatingWord) return;
-
-      // Show popup immediately with loading state
+    onSelect: (sel) => {
       setWordPopup({
         word: sel.text,
-        translation: undefined,
-        partOfSpeech: undefined,
-        example: undefined,
         position: sel,
-        isLoading: true,
       });
-
-      setIsTranslatingWord(true);
-      try {
-        const context = session?.currentSentence || undefined;
-        const result = await translateWord(sel.text, context);
-        // Update popup with actual data
-        setWordPopup({
-          word: result.word,
-          translation: result.translation,
-          partOfSpeech: result.partOfSpeech,
-          example: result.example,
-          exampleTranslation: result.exampleTranslation,
-          position: sel,
-          isLoading: false,
-        });
-      } catch (error) {
-        console.error('Failed to translate word:', error);
-        setWordPopup(null);
-        toast.error('Translation failed', {
-          description: 'Could not translate the selected word. Please try again.',
-        });
-      } finally {
-        setIsTranslatingWord(false);
-      }
     },
   });
-
-  const handleAddToDictionary = async (word: string, translation: string, context?: string) => {
-    if (!session) return;
-
-    try {
-      await saveWordToDictionary(1, {
-        // TODO: Get actual userId
-        word,
-        translation,
-        context,
-        sessionId: session.id,
-      });
-      toast.success('Saved to dictionary', {
-        description: `"${word}" has been added to your personal dictionary`,
-      });
-    } catch (error) {
-      console.error('Failed to save word:', error);
-      toast.error('Failed to save word', {
-        description: 'Could not add word to dictionary. Please try again.',
-      });
-    }
-  };
-
-  const initSession = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const newSession = await createSession(paragraphId);
-      setSession(newSession);
-
-      // Load completedData from backend
-      if (newSession.completedSentenceDetails) {
-        setCompletedData(newSession.completedSentenceDetails);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to start session');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleSubmit = async () => {
     if (!session || !userTranslation.trim()) return;
 
-    setIsSubmitting(true);
-    setError(null);
     try {
       const isRetry = retryingSubmission !== null;
-      const result = await submitSentenceTranslation(
-        session.id,
+      const result = await submitTranslationMutation.mutateAsync({
+        sessionId: session.id,
         userTranslation,
-        isRetry ? { isRetry: true, parentSubmissionId: retryingSubmission.id } : undefined
-      );
+        options: isRetry ? { isRetry: true, parentSubmissionId: retryingSubmission.id } : undefined,
+      });
+
       setLastSubmission(result);
       setRetryingSubmission(null);
 
-      const updatedSession = await getSession(session.id);
+      // Refetch session to get updated state
+      await refetchSession();
 
       const passedThreshold = result.accuracy >= 80;
 
@@ -264,19 +216,11 @@ export function ParagraphSession({ paragraphId }: Props) {
           },
         };
         setCompletedData(newCompletedData);
-
-        if (result.isLastSentence) {
-          setSession((prev) => (prev ? { ...updatedSession, status: 'COMPLETED' } : null));
-        } else {
-          setSession(updatedSession);
-        }
-      } else {
-        setSession(updatedSession);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to submit translation');
-    } finally {
-      setIsSubmitting(false);
+      toast.error('Failed to submit translation', {
+        description: err instanceof Error ? err.message : 'Unknown error',
+      });
     }
   };
 
@@ -300,24 +244,19 @@ export function ParagraphSession({ paragraphId }: Props) {
   const handleSkip = async () => {
     if (!session) return;
 
-    setIsSubmitting(true);
-    setError(null);
     try {
-      const result = await skipSentence(session.id);
+      const result = await skipSentenceMutation.mutateAsync(session.id);
       setLastSubmission(result);
 
       if (!result.isLastSentence) {
-        const updatedSession = await getSession(session.id);
-        setSession(updatedSession);
-      } else {
-        setSession((prev) => (prev ? { ...prev, status: 'COMPLETED' } : null));
+        await refetchSession();
       }
       setUserTranslation('');
       setTimeout(() => textareaRef.current?.focus(), 0);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to skip sentence');
-    } finally {
-      setIsSubmitting(false);
+      toast.error('Failed to skip sentence', {
+        description: err instanceof Error ? err.message : 'Unknown error',
+      });
     }
   };
 
@@ -541,7 +480,7 @@ export function ParagraphSession({ paragraphId }: Props) {
     );
   };
 
-  if (isLoading) {
+  if (isLoading || !session) {
     return (
       <div
         className="flex min-h-screen items-center justify-center"
@@ -1393,17 +1332,14 @@ export function ParagraphSession({ paragraphId }: Props) {
         {wordPopup && (
           <WordPopup
             word={wordPopup.word}
-            translation={wordPopup.translation}
-            partOfSpeech={wordPopup.partOfSpeech}
-            example={wordPopup.example}
-            exampleTranslation={wordPopup.exampleTranslation}
             position={wordPopup.position}
-            isLoading={wordPopup.isLoading}
             onClose={() => {
               setWordPopup(null);
               window.getSelection()?.removeAllRanges();
             }}
-            onAddToDictionary={handleAddToDictionary}
+            sessionId={session?.id}
+            context={session?.currentSentence}
+            userId={1} // TODO: Get actual userId
           />
         )}
 
