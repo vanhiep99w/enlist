@@ -197,8 +197,14 @@ export function ParagraphSession({ paragraphId }: Props) {
         context,
         sessionId: session.id,
       });
+      toast.success('Saved to dictionary', {
+        description: `"${word}" has been added to your personal dictionary`,
+      });
     } catch (error) {
       console.error('Failed to save word:', error);
+      toast.error('Failed to save word', {
+        description: 'Could not add word to dictionary. Please try again.',
+      });
     }
   };
 
