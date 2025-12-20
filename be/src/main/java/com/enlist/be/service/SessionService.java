@@ -31,6 +31,7 @@ public class SessionService {
     private final AIService aiService;
     private final CreditsService creditsService;
     private final DailyGoalService dailyGoalService;
+    private final ReviewService reviewService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Transactional
@@ -147,6 +148,10 @@ public class SessionService {
 
         if (!isRetry) {
             session.setTotalPoints(session.getTotalPoints() + pointsEarned);
+        }
+
+        if (accuracy < 80.0 && !isRetry) {
+            reviewService.addToReviewQueue(session.getUserId(), submission.getId());
         }
 
         boolean passedThreshold = accuracy >= 80.0;

@@ -1,6 +1,8 @@
 package com.enlist.be.controller;
 
+import com.enlist.be.dto.ProgressAnalyticsResponse;
 import com.enlist.be.service.ErrorAnalyticsService;
+import com.enlist.be.service.ProgressAnalyticsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +17,7 @@ import java.util.Map;
 public class AnalyticsController {
 
     private final ErrorAnalyticsService errorAnalyticsService;
+    private final ProgressAnalyticsService progressAnalyticsService;
 
     @GetMapping("/errors/{userId}")
     public ResponseEntity<Map<String, Object>> getDetailedErrorAnalytics(@PathVariable Long userId) {
@@ -43,5 +46,19 @@ public class AnalyticsController {
             @PathVariable Long userId,
             @RequestParam(defaultValue = "5") int limit) {
         return ResponseEntity.ok(errorAnalyticsService.getMostCommonErrors(userId, limit));
+    }
+
+    @GetMapping("/common-mistakes/{userId}")
+    public ResponseEntity<List<Map<String, Object>>> getCommonMistakes(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "10") int limit) {
+        return ResponseEntity.ok(errorAnalyticsService.getMostCommonErrors(userId, limit));
+    }
+
+    @GetMapping("/progress/{userId}")
+    public ResponseEntity<ProgressAnalyticsResponse> getProgressAnalytics(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "30") int days) {
+        return ResponseEntity.ok(progressAnalyticsService.getProgressAnalytics(userId, days));
     }
 }

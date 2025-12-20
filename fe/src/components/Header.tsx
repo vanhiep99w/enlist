@@ -4,6 +4,7 @@ import { StreakDisplay } from './StreakDisplay';
 import { SoundToggle } from './SoundToggle';
 import { ThemeSelector } from './ThemeSelector';
 import { Logo } from './Logo';
+import { ReviewBadge } from './ReviewBadge';
 
 export function Header() {
   return (
@@ -38,6 +39,13 @@ export function Header() {
               Paragraphs
             </Link>
             <Link
+              to="/analytics"
+              className="hover-underline transition-colors [&.active]:text-amber-500"
+              style={{ color: 'var(--color-text-secondary)' }}
+            >
+              Analytics
+            </Link>
+            <Link
               to="/leaderboard"
               className="hover-underline transition-colors [&.active]:text-amber-500"
               style={{ color: 'var(--color-text-secondary)' }}
@@ -47,6 +55,7 @@ export function Header() {
           </nav>
         </div>
         <div className="flex items-center gap-3">
+          <ReviewBadge />
           <StreakDisplay />
           <CreditsDisplay />
           <SoundToggle />

@@ -83,3 +83,18 @@ export const getSessionDictionary = async (
 export const deleteWord = async (userId: number, wordId: number): Promise<void> => {
   await axios.delete(`${API_BASE_URL}/api/dictionary/${userId}/${wordId}`);
 };
+
+export interface WordExample {
+  id?: number;
+  word: string;
+  exampleSentence: string;
+  translation: string;
+  source: string;
+}
+
+export const getWordExamples = async (word: string): Promise<WordExample[]> => {
+  const response = await axios.get<WordExample[]>(
+    `${API_BASE_URL}/api/words/${encodeURIComponent(word)}/examples`
+  );
+  return response.data;
+};

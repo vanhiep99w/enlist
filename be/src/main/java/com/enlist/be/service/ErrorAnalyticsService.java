@@ -60,11 +60,17 @@ public class ErrorAnalyticsService {
     @Transactional(readOnly = true)
     public Map<String, Object> getErrorTrend(Long userId, int days) {
         LocalDateTime startDate = LocalDateTime.now().minusDays(days);
+        LocalDateTime previousPeriodStart = startDate.minusDays(days);
+        
         List<ErrorAnalytics> recentErrors = errorAnalyticsRepository
                 .findByUserIdAndLastOccurrenceAfter(userId, startDate);
+        List<ErrorAnalytics> previousErrors = errorAnalyticsRepository
+                .findByUserIdAndLastOccurrenceAfter(userId, previousPeriodStart);
 
         Map<String, Integer> trendByType = new HashMap<>();
+        Map<String, Integer> previousByType = new HashMap<>();
         int totalRecentErrors = 0;
+        int totalPreviousErrors = 0;
 
         for (ErrorAnalytics error : recentErrors) {
             String type = error.getErrorType().name();
@@ -72,10 +78,34 @@ public class ErrorAnalyticsService {
             totalRecentErrors += error.getCount();
         }
 
+        for (ErrorAnalytics error : previousErrors) {
+            if (error.getLastOccurrence().isBefore(startDate)) {
+                String type = error.getErrorType().name();
+                previousByType.put(type, previousByType.getOrDefault(type, 0) + error.getCount());
+                totalPreviousErrors += error.getCount();
+            }
+        }
+
+        Map<String, Double> trendChange = new HashMap<>();
+        for (String type : trendByType.keySet()) {
+            int current = trendByType.get(type);
+            int previous = previousByType.getOrDefault(type, 0);
+            double change = previous == 0 ? 100.0 
+                : ((current - previous) * 100.0 / previous);
+            trendChange.put(type, Math.round(change * 10.0) / 10.0);
+        }
+
+        double overallTrend = totalPreviousErrors == 0 ? 0.0
+            : ((totalRecentErrors - totalPreviousErrors) * 100.0 / totalPreviousErrors);
+
         Map<String, Object> trend = new HashMap<>();
         trend.put("period", days + " days");
         trend.put("byType", trendByType);
         trend.put("totalErrors", totalRecentErrors);
+        trend.put("previousPeriodErrors", totalPreviousErrors);
+        trend.put("trendChange", trendChange);
+        trend.put("overallTrend", Math.round(overallTrend * 10.0) / 10.0);
+        trend.put("improving", overallTrend < 0);
         trend.put("startDate", startDate);
         
         return trend;

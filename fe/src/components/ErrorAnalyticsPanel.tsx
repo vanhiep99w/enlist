@@ -3,6 +3,18 @@ import { getDetailedErrorAnalytics } from '../api/analyticsApi';
 import type { ErrorAnalytics } from '../types/analytics';
 import { motion } from 'motion/react';
 import { AlertCircle, TrendingDown, Award, Brain } from 'lucide-react';
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+} from 'recharts';
 
 export function ErrorAnalyticsPanel() {
   const [analytics, setAnalytics] = useState<ErrorAnalytics | null>(null);
@@ -116,6 +128,36 @@ export function ErrorAnalyticsPanel() {
         </div>
 
         <div className="space-y-4">
+          {/* Pie Chart Visualization */}
+          <div className="mb-6">
+            <ResponsiveContainer width="100%" height={240}>
+              <PieChart>
+                <Pie
+                  data={errorTypes.map(([type, count]) => ({ name: type, value: count }))}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={80}
+                  label={(entry) => `${entry.name}: ${entry.value}`}
+                  animationDuration={800}
+                >
+                  {errorTypes.map(([type], index) => (
+                    <Cell key={`cell-${index}`} fill={getErrorTypeColor(type)} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'var(--color-surface)',
+                    border: '2px solid var(--color-border)',
+                    borderRadius: '12px',
+                    padding: '8px 12px',
+                  }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+
           {errorTypes.map(([type, count], index) => {
             const percentage = (count / distribution.totalErrors) * 100;
             const width = (count / maxTypeCount) * 100;
@@ -196,6 +238,42 @@ export function ErrorAnalyticsPanel() {
           </div>
 
           <div className="space-y-3">
+            {/* Bar Chart for Weak Areas */}
+            <div className="mb-6">
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart
+                  data={weakAreas.slice(0, 5).map((area) => ({
+                    name: area.errorCategory.replace(/_/g, ' '),
+                    count: area.count,
+                    percentage: area.percentage,
+                  }))}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" opacity={0.3} />
+                  <XAxis
+                    dataKey="name"
+                    stroke="var(--color-text-muted)"
+                    tick={{ fill: 'var(--color-text-muted)', fontSize: 11 }}
+                    angle={-15}
+                    textAnchor="end"
+                    height={60}
+                  />
+                  <YAxis
+                    stroke="var(--color-text-muted)"
+                    tick={{ fill: 'var(--color-text-muted)', fontSize: 12 }}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'var(--color-surface)',
+                      border: '2px solid var(--color-border)',
+                      borderRadius: '12px',
+                      padding: '8px 12px',
+                    }}
+                  />
+                  <Bar dataKey="count" fill="#8b5cf6" radius={[8, 8, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
             {weakAreas.slice(0, 5).map((area, index) => (
               <motion.div
                 key={`${area.errorType}-${area.errorCategory}`}

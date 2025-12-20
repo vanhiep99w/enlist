@@ -9,11 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ReviewRouteImport } from './routes/review'
 import { Route as ParagraphsRouteImport } from './routes/paragraphs'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
+import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SessionParagraphIdRouteImport } from './routes/session.$paragraphId'
 
+const ReviewRoute = ReviewRouteImport.update({
+  id: '/review',
+  path: '/review',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ParagraphsRoute = ParagraphsRouteImport.update({
   id: '/paragraphs',
   path: '/paragraphs',
@@ -22,6 +29,11 @@ const ParagraphsRoute = ParagraphsRouteImport.update({
 const LeaderboardRoute = LeaderboardRouteImport.update({
   id: '/leaderboard',
   path: '/leaderboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AnalyticsRoute = AnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -37,45 +49,74 @@ const SessionParagraphIdRoute = SessionParagraphIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/analytics': typeof AnalyticsRoute
   '/leaderboard': typeof LeaderboardRoute
   '/paragraphs': typeof ParagraphsRoute
+  '/review': typeof ReviewRoute
   '/session/$paragraphId': typeof SessionParagraphIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/analytics': typeof AnalyticsRoute
   '/leaderboard': typeof LeaderboardRoute
   '/paragraphs': typeof ParagraphsRoute
+  '/review': typeof ReviewRoute
   '/session/$paragraphId': typeof SessionParagraphIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/analytics': typeof AnalyticsRoute
   '/leaderboard': typeof LeaderboardRoute
   '/paragraphs': typeof ParagraphsRoute
+  '/review': typeof ReviewRoute
   '/session/$paragraphId': typeof SessionParagraphIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/leaderboard' | '/paragraphs' | '/session/$paragraphId'
+  fullPaths:
+    | '/'
+    | '/analytics'
+    | '/leaderboard'
+    | '/paragraphs'
+    | '/review'
+    | '/session/$paragraphId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/leaderboard' | '/paragraphs' | '/session/$paragraphId'
+  to:
+    | '/'
+    | '/analytics'
+    | '/leaderboard'
+    | '/paragraphs'
+    | '/review'
+    | '/session/$paragraphId'
   id:
     | '__root__'
     | '/'
+    | '/analytics'
     | '/leaderboard'
     | '/paragraphs'
+    | '/review'
     | '/session/$paragraphId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AnalyticsRoute: typeof AnalyticsRoute
   LeaderboardRoute: typeof LeaderboardRoute
   ParagraphsRoute: typeof ParagraphsRoute
+  ReviewRoute: typeof ReviewRoute
   SessionParagraphIdRoute: typeof SessionParagraphIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/review': {
+      id: '/review'
+      path: '/review'
+      fullPath: '/review'
+      preLoaderRoute: typeof ReviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/paragraphs': {
       id: '/paragraphs'
       path: '/paragraphs'
@@ -88,6 +129,13 @@ declare module '@tanstack/react-router' {
       path: '/leaderboard'
       fullPath: '/leaderboard'
       preLoaderRoute: typeof LeaderboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/analytics': {
+      id: '/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AnalyticsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -109,8 +157,10 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AnalyticsRoute: AnalyticsRoute,
   LeaderboardRoute: LeaderboardRoute,
   ParagraphsRoute: ParagraphsRoute,
+  ReviewRoute: ReviewRoute,
   SessionParagraphIdRoute: SessionParagraphIdRoute,
 }
 export const routeTree = rootRouteImport

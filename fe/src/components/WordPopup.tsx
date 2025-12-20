@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Volume2, BookmarkPlus, X, Check, Loader2 } from 'lucide-react';
+import { Volume2, BookmarkPlus, X, Check, Loader2, BookText } from 'lucide-react';
 import { toast } from 'sonner';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { ttsService } from '../services/ttsService';
 import { useTranslateWord, useSaveWord } from '../hooks/useDictionary';
+import { useQuery } from '@tanstack/react-query';
+import { getWordExamples } from '../api/dictionaryApi';
 
 interface WordPopupProps {
   word: string;
@@ -33,15 +35,25 @@ export const WordPopup = ({
   const [isAdded, setIsAdded] = useState(false);
   const [open, setOpen] = useState(true);
   const [wordData, setWordData] = useState<WordData>({});
+  const [activeTab, setActiveTab] = useState<'translation' | 'examples'>('translation');
 
   const translateWordMutation = useTranslateWord();
   const saveWordMutation = useSaveWord();
+
+  const { data: examples, isLoading: examplesLoading } = useQuery({
+    queryKey: ['wordExamples', word],
+    queryFn: () => getWordExamples(word),
+    enabled: activeTab === 'examples',
+  });
 
   // Load word translation on mount
   useEffect(() => {
     const loadTranslation = async () => {
       try {
-        const result = await translateWordMutation.mutateAsync({ word, context });
+        const result = await translateWordMutation.mutateAsync({
+          word,
+          context: context || undefined,
+        });
         setWordData({
           translation: result.translation,
           partOfSpeech: result.partOfSpeech,
@@ -194,7 +206,48 @@ export const WordPopup = ({
                     )}
                   </div>
                 </div>
+              </div>
 
+              {/* Close button */}
+              <button
+                onClick={() => {
+                  setOpen(false);
+                  onClose();
+                }}
+                className="border-border/50 hover:border-border hover:bg-muted/50 text-muted-foreground hover:text-foreground focus:ring-primary/50 shrink-0 cursor-pointer rounded-lg border p-1.5 transition-all focus:ring-2 focus:outline-none"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+
+            {/* Tabs */}
+            <div className="border-border/50 mb-3 flex gap-1 border-b">
+              <button
+                onClick={() => setActiveTab('translation')}
+                className={`flex-1 pb-2 text-xs font-semibold transition-colors ${
+                  activeTab === 'translation'
+                    ? 'text-primary border-primary border-b-2'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                Translation
+              </button>
+              <button
+                onClick={() => setActiveTab('examples')}
+                className={`flex flex-1 items-center justify-center gap-1 pb-2 text-xs font-semibold transition-colors ${
+                  activeTab === 'examples'
+                    ? 'text-primary border-primary border-b-2'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <BookText className="h-3 w-3" />
+                Examples
+              </button>
+            </div>
+
+            {/* Tab Content */}
+            {activeTab === 'translation' ? (
+              <>
                 {/* Translation - Fixed height container */}
                 <div className="flex min-h-[48px] items-start">
                   {isLoading ? (
@@ -231,19 +284,44 @@ export const WordPopup = ({
                     <div className="h-3" /> // Spacer to maintain height
                   )}
                 </div>
+              </>
+            ) : (
+              <div className="max-h-[240px] min-h-[104px] overflow-y-auto">
+                {examplesLoading ? (
+                  <div className="space-y-3">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="space-y-2">
+                        <div className="bg-muted/40 h-3 w-full animate-pulse rounded-full" />
+                        <div className="bg-muted/30 h-3 w-4/5 animate-pulse rounded-full" />
+                      </div>
+                    ))}
+                  </div>
+                ) : examples && examples.length > 0 ? (
+                  <div className="space-y-3">
+                    {examples.map((example, idx) => (
+                      <div
+                        key={example.id || idx}
+                        className="border-primary/30 space-y-1 border-l-2 pl-3"
+                      >
+                        <p className="text-muted-foreground text-xs leading-relaxed italic">
+                          "{example.exampleSentence}"
+                        </p>
+                        <p className="text-muted-foreground/60 text-xs leading-relaxed">
+                          "{example.translation}"
+                        </p>
+                        <p className="text-muted-foreground/40 text-[10px] tracking-wide uppercase">
+                          {example.source}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-muted-foreground flex h-24 items-center justify-center text-xs">
+                    No examples available
+                  </div>
+                )}
               </div>
-
-              {/* Close button */}
-              <button
-                onClick={() => {
-                  setOpen(false);
-                  onClose();
-                }}
-                className="border-border/50 hover:border-border hover:bg-muted/50 text-muted-foreground hover:text-foreground focus:ring-primary/50 shrink-0 cursor-pointer rounded-lg border p-1.5 transition-all focus:ring-2 focus:outline-none"
-              >
-                <X className="h-3.5 w-3.5" />
-              </button>
-            </div>
+            )}
 
             {/* Action buttons */}
             <div className="mt-4 grid grid-cols-2 gap-2">
