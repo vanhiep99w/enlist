@@ -19,6 +19,7 @@ import { KeyboardShortcutsModal } from './KeyboardShortcutsModal';
 import { SentenceTooltip } from './SentenceTooltip';
 import { SuccessAnimation } from './SuccessAnimation';
 import { Tooltip } from './Tooltip';
+import { TooltipProvider } from './ui/tooltip';
 import { AutoResizeTextarea, type AutoResizeTextareaRef } from './AutoResizeTextarea';
 import { useTextSelection } from '../hooks/useTextSelection';
 import type { Session, SentenceSubmissionResponse, CompletedSentenceData } from '../types/session';
@@ -43,7 +44,6 @@ export function ParagraphSession({ paragraphId }: Props) {
   );
   const [previousAttempt, setPreviousAttempt] = useState<SentenceSubmissionResponse | null>(null);
   const [completedData, setCompletedData] = useState<Record<number, CompletedSentenceData>>({});
-  const [hoveredSentence, setHoveredSentence] = useState<number | null>(null);
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
   const [showDictionary, setShowDictionary] = useState(false);
   const [showDictionaryPanel, setShowDictionaryPanel] = useState(false);
@@ -407,90 +407,87 @@ export function ParagraphSession({ paragraphId }: Props) {
         data.userTranslation.toLowerCase().trim() !== data.correctTranslation.toLowerCase().trim();
 
       return (
-        <span
+        <SentenceTooltip
           key={index}
-          className="relative inline cursor-help"
-          style={{ color: 'var(--color-text-highlight)' }}
-          onMouseEnter={() => setHoveredSentence(index)}
-          onMouseLeave={() => setHoveredSentence(null)}
+          trigger={
+            <span
+              className="relative inline cursor-help"
+              style={{ color: 'var(--color-text-highlight)' }}
+            >
+              {displayText}{' '}
+            </span>
+          }
         >
-          {displayText}{' '}
-          {hoveredSentence === index && (
-            <SentenceTooltip>
-              {/* Accuracy */}
-              <div className="mb-2 flex items-center justify-between">
-                <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
-                  Accuracy:
-                </span>
-                <span
-                  className={`rounded px-1.5 py-0.5 text-xs font-medium ${
-                    data.accuracy >= 90
-                      ? 'bg-green-900 text-green-300'
-                      : data.accuracy >= 80
-                        ? 'bg-yellow-900 text-yellow-300'
-                        : 'bg-red-900 text-red-300'
-                  }`}
-                >
-                  {Math.round(data.accuracy)}%
-                </span>
-              </div>
+          {/* Accuracy */}
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+              Accuracy:
+            </span>
+            <span
+              className={`rounded px-1.5 py-0.5 text-xs font-medium ${
+                data.accuracy >= 90
+                  ? 'bg-green-900 text-green-300'
+                  : data.accuracy >= 80
+                    ? 'bg-yellow-900 text-yellow-300'
+                    : 'bg-red-900 text-red-300'
+              }`}
+            >
+              {Math.round(data.accuracy)}%
+            </span>
+          </div>
 
-              {/* Original Vietnamese */}
-              <div className="mb-2">
-                <span className="block text-xs" style={{ color: 'var(--color-text-muted)' }}>
-                  Original:
-                </span>
-                <span className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
-                  {data.originalSentence}
-                </span>
-              </div>
+          {/* Original Vietnamese */}
+          <div className="mb-2">
+            <span className="block text-xs" style={{ color: 'var(--color-text-muted)' }}>
+              Original:
+            </span>
+            <span className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+              {data.originalSentence}
+            </span>
+          </div>
 
-              {/* User's input if different */}
-              {userDiffersFromCorrect && (
-                <div className="mb-2">
-                  <span className="block text-xs" style={{ color: 'var(--color-text-muted)' }}>
-                    Your input:
-                  </span>
-                  <span className="text-xs text-orange-400 line-through">
-                    {data.userTranslation}
-                  </span>
-                </div>
-              )}
-
-              {/* Errors */}
-              {hasErrors && (
-                <div>
-                  <span className="mb-1 block text-xs" style={{ color: 'var(--color-text-muted)' }}>
-                    Corrections:
-                  </span>
-                  {data.errors.slice(0, 3).map((err, i) => (
-                    <div key={i} className="mb-0.5 flex items-start gap-1 text-xs">
-                      <span
-                        className={`rounded px-1 text-[10px] ${
-                          err.type === 'GRAMMAR'
-                            ? 'bg-purple-900 text-purple-300'
-                            : err.type === 'WORD_CHOICE'
-                              ? 'bg-blue-900 text-blue-300'
-                              : 'bg-orange-900 text-orange-300'
-                        }`}
-                      >
-                        {err.type === 'GRAMMAR' ? 'G' : err.type === 'WORD_CHOICE' ? 'W' : 'N'}
-                      </span>
-                      <span style={{ color: 'var(--color-text-secondary)' }}>
-                        {err.quickFix || err.correction}
-                      </span>
-                    </div>
-                  ))}
-                  {data.errors.length > 3 && (
-                    <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
-                      +{data.errors.length - 3} more
-                    </span>
-                  )}
-                </div>
-              )}
-            </SentenceTooltip>
+          {/* User's input if different */}
+          {userDiffersFromCorrect && (
+            <div className="mb-2">
+              <span className="block text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                Your input:
+              </span>
+              <span className="text-xs text-orange-400 line-through">{data.userTranslation}</span>
+            </div>
           )}
-        </span>
+
+          {/* Errors */}
+          {hasErrors && (
+            <div>
+              <span className="mb-1 block text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                Corrections:
+              </span>
+              {data.errors.slice(0, 3).map((err, i) => (
+                <div key={i} className="mb-0.5 flex items-start gap-1 text-xs">
+                  <span
+                    className={`rounded px-1 text-[10px] ${
+                      err.type === 'GRAMMAR'
+                        ? 'bg-purple-900 text-purple-300'
+                        : err.type === 'WORD_CHOICE'
+                          ? 'bg-blue-900 text-blue-300'
+                          : 'bg-orange-900 text-orange-300'
+                    }`}
+                  >
+                    {err.type === 'GRAMMAR' ? 'G' : err.type === 'WORD_CHOICE' ? 'W' : 'N'}
+                  </span>
+                  <span style={{ color: 'var(--color-text-secondary)' }}>
+                    {err.quickFix || err.correction}
+                  </span>
+                </div>
+              ))}
+              {data.errors.length > 3 && (
+                <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                  +{data.errors.length - 3} more
+                </span>
+              )}
+            </div>
+          )}
+        </SentenceTooltip>
       );
     }
 
@@ -503,30 +500,29 @@ export function ParagraphSession({ paragraphId }: Props) {
       const originalSentence = session.allSentences[index];
 
       return (
-        <span
+        <SentenceTooltip
           key={index}
-          className="relative inline cursor-help"
-          style={{ color: 'var(--color-text-highlight)' }}
-          onMouseEnter={() => setHoveredSentence(index)}
-          onMouseLeave={() => setHoveredSentence(null)}
+          trigger={
+            <span
+              className="relative inline cursor-help"
+              style={{ color: 'var(--color-text-highlight)' }}
+            >
+              {displayText}{' '}
+            </span>
+          }
         >
-          {displayText}{' '}
-          {hoveredSentence === index && (
-            <SentenceTooltip>
-              <div className="mb-2">
-                <span className="block text-xs" style={{ color: 'var(--color-text-muted)' }}>
-                  Original:
-                </span>
-                <span className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
-                  {originalSentence}
-                </span>
-              </div>
-              <div className="text-xs italic" style={{ color: 'var(--color-text-muted)' }}>
-                (Detailed feedback not available for this sentence)
-              </div>
-            </SentenceTooltip>
-          )}
-        </span>
+          <div className="mb-2">
+            <span className="block text-xs" style={{ color: 'var(--color-text-muted)' }}>
+              Original:
+            </span>
+            <span className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+              {originalSentence}
+            </span>
+          </div>
+          <div className="text-xs italic" style={{ color: 'var(--color-text-muted)' }}>
+            (Detailed feedback not available for this sentence)
+          </div>
+        </SentenceTooltip>
       );
     }
 
@@ -599,7 +595,8 @@ export function ParagraphSession({ paragraphId }: Props) {
   const progressPercent = (session.completedSentences / session.totalSentences) * 100;
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--color-surface-dark)' }}>
+    <TooltipProvider delayDuration={200}>
+      <div className="min-h-screen" style={{ backgroundColor: 'var(--color-surface-dark)' }}>
       {/* Success Animation */}
       <SuccessAnimation
         show={showSuccessAnimation}
@@ -1405,5 +1402,6 @@ export function ParagraphSession({ paragraphId }: Props) {
         userId={1} // TODO: Get actual userId
       />
     </div>
+    </TooltipProvider>
   );
 }
