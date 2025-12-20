@@ -5,22 +5,27 @@
 
 export interface TTSOptions {
   voice?: string;
-  speed?: number;
   pitch?: number;
+  maxWaitMs?: number;
+  intervalMs?: number;
 }
 
 export interface TTSConfig {
   apiUrl: string;
+  apiKey: string;
   defaultVoice: string;
-  defaultSpeed: number;
   defaultPitch: number;
+  maxWaitMs: number;
+  intervalMs: number;
 }
 
 const DEFAULT_CONFIG: TTSConfig = {
-  apiUrl: import.meta.env.VITE_TTS_API_URL || 'https://ttsforfree.com/api/tts',
+  apiUrl: import.meta.env.VITE_TTS_API_URL || 'https://api.ttsforfree.com',
+  apiKey: import.meta.env.VITE_TTS_API_KEY || '',
   defaultVoice: import.meta.env.VITE_TTS_DEFAULT_VOICE || 'en-US-Standard-C',
-  defaultSpeed: Number(import.meta.env.VITE_TTS_DEFAULT_SPEED) || 0.85,
-  defaultPitch: Number(import.meta.env.VITE_TTS_DEFAULT_PITCH) || 1.0,
+  defaultPitch: Number(import.meta.env.VITE_TTS_DEFAULT_PITCH) || 0,
+  maxWaitMs: Number(import.meta.env.VITE_TTS_MAX_WAIT_MS) || 60000,
+  intervalMs: Number(import.meta.env.VITE_TTS_INTERVAL_MS) || 1500,
 };
 
 class TTSService {
@@ -37,13 +42,12 @@ class TTSService {
    */
   private getCacheKey(text: string, options: TTSOptions): string {
     const voice = options.voice || this.config.defaultVoice;
-    const speed = options.speed || this.config.defaultSpeed;
-    const pitch = options.pitch || this.config.defaultPitch;
-    return `${text}_${voice}_${speed}_${pitch}`;
+    const pitch = options.pitch ?? this.config.defaultPitch;
+    return `${text}_${voice}_${pitch}`;
   }
 
   /**
-   * Fetch audio from ttsforfree.com
+   * Fetch audio from ttsforfree.com using their async job-based API
    */
   private async fetchAudio(text: string, options: TTSOptions): Promise<string> {
     const cacheKey = this.getCacheKey(text, options);
@@ -53,31 +57,70 @@ class TTSService {
       return this.audioCache.get(cacheKey)!;
     }
 
+    const apiKey = this.config.apiKey;
+    if (!apiKey) {
+      throw new Error('TTS API key not configured. Please set VITE_TTS_API_KEY in .env file');
+    }
+
     try {
-      const response = await fetch(this.config.apiUrl, {
+      const voice = options.voice || this.config.defaultVoice;
+      const pitch = options.pitch ?? this.config.defaultPitch;
+
+      // Step 1: Create TTS job
+      const createResponse = await fetch(`${this.config.apiUrl}/api/tts/createby`, {
         method: 'POST',
         headers: {
+          'X-API-Key': apiKey,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          text,
-          voice: options.voice || this.config.defaultVoice,
-          speed: options.speed || this.config.defaultSpeed,
-          pitch: options.pitch || this.config.defaultPitch,
+          Texts: text,
+          Voice: voice,
+          Pitch: pitch,
+          ConnectionId: '',
+          CallbackUrl: '',
         }),
       });
 
-      if (!response.ok) {
-        throw new Error(`TTS API error: ${response.statusText}`);
+      const created = await createResponse.json();
+      if (!createResponse.ok || !created?.Id) {
+        throw new Error(created?.Message || `Create failed: ${createResponse.status}`);
       }
 
-      const blob = await response.blob();
-      const audioUrl = URL.createObjectURL(blob);
+      // Step 2: Poll for job completion
+      const jobId = created.Id;
+      const maxWaitMs = options.maxWaitMs || this.config.maxWaitMs;
+      const intervalMs = options.intervalMs || this.config.intervalMs;
+      const startTime = Date.now();
 
-      // Cache the audio URL
-      this.audioCache.set(cacheKey, audioUrl);
+      while (Date.now() - startTime < maxWaitMs) {
+        const statusResponse = await fetch(`${this.config.apiUrl}/api/tts/status/${jobId}`, {
+          headers: {
+            'X-API-Key': apiKey,
+          },
+        });
 
-      return audioUrl;
+        const status = await statusResponse.json();
+        if (!statusResponse.ok) {
+          throw new Error(status?.Message || `Status failed: ${statusResponse.status}`);
+        }
+
+        if (status.Status === 'SUCCESS' && status.Data) {
+          const audioUrl = status.Data;
+          // Cache the audio URL
+          this.audioCache.set(cacheKey, audioUrl);
+          return audioUrl;
+        }
+
+        if (status.Status === 'ERROR') {
+          throw new Error(status.Message || 'TTS job failed');
+        }
+
+        // Wait before next poll
+        await new Promise((resolve) => setTimeout(resolve, intervalMs));
+      }
+
+      throw new Error('Timeout waiting for TTS job to complete');
     } catch (error) {
       console.error('TTS fetch error:', error);
       throw error;
@@ -158,8 +201,8 @@ class TTSService {
 
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'en-US';
-      utterance.rate = options.speed || this.config.defaultSpeed;
-      utterance.pitch = options.pitch || this.config.defaultPitch;
+      utterance.rate = 0.85;
+      utterance.pitch = options.pitch ?? this.config.defaultPitch;
 
       utterance.onend = () => resolve();
       utterance.onerror = (error) => reject(error);

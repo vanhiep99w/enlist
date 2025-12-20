@@ -34,7 +34,7 @@ export const WordPopup = ({
     setIsPlaying(true);
     try {
       await ttsService.speakWithFallback(word, {
-        speed: 0.85,
+        pitch: 0,
         voice: 'en-US-Standard-C',
       });
     } catch (error) {
