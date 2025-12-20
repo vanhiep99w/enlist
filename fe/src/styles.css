@@ -815,69 +815,93 @@ code {
 }
 
 [data-sonner-toast] {
-  background: linear-gradient(
-    145deg,
-    var(--color-surface-elevated) 0%,
-    rgba(var(--color-surface-elevated-rgb), 0.95) 100%
-  ) !important;
-  border: 1px solid rgba(var(--color-border-rgb), 0.3) !important;
+  background: var(--color-surface-elevated) !important;
+  border: 1px solid var(--color-border) !important;
   box-shadow: 
-    0 20px 60px -15px rgba(0, 0, 0, 0.8),
-    0 8px 24px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.03) !important;
+    0 24px 64px -16px rgba(0, 0, 0, 0.9),
+    0 12px 32px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
   backdrop-filter: blur(24px) saturate(200%);
   padding: 18px 20px !important;
   min-width: 360px;
   border-radius: 12px !important;
   animation: toast-slide-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
 }
 
-/* Success toast - subtle green gradient */
+/* Radial glow overlay for each type */
+[data-sonner-toast]::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 12px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+/* Success toast - radial green glow */
 [data-sonner-toast][data-type="success"] {
-  background: linear-gradient(
-    145deg,
-    rgba(34, 197, 94, 0.12) 0%,
-    var(--color-surface-elevated) 60%,
-    var(--color-surface-elevated) 100%
-  ) !important;
-  border: 1px solid rgba(34, 197, 94, 0.25) !important;
+  border-color: rgba(34, 197, 94, 0.4) !important;
   box-shadow: 
-    0 20px 60px -15px rgba(34, 197, 94, 0.3),
-    0 8px 24px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(34, 197, 94, 0.15),
-    0 0 0 1px rgba(34, 197, 94, 0.1) !important;
+    0 24px 64px -16px rgba(34, 197, 94, 0.4),
+    0 12px 32px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(34, 197, 94, 0.2),
+    0 0 0 1px rgba(34, 197, 94, 0.15) !important;
 }
 
-/* Error toast - subtle red gradient */
+[data-sonner-toast][data-type="success"]::before {
+  background: radial-gradient(
+    circle at top left,
+    rgba(34, 197, 94, 0.18) 0%,
+    rgba(34, 197, 94, 0.08) 40%,
+    transparent 70%
+  );
+  opacity: 1;
+}
+
+/* Error toast - radial red glow */
 [data-sonner-toast][data-type="error"] {
-  background: linear-gradient(
-    145deg,
-    rgba(239, 68, 68, 0.15) 0%,
-    var(--color-surface-elevated) 60%,
-    var(--color-surface-elevated) 100%
-  ) !important;
-  border: 1px solid rgba(239, 68, 68, 0.3) !important;
+  border-color: rgba(239, 68, 68, 0.5) !important;
   box-shadow: 
-    0 20px 60px -15px rgba(239, 68, 68, 0.4),
-    0 8px 24px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(239, 68, 68, 0.2),
-    0 0 0 1px rgba(239, 68, 68, 0.12) !important;
+    0 24px 64px -16px rgba(239, 68, 68, 0.5),
+    0 12px 32px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(239, 68, 68, 0.25),
+    0 0 0 1px rgba(239, 68, 68, 0.2) !important;
 }
 
-/* Warning toast - subtle yellow gradient */
+[data-sonner-toast][data-type="error"]::before {
+  background: radial-gradient(
+    circle at top left,
+    rgba(239, 68, 68, 0.2) 0%,
+    rgba(239, 68, 68, 0.1) 40%,
+    transparent 70%
+  );
+  opacity: 1;
+}
+
+/* Warning toast - radial yellow glow */
 [data-sonner-toast][data-type="warning"] {
-  background: linear-gradient(
-    145deg,
-    rgba(234, 179, 8, 0.12) 0%,
-    var(--color-surface-elevated) 60%,
-    var(--color-surface-elevated) 100%
-  ) !important;
-  border: 1px solid rgba(234, 179, 8, 0.25) !important;
+  border-color: rgba(234, 179, 8, 0.4) !important;
   box-shadow: 
-    0 20px 60px -15px rgba(234, 179, 8, 0.3),
-    0 8px 24px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(234, 179, 8, 0.15),
-    0 0 0 1px rgba(234, 179, 8, 0.1) !important;
+    0 24px 64px -16px rgba(234, 179, 8, 0.4),
+    0 12px 32px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(234, 179, 8, 0.2),
+    0 0 0 1px rgba(234, 179, 8, 0.15) !important;
+}
+
+[data-sonner-toast][data-type="warning"]::before {
+  background: radial-gradient(
+    circle at top left,
+    rgba(234, 179, 8, 0.18) 0%,
+    rgba(234, 179, 8, 0.08) 40%,
+    transparent 70%
+  );
+  opacity: 1;
 }
 
 [data-sonner-toast] [data-title] {
