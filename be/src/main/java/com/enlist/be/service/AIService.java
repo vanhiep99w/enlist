@@ -189,6 +189,15 @@ public class AIService {
                 - errorText: exact substring from student's translation
                 - correction: ONLY the replacement for errorText, NOT the entire sentence
                 
+                ⚠️ FOR MISSING WORDS (e.g., missing "has"/"is"/"are"):
+                - Find the position where the word SHOULD be inserted
+                - Set startIndex to the index BEFORE where word should be inserted
+                - Set endIndex to startIndex + 1 (highlight one space or the next word's first character)
+                - Set errorText to empty string "" or the character at that position
+                - Set correction to the missing word (e.g., "has ")
+                Example: "The class twelve students" → missing "has" between "class" and "twelve"
+                  startIndex: 10 (index of space after "class"), endIndex: 11, errorText: " ", correction: " has"
+                
                 ⚠️ CRITICAL - SEPARATE ERRORS FOR EACH ISSUE:
                 Create INDIVIDUAL error entries for each distinct mistake.
                 

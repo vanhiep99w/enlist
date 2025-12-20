@@ -409,7 +409,8 @@ export function ParagraphSession({ paragraphId }: Props) {
       return (
         <span
           key={index}
-          className="relative inline cursor-help text-green-400"
+          className="relative inline cursor-help"
+          style={{ color: 'var(--color-text-highlight)' }}
           onMouseEnter={() => setHoveredSentence(index)}
           onMouseLeave={() => setHoveredSentence(null)}
         >
@@ -504,7 +505,8 @@ export function ParagraphSession({ paragraphId }: Props) {
       return (
         <span
           key={index}
-          className="relative inline cursor-help text-green-400"
+          className="relative inline cursor-help"
+          style={{ color: 'var(--color-text-highlight)' }}
           onMouseEnter={() => setHoveredSentence(index)}
           onMouseLeave={() => setHoveredSentence(null)}
         >
@@ -531,13 +533,11 @@ export function ParagraphSession({ paragraphId }: Props) {
     return (
       <span
         key={index}
-        className={`${
-          isCurrentSentence || isRetryingSentence ? 'font-semibold text-orange-400' : ''
-        }`}
+        className={`${isCurrentSentence || isRetryingSentence ? 'font-semibold' : ''}`}
         style={
-          !(isCurrentSentence || isRetryingSentence)
-            ? { color: 'var(--color-text-secondary)' }
-            : undefined
+          isCurrentSentence || isRetryingSentence
+            ? { color: 'var(--color-text-current)' }
+            : { color: 'var(--color-text-secondary)' }
         }
       >
         {sentence}{' '}
@@ -737,17 +737,19 @@ export function ParagraphSession({ paragraphId }: Props) {
                 }}
               >
                 {/* Elegant accent bar - matching Dictionary theme */}
-                <div 
+                <div
                   className="absolute top-0 right-0 left-0 h-1 overflow-hidden"
                   style={{
-                    background: 'linear-gradient(90deg, rgba(139, 92, 246, 0.3) 0%, rgba(139, 92, 246, 0.6) 50%, rgba(139, 92, 246, 0.3) 100%)'
+                    background:
+                      'linear-gradient(90deg, rgba(139, 92, 246, 0.3) 0%, rgba(139, 92, 246, 0.6) 50%, rgba(139, 92, 246, 0.3) 100%)',
                   }}
                 >
-                  <div 
+                  <div
                     className="absolute inset-0 animate-pulse"
                     style={{
-                      background: 'linear-gradient(90deg, transparent 0%, rgba(139, 92, 246, 0.8) 50%, transparent 100%)',
-                      filter: 'blur(4px)'
+                      background:
+                        'linear-gradient(90deg, transparent 0%, rgba(139, 92, 246, 0.8) 50%, transparent 100%)',
+                      filter: 'blur(4px)',
                     }}
                   />
                 </div>
@@ -1206,7 +1208,7 @@ export function ParagraphSession({ paragraphId }: Props) {
       {/* Floating Sidebar - Premium Glass Design */}
       {session && (
         <div
-          className={`fixed top-1/2 right-4 z-40 -translate-y-1/2 flex-col gap-4 transition-all duration-300 hidden md:flex ${sidebarCollapsed ? 'translate-x-[calc(100%-12px)]' : ''}`}
+          className={`fixed top-1/2 right-4 z-40 hidden -translate-y-1/2 flex-col gap-4 transition-all duration-300 md:flex ${sidebarCollapsed ? 'translate-x-[calc(100%-12px)]' : ''}`}
         >
           {/* Collapse/Expand Toggle */}
           <button

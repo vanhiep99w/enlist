@@ -103,9 +103,10 @@ export const WordPopup = ({
         </PopoverTrigger>
         <PopoverContent
           className="bg-card/98 border-primary/20 w-[340px] overflow-hidden border-2 p-0 shadow-2xl backdrop-blur-xl"
-          side="top"
-          sideOffset={14}
-          align="center"
+          side="bottom"
+          sideOffset={40}
+          align="start"
+          alignOffset={40}
         >
           {/* Decorative top border gradient */}
           <div

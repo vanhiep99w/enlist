@@ -1,7 +1,6 @@
 import type { TranslationFeedback, TranslationError } from '../types/translation';
 import { SuggestionLine } from './SuggestionLine';
-import { Card, CardContent } from './ui/card';
-import { Badge } from './ui/badge';
+import { Card } from './ui/card';
 import { cn } from '@/lib/utils';
 
 interface Props {
@@ -10,9 +9,9 @@ interface Props {
 }
 
 const errorTypeBadgeColors: Record<TranslationError['type'], string> = {
-  GRAMMAR: 'bg-purple-500/20 text-purple-400 border border-purple-500/30',
-  WORD_CHOICE: 'bg-blue-500/20 text-blue-400 border border-blue-500/30',
-  NATURALNESS: 'bg-orange-500/20 text-orange-400 border border-orange-500/30',
+  GRAMMAR: 'text-purple-500 border ',
+  WORD_CHOICE: 'text-blue-500 border ',
+  NATURALNESS: 'text-orange-500 border ',
 };
 
 const errorTypeLabels: Record<TranslationError['type'], string> = {
@@ -21,18 +20,48 @@ const errorTypeLabels: Record<TranslationError['type'], string> = {
   NATURALNESS: 'Naturalness',
 };
 
+const errorTypeIcons: Record<TranslationError['type'], string> = {
+  GRAMMAR: '⚙',
+  WORD_CHOICE: '💬',
+  NATURALNESS: '✨',
+};
+
 function ErrorCard({ error }: { error: TranslationError }) {
   return (
-    <Card>
-      <CardContent className="flex items-center gap-2 p-0 px-2 py-1.5">
-        <Badge className={cn('text-xs font-medium', errorTypeBadgeColors[error.type])}>
-          {errorTypeLabels[error.type]}
-        </Badge>
-        <span className="text-muted-foreground truncate text-sm">
-          {error.quickFix || error.correction}
-        </span>
-      </CardContent>
-    </Card>
+    <div
+      className={cn(
+        'group relative overflow-hidden rounded-md transition-all duration-150',
+        errorTypeBadgeColors[error.type]
+      )}
+      style={{
+        backgroundColor: 'var(--color-surface)',
+        borderColor: 'var(--color-border)',
+      }}
+    >
+      <div className="flex items-start gap-2 p-2.5">
+        {/* Icon */}
+        <span className="mt-0.5 shrink-0 text-base leading-none">{errorTypeIcons[error.type]}</span>
+
+        {/* Content */}
+        <div className="min-w-0 flex-1">
+          {/* Type + Correction in one line */}
+          <div className="flex flex-wrap items-baseline gap-2">
+            <span className="shrink-0 text-[10px] font-bold tracking-wide uppercase opacity-80">
+              {errorTypeLabels[error.type]}
+            </span>
+            <span className="text-sm leading-tight font-semibold">
+              {error.quickFix || error.correction}
+            </span>
+          </div>
+
+          {/* Issue explanation */}
+          {error.issue && <div className="mt-1 text-xs leading-snug opacity-70">{error.issue}</div>}
+        </div>
+      </div>
+
+      {/* Subtle hover effect */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
+    </div>
   );
 }
 
@@ -85,14 +114,27 @@ export function FeedbackPanel({ feedback, userTranslation }: Props) {
 
       {/* Good Points */}
       {feedback.goodPoints && feedback.goodPoints.length > 0 && (
-        <div className="rounded-lg border border-emerald-700 bg-emerald-900/30 p-3">
+        <div
+          className="rounded-lg border p-3"
+          style={{
+            backgroundColor: 'var(--color-surface)',
+            borderColor: 'var(--color-border)',
+          }}
+        >
           <div className="flex items-start gap-2">
-            <span className="shrink-0 text-sm font-medium text-emerald-400">✨ Điểm tốt:</span>
+            <span
+              className="shrink-0 text-sm font-medium"
+              style={{ color: 'var(--color-text-highlight)' }}
+            >
+              ✨ Điểm tốt:
+            </span>
             <div className="flex-1 space-y-1">
               {feedback.goodPoints.map((point, index) => (
                 <div key={index} className="text-sm">
-                  <span className="font-medium text-emerald-300">"{point.phrase}"</span>
-                  <span className="text-emerald-400"> – {point.reason}</span>
+                  <span className="font-medium" style={{ color: 'var(--color-text-highlight)' }}>
+                    "{point.phrase}"
+                  </span>
+                  <span style={{ color: 'var(--color-text-highlight)' }}> – {point.reason}</span>
                 </div>
               ))}
             </div>
