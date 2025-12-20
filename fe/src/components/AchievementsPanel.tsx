@@ -1,5 +1,6 @@
 import { AchievementCard } from './AchievementCard';
 import type { Achievement } from '../types/user';
+import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 
 interface Props {
   achievements: Achievement[];
@@ -9,9 +10,11 @@ interface Props {
 export function AchievementsPanel({ achievements, newAchievements = [] }: Props) {
   if (achievements.length === 0) {
     return (
-      <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
-        <h3 className="text-lg font-semibold mb-4" style={{ color: 'var(--color-text-secondary)' }}>Today's Achievements</h3>
-        <div className="flex flex-col items-center py-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-muted-foreground">Today's Achievements</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col items-center py-6">
           <svg
             className="w-24 h-24 mb-4"
             viewBox="0 0 100 100"
@@ -98,17 +101,19 @@ export function AchievementsPanel({ achievements, newAchievements = [] }: Props)
               opacity="0.7"
             />
           </svg>
-          <p className="font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>No achievements yet</p>
-          <p className="text-sm text-center" style={{ color: 'var(--color-text-muted)' }}>Complete sessions to earn your first trophy!</p>
-        </div>
-      </div>
+          <p className="font-medium mb-1 text-muted-foreground">No achievements yet</p>
+          <p className="text-sm text-center text-muted-foreground">Complete sessions to earn your first trophy!</p>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
-      <h3 className="text-lg font-semibold mb-4" style={{ color: 'var(--color-text-secondary)' }}>Today's Achievements</h3>
-      <div className="grid grid-cols-2 gap-4">
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-muted-foreground">Today's Achievements</CardTitle>
+      </CardHeader>
+      <CardContent className="grid grid-cols-2 gap-4">
         {achievements.map((achievement) => (
           <AchievementCard
             key={achievement.id}
@@ -116,7 +121,7 @@ export function AchievementsPanel({ achievements, newAchievements = [] }: Props)
             isNew={newAchievements.includes(achievement.id)}
           />
         ))}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

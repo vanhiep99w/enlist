@@ -24,14 +24,9 @@ export function SentenceTooltip({ children }: Props) {
   return (
     <span 
       ref={tooltipRef}
-      className={`absolute bottom-full mb-2 px-3 py-2 text-sm rounded-lg z-50 border w-80 whitespace-normal shadow-xl ${
+      className={`absolute bottom-full mb-2 px-4 py-3 text-sm rounded-lg z-50 border w-80 whitespace-normal shadow-xl backdrop-blur-xl ${
         position === 'right' ? 'right-0' : 'left-0'
-      }`}
-      style={{ 
-        backgroundColor: 'var(--color-surface)', 
-        color: 'var(--color-text-secondary)', 
-        borderColor: 'var(--color-border)' 
-      }}
+      } bg-card/95 text-foreground border-primary/20 animate-in fade-in zoom-in-95 slide-in-from-bottom-2 duration-200`}
     >
       {children}
     </span>

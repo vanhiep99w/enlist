@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import type { TranslationFeedback, TranslationError } from '../types/translation';
 import { SuggestionLine } from './SuggestionLine';
+import { Card, CardContent } from './ui/card';
+import { Badge } from './ui/badge';
+import { cn } from '@/lib/utils';
 
 interface Props {
   feedback: TranslationFeedback;
@@ -27,69 +30,65 @@ const errorTypeLabels: Record<TranslationError['type'], string> = {
 
 function QuickErrorCard({ error }: { error: TranslationError }) {
   return (
-    <div
-      className="flex items-center gap-2 py-1.5 px-2 rounded"
-      style={{ backgroundColor: 'var(--color-surface-light)', borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--color-border)' }}
-    >
-      <span
-        className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium ${errorTypeBadgeColors[error.type]}`}
-      >
-        {errorTypeLabels[error.type]}
-      </span>
-      <span className="text-sm truncate" style={{ color: 'var(--color-text-secondary)' }}>
-        {error.quickFix || error.correction}
-      </span>
-    </div>
+    <Card>
+      <CardContent className="flex items-center gap-2 py-1.5 px-2 p-0">
+        <Badge className={cn('text-xs font-medium', errorTypeBadgeColors[error.type])}>
+          {errorTypeLabels[error.type]}
+        </Badge>
+        <span className="text-sm truncate text-muted-foreground">
+          {error.quickFix || error.correction}
+        </span>
+      </CardContent>
+    </Card>
   );
 }
 
 function DetailedErrorCard({ error }: { error: TranslationError }) {
   return (
-    <div
-      className="rounded p-3"
-      style={{ backgroundColor: 'var(--color-surface-light)', borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--color-border)' }}
-    >
-      <div className="flex items-start gap-2">
-        <span
-          className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium shrink-0 ${errorTypeBadgeColors[error.type]}`}
-        >
-          {errorTypeLabels[error.type]}
-        </span>
-        <div className="flex-1 min-w-0 text-sm">
-          <p className="font-medium" style={{ color: 'var(--color-text-primary)' }}>{error.issue}</p>
-          <p className="mt-1" style={{ color: 'var(--color-text-secondary)' }}>
-            <span className="font-medium">Fix:</span>{' '}
-            <span className="text-green-400">{error.correction}</span>
-          </p>
-          {error.explanation && (
-            <p className="mt-1 text-xs" style={{ color: 'var(--color-text-muted)' }}>{error.explanation}</p>
-          )}
+    <Card>
+      <CardContent className="p-3">
+        <div className="flex items-start gap-2">
+          <Badge className={cn('text-xs font-medium shrink-0', errorTypeBadgeColors[error.type])}>
+            {errorTypeLabels[error.type]}
+          </Badge>
+          <div className="flex-1 min-w-0 text-sm">
+            <p className="font-medium text-card-foreground">{error.issue}</p>
+            <p className="mt-1 text-muted-foreground">
+              <span className="font-medium">Fix:</span>{' '}
+              <span className="text-green-400">{error.correction}</span>
+            </p>
+            {error.explanation && (
+              <p className="mt-1 text-xs text-muted-foreground">{error.explanation}</p>
+            )}
+          </div>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
 
 function ModeToggle({ mode, onChange }: { mode: FeedbackMode; onChange: (mode: FeedbackMode) => void }) {
   return (
-    <div className="flex items-center gap-1 rounded p-0.5" style={{ backgroundColor: 'var(--color-surface-light)' }}>
+    <div className="flex items-center gap-1 rounded p-0.5 bg-muted">
       <button
         onClick={() => onChange('quick')}
-        className="px-2 py-1 text-xs font-medium rounded transition-all"
-        style={mode === 'quick'
-          ? { backgroundColor: 'var(--color-surface-elevated)', color: 'var(--color-text-primary)', boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.05)' }
-          : { color: 'var(--color-text-secondary)' }
-        }
+        className={cn(
+          'px-2 py-1 text-xs font-medium rounded transition-all',
+          mode === 'quick' 
+            ? 'bg-background text-foreground shadow-sm' 
+            : 'text-muted-foreground'
+        )}
       >
         Quick
       </button>
       <button
         onClick={() => onChange('detailed')}
-        className="px-2 py-1 text-xs font-medium rounded transition-all"
-        style={mode === 'detailed'
-          ? { backgroundColor: 'var(--color-surface-elevated)', color: 'var(--color-text-primary)', boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.05)' }
-          : { color: 'var(--color-text-secondary)' }
-        }
+        className={cn(
+          'px-2 py-1 text-xs font-medium rounded transition-all',
+          mode === 'detailed'
+            ? 'bg-background text-foreground shadow-sm'
+            : 'text-muted-foreground'
+        )}
       >
         Detailed
       </button>
@@ -121,20 +120,20 @@ function CollapsibleTipsSection({ feedback, isExpanded, onToggle }: CollapsibleT
     (feedback.suggestions?.length || 0);
 
   return (
-    <div className="rounded-lg overflow-hidden" style={{ borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--color-border)' }}>
+    <Card className="overflow-hidden">
       <button
         onClick={onToggle}
         className="w-full flex items-center justify-between p-3 bg-gradient-to-r from-indigo-900/50 to-purple-900/50 hover:from-indigo-900/70 hover:to-purple-900/70 transition-colors"
       >
         <div className="flex items-center gap-2">
           <span className="text-lg">📖</span>
-          <span className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>Learning Tips</span>
-          <span className="px-1.5 py-0.5 bg-indigo-900 text-indigo-300 text-xs rounded-full">
+          <span className="text-sm font-medium text-card-foreground">Learning Tips</span>
+          <Badge className="bg-indigo-900 text-indigo-300 text-xs">
             {tipCount}
-          </span>
+          </Badge>
         </div>
         <svg
-          className={`h-4 w-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+          className={cn('h-4 w-4 transition-transform', isExpanded && 'rotate-180')}
           style={{ color: 'var(--color-text-secondary)' }}
           fill="none"
           viewBox="0 0 24 24"
@@ -144,8 +143,8 @@ function CollapsibleTipsSection({ feedback, isExpanded, onToggle }: CollapsibleT
         </svg>
       </button>
       
-      <div className={`transition-all duration-300 ${isExpanded ? 'max-h-[2000px]' : 'max-h-0 overflow-hidden'}`}>
-        <div className="p-3 space-y-3" style={{ backgroundColor: 'var(--color-surface)' }}>
+      <div className={cn('transition-all duration-300', isExpanded ? 'max-h-[2000px]' : 'max-h-0 overflow-hidden')}>
+        <CardContent className="p-3 space-y-3 bg-card">
           {/* Article Tips */}
           {feedback.articleTips && feedback.articleTips.length > 0 && (
             <div className="space-y-2">
@@ -172,7 +171,7 @@ function CollapsibleTipsSection({ feedback, isExpanded, onToggle }: CollapsibleT
                 <div key={index} className="bg-blue-900/30 border border-blue-800 rounded p-2 text-xs">
                   <div className="flex items-center gap-1.5">
                     <span className="text-red-400 line-through">{coll.incorrect}</span>
-                    <span style={{ color: 'var(--color-text-muted)' }}>→</span>
+                    <span className="text-muted-foreground">→</span>
                     <span className="text-green-400 font-medium">{coll.correct}</span>
                   </div>
                   <p className="text-blue-400 mt-1">{coll.explanation}</p>
@@ -191,7 +190,7 @@ function CollapsibleTipsSection({ feedback, isExpanded, onToggle }: CollapsibleT
                 <div key={index} className="bg-amber-900/30 border border-amber-800 rounded p-2 text-xs">
                   <div className="flex items-center gap-1.5">
                     <span className="text-red-400 line-through">{tip.incorrectWord}</span>
-                    <span style={{ color: 'var(--color-text-muted)' }}>→</span>
+                    <span className="text-muted-foreground">→</span>
                     <span className="text-green-400 font-medium">{tip.correctWord}</span>
                   </div>
                   <p className="text-amber-400 mt-1">{tip.explanation}</p>
@@ -209,10 +208,10 @@ function CollapsibleTipsSection({ feedback, isExpanded, onToggle }: CollapsibleT
               {feedback.registerTips.map((tip, index) => (
                 <div key={index} className="bg-rose-900/30 border border-rose-800 rounded p-2 text-xs">
                   <div className="flex items-center gap-1.5">
-                    <span style={{ color: 'var(--color-text-muted)' }}>Casual:</span>
+                    <span className="text-muted-foreground">Casual:</span>
                     <span className="text-rose-400">{tip.casualWord}</span>
-                    <span style={{ color: 'var(--color-text-muted)' }}>→</span>
-                    <span style={{ color: 'var(--color-text-muted)' }}>Formal:</span>
+                    <span className="text-muted-foreground">→</span>
+                    <span className="text-muted-foreground">Formal:</span>
                     <span className="text-green-400 font-medium">{tip.formalWord}</span>
                   </div>
                   <p className="text-rose-400 mt-1">{tip.explanation}</p>
@@ -224,20 +223,20 @@ function CollapsibleTipsSection({ feedback, isExpanded, onToggle }: CollapsibleT
           {/* Suggestions */}
           {feedback.suggestions && feedback.suggestions.length > 0 && (
             <div className="space-y-1">
-              <div className="flex items-center gap-1.5 text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+              <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
                 <span>✨</span> Suggestions
               </div>
               {feedback.suggestions.map((suggestion, index) => (
-                <div key={index} className="flex items-start gap-1.5 text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+                <div key={index} className="flex items-start gap-1.5 text-xs text-muted-foreground">
                   <span className="text-blue-400 mt-0.5">•</span>
                   <span>{suggestion}</span>
                 </div>
               ))}
             </div>
           )}
-        </div>
+        </CardContent>
       </div>
-    </div>
+    </Card>
   );
 }
 
@@ -271,10 +270,7 @@ export function FeedbackPanel({ feedback, userTranslation, showDetailedPrompt, o
   const ErrorCard = mode === 'quick' ? QuickErrorCard : DetailedErrorCard;
 
   return (
-    <div
-      className="rounded-lg p-4 space-y-3"
-      style={{ backgroundColor: 'var(--color-surface)', borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--color-border)' }}
-    >
+    <Card className="p-4 space-y-3">
       {/* Onboarding Prompt - Compact */}
       {showDetailedPrompt && !promptDismissed && mode === 'quick' && (
         <div className="bg-blue-900/50 border border-blue-700 rounded-lg p-3 flex items-center justify-between gap-3">
@@ -342,12 +338,12 @@ export function FeedbackPanel({ feedback, userTranslation, showDetailedPrompt, o
       {feedback.errors.length > 0 && (
         <div>
           <div className="flex items-center justify-between gap-2 mb-2">
-            <span className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+            <span className="text-sm font-medium text-muted-foreground">
               Errors ({feedback.errors.length})
             </span>
             <ModeToggle mode={mode} onChange={setMode} />
           </div>
-          <div className={`space-y-${mode === 'quick' ? '1' : '2'}`}>
+          <div className={cn('space-y-1', mode === 'detailed' && 'space-y-2')}>
             {feedback.errors.map((error, index) => (
               <ErrorCard key={index} error={error} />
             ))}
@@ -371,6 +367,6 @@ export function FeedbackPanel({ feedback, userTranslation, showDetailedPrompt, o
         isExpanded={tipsExpanded} 
         onToggle={() => setTipsExpanded(!tipsExpanded)} 
       />
-    </div>
+    </Card>
   );
 }

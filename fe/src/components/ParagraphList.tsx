@@ -271,9 +271,9 @@ export function ParagraphList() {
         {/* Filters */}
         <div className="space-y-4 mb-8 animate-fade-up stagger-2 relative z-20">
           {/* Search and Topic Filter Row */}
-          <div className="flex flex-wrap gap-4 relative z-20">
+          <div className="flex gap-3 relative z-20">
             {/* Search Input */}
-            <div className="flex-1 min-w-[200px] relative">
+            <div className="flex-1 relative">
               <svg 
                 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-text-muted)]" 
                 viewBox="0 0 24 24" 
@@ -288,7 +288,7 @@ export function ParagraphList() {
                 placeholder="Search paragraphs..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl 
+                className="w-full h-10 pl-12 pr-4 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl 
                   text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)]
                   focus:ring-2 focus:ring-[var(--color-primary)]/50 focus:border-[var(--color-primary)] transition-all"
               />

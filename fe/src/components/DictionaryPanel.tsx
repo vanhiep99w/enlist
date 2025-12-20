@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { X, Search, Trash2, BookOpen, Calendar, Sparkles } from 'lucide-react';
 import { getUserDictionary, deleteWord, type DictionaryWord } from '../api/dictionaryApi';
+import { Card, CardContent } from './ui/card';
+import { cn } from '@/lib/utils';
 
 interface DictionaryPanelProps {
   isOpen: boolean;
@@ -159,44 +161,46 @@ export const DictionaryPanel = ({ isOpen, onClose, userId }: DictionaryPanelProp
             </div>
           ) : (
             filteredWords.map((word) => (
-              <div
+              <Card
                 key={word.id}
-                className="group rounded-lg p-4 cursor-pointer transition-all hover:scale-[1.02]"
-                style={{
-                  backgroundColor: selectedWord?.id === word.id ? 'rgba(139, 92, 246, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                  border: '1px solid',
-                  borderColor: selectedWord?.id === word.id ? 'rgba(139, 92, 246, 0.4)' : 'rgba(255, 255, 255, 0.1)',
-                }}
+                className={cn(
+                  'group cursor-pointer transition-all hover:scale-[1.02]',
+                  selectedWord?.id === word.id 
+                    ? 'bg-purple-900/20 border-purple-500/40' 
+                    : 'bg-card/5 border-border/10'
+                )}
                 onClick={() => setSelectedWord(word)}
               >
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex-1">
-                    <h3 className="font-bold text-lg text-white mb-1" style={{ fontFamily: 'ui-serif, Georgia, serif' }}>
-                      {word.word}
-                    </h3>
-                    <p className="text-sm text-white/70">{word.translation}</p>
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex-1">
+                      <h3 className="font-bold text-lg text-white mb-1" style={{ fontFamily: 'ui-serif, Georgia, serif' }}>
+                        {word.word}
+                      </h3>
+                      <p className="text-sm text-white/70">{word.translation}</p>
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(word.id);
+                      }}
+                      className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-red-500/20 transition-all"
+                      style={{ color: '#ef4444' }}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete(word.id);
-                    }}
-                    className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-red-500/20 transition-all"
-                    style={{ color: '#ef4444' }}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
 
-                {word.context && (
-                  <p className="text-xs italic text-white/40 mb-2 line-clamp-2">"{word.context}"</p>
-                )}
+                  {word.context && (
+                    <p className="text-xs italic text-white/40 mb-2 line-clamp-2">"{word.context}"</p>
+                  )}
 
-                <div className="flex items-center gap-2 text-xs text-white/30">
-                  <Calendar className="w-3 h-3" />
-                  <span>{formatDate(word.createdAt)}</span>
-                </div>
-              </div>
+                  <div className="flex items-center gap-2 text-xs text-white/30">
+                    <Calendar className="w-3 h-3" />
+                    <span>{formatDate(word.createdAt)}</span>
+                  </div>
+                </CardContent>
+              </Card>
             ))
           )}
         </div>

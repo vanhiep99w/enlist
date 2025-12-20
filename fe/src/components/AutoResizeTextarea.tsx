@@ -1,4 +1,6 @@
 import { useRef, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react';
+import { Textarea } from './ui/textarea';
+import { cn } from '@/lib/utils';
 
 interface AutoResizeTextareaProps {
   value: string;
@@ -77,42 +79,25 @@ export const AutoResizeTextarea = forwardRef<AutoResizeTextareaRef, AutoResizeTe
     const isNearOptimal = charCount >= optimalRange.min * 0.6 && charCount < optimalRange.min;
     const isOverOptimal = charCount > optimalRange.max;
 
-    const getProgressColor = () => {
-      if (charCount === 0) return 'var(--color-surface-elevated)';
-      if (isOverOptimal) return undefined; // uses bg-amber-500
-      if (isInOptimalRange) return undefined; // uses bg-emerald-500
-      if (isNearOptimal) return undefined; // uses bg-blue-500
-      return 'var(--color-text-muted)';
-    };
-
     const getProgressColorClass = () => {
-      if (charCount === 0) return '';
+      if (charCount === 0) return 'bg-muted';
       if (isOverOptimal) return 'bg-amber-500';
       if (isInOptimalRange) return 'bg-emerald-500';
-      if (isNearOptimal) return 'bg-blue-500';
-      return '';
+      if (isNearOptimal) return 'bg-primary';
+      return 'bg-muted';
     };
 
     const getProgressWidth = () => {
       if (charCount === 0) return 0;
-      const targetWidth = Math.min((charCount / optimalRange.max) * 100, 100);
-      return targetWidth;
-    };
-
-    const getCounterColor = () => {
-      if (charCount === 0) return 'var(--color-text-muted)';
-      if (isOverOptimal) return undefined; // uses text-amber-400
-      if (isInOptimalRange) return undefined; // uses text-emerald-400
-      if (isNearOptimal) return undefined; // uses text-blue-400
-      return 'var(--color-text-muted)';
+      return Math.min((charCount / optimalRange.max) * 100, 100);
     };
 
     const getCounterColorClass = () => {
-      if (charCount === 0) return '';
+      if (charCount === 0) return 'text-muted-foreground';
       if (isOverOptimal) return 'text-amber-400';
       if (isInOptimalRange) return 'text-emerald-400';
-      if (isNearOptimal) return 'text-blue-400';
-      return '';
+      if (isNearOptimal) return 'text-primary';
+      return 'text-muted-foreground';
     };
 
     const getHintText = () => {
@@ -125,7 +110,7 @@ export const AutoResizeTextarea = forwardRef<AutoResizeTextareaRef, AutoResizeTe
 
     return (
       <div className="relative group">
-        <textarea
+        <Textarea
           ref={textareaRef}
           id={id}
           value={value}
@@ -133,66 +118,39 @@ export const AutoResizeTextarea = forwardRef<AutoResizeTextareaRef, AutoResizeTe
           onKeyDown={onKeyDown}
           placeholder={placeholder}
           disabled={disabled}
-          className={`
-            w-full px-4 py-3 
-            backdrop-blur-sm
-            border
-            rounded-lg rounded-b-none
-            text-base leading-6
-            placeholder-gray-500 
-            focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500
-            disabled:opacity-50 disabled:cursor-not-allowed
-            resize-none
-            transition-all duration-200 ease-out
-            overflow-hidden
-          `}
+          className={cn(
+            'resize-none rounded-b-none backdrop-blur-sm transition-all duration-200 overflow-hidden',
+            showCharCount ? 'border-b-0' : ''
+          )}
           style={{
             minHeight: `${24 * minRows + 24}px`,
-            backgroundColor: 'var(--color-surface-light)',
-            borderColor: 'var(--color-border)',
-            color: 'var(--color-text-primary)',
           }}
         />
 
         {showCharCount && (
           <div
-            className={`
-              flex items-center justify-between
-              px-4 py-2
-              backdrop-blur-sm
-              border border-t-0
-              rounded-b-lg
-              transition-all duration-300
-              ${disabled ? 'opacity-50' : ''}
-            `}
-            style={{
-              backgroundColor: 'var(--color-surface)',
-              borderColor: 'var(--color-border)',
-            }}
+            className={cn(
+              'flex items-center justify-between px-4 py-2 bg-card/50 backdrop-blur-sm border border-t-0 border-border rounded-b-lg transition-all duration-300',
+              disabled && 'opacity-50'
+            )}
           >
             <div className="flex items-center gap-3 flex-1">
-              <div 
-                className="flex-1 h-1 rounded-full overflow-hidden max-w-32"
-                style={{ backgroundColor: 'var(--color-surface-light)' }}
-              >
+              <div className="flex-1 h-1 rounded-full overflow-hidden max-w-32 bg-muted">
                 <div
-                  className={`h-full ${getProgressColorClass()} transition-all duration-500 ease-out rounded-full`}
-                  style={{ 
-                    width: `${getProgressWidth()}%`,
-                    backgroundColor: getProgressColor(),
-                  }}
+                  className={cn(
+                    'h-full transition-all duration-500 ease-out rounded-full',
+                    getProgressColorClass()
+                  )}
+                  style={{ width: `${getProgressWidth()}%` }}
                 />
               </div>
 
               {getHintText() && (
                 <span
-                  className={`
-                    text-xs font-medium tracking-wide uppercase
-                    ${getCounterColorClass()}
-                    transition-all duration-300
-                    animate-in fade-in slide-in-from-left-2 duration-200
-                  `}
-                  style={{ color: getCounterColor() }}
+                  className={cn(
+                    'text-xs font-medium tracking-wide uppercase transition-all duration-300 animate-in fade-in slide-in-from-left-2',
+                    getCounterColorClass()
+                  )}
                 >
                   {getHintText()}
                 </span>
@@ -201,23 +159,15 @@ export const AutoResizeTextarea = forwardRef<AutoResizeTextareaRef, AutoResizeTe
 
             <div className="flex items-baseline gap-1.5">
               <span
-                className={`
-                  font-mono text-sm tabular-nums font-medium
-                  ${getCounterColorClass()}
-                  transition-colors duration-300
-                `}
-                style={{ color: getCounterColor() }}
+                className={cn(
+                  'font-mono text-sm tabular-nums font-medium transition-colors duration-300',
+                  getCounterColorClass()
+                )}
               >
                 {charCount}
               </span>
-              <span 
-                className="text-xs font-medium"
-                style={{ color: 'var(--color-text-muted)' }}
-              >/</span>
-              <span 
-                className="text-xs font-mono tabular-nums"
-                style={{ color: 'var(--color-text-muted)' }}
-              >
+              <span className="text-xs font-medium text-muted-foreground">/</span>
+              <span className="text-xs font-mono tabular-nums text-muted-foreground">
                 {optimalRange.max}
               </span>
             </div>

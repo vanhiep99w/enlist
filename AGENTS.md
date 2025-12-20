@@ -27,6 +27,30 @@
 - **Error Handling**: Backend custom exceptions; frontend try/catch with error states
 - **Database**: Do NOT create actual Foreign Keys (FK) in the database - use application-level references only
 
+## Frontend Design Rule (CRITICAL)
+
+**MANDATORY**: Before implementing ANY frontend task (components, pages, layouts, styling, UI updates), you MUST:
+
+1. **Load the `frontend-design` skill** using the `skill` tool with `name: "frontend-design"`
+2. **Follow ALL instructions** from the loaded skill for implementation
+3. This applies to:
+   - Creating new components
+   - Modifying existing components
+   - Building pages or layouts
+   - Updating styles or UI elements
+   - Any visual/interactive frontend work
+
+**Purpose**: Ensures high-quality, production-grade interfaces that avoid generic AI aesthetics.
+
+**Example workflow**:
+```
+User: "Create a dashboard component"
+Agent: [Loads frontend-design skill] → [Implements following skill guidelines]
+
+User: "Update the login page styling"
+Agent: [Loads frontend-design skill] → [Updates following skill guidelines]
+```
+
 ## Issue Tracking with bd (beads)
 
 **IMPORTANT**: This project uses **bd (beads)** for ALL issue tracking. Do NOT use markdown TODOs, task lists, or other tracking methods.

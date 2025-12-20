@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { lookupWord, type DictionaryEntry } from '../api/dictionaryApi';
+import { lookupWord, type WordTranslation } from '../api/dictionaryApi';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
+import { Search, BookOpen, Volume2 } from 'lucide-react';
 
 interface Props {
   isOpen: boolean;
@@ -8,7 +10,7 @@ interface Props {
 
 export function DictionaryModal({ isOpen, onClose }: Props) {
   const [query, setQuery] = useState('');
-  const [result, setResult] = useState<DictionaryEntry | null>(null);
+  const [result, setResult] = useState<WordTranslation | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [notFound, setNotFound] = useState(false);
 
@@ -35,108 +37,97 @@ export function DictionaryModal({ isOpen, onClose }: Props) {
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div 
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in duration-200" 
-      onClick={onClose}
-    >
-      <div 
-        className="backdrop-blur-xl rounded-2xl w-full max-w-md max-h-[80vh] overflow-hidden shadow-2xl shadow-black/50 ring-1 ring-white/5 animate-in zoom-in-95 slide-in-from-bottom-4 duration-300"
-        style={{ backgroundColor: 'var(--color-surface-dark)', opacity: 0.8, borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--color-border)' }}
-        onClick={e => e.stopPropagation()}
-      >
-        <div 
-          className="p-4 flex items-center justify-between bg-gradient-to-r from-purple-500/10 to-transparent"
-          style={{ borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: 'var(--color-border)' }}
-        >
-          <h2 className="text-lg font-semibold flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
-            <span className="text-xl">📖</span>
-            <span>Dictionary</span>
-          </h2>
-          <button 
-            onClick={onClose}
-            className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/10 transition-all duration-200"
-            style={{ color: 'var(--color-text-secondary)' }}
-          >
-            ✕
-          </button>
-        </div>
-        
-        <div className="p-4">
-          <div className="flex gap-2 mb-4">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[500px] bg-card/95 backdrop-blur-xl border-primary/20 shadow-2xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-2xl font-display text-foreground">
+            <BookOpen className="w-6 h-6 text-primary" />
+            Dictionary Lookup
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4 mt-4">
+          <div className="relative">
             <input
               type="text"
               value={query}
-              onChange={e => setQuery(e.target.value)}
+              onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Enter a word..."
-              className="flex-1 backdrop-blur-sm rounded-xl px-4 py-2.5 placeholder-gray-500 focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 transition-all duration-200"
-              style={{ backgroundColor: 'var(--color-surface)', borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
+              className="w-full px-4 py-3 pl-11 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
               autoFocus
             />
-            <button
-              onClick={handleSearch}
-              disabled={isLoading || !query.trim()}
-              className="px-5 py-2.5 bg-purple-600/90 backdrop-blur-sm text-white rounded-xl font-medium hover:bg-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:shadow-lg hover:shadow-purple-500/25"
-            >
-              {isLoading ? '...' : 'Look up'}
-            </button>
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
           </div>
-          
-          <div className="overflow-y-auto max-h-[50vh]">
+
+          <button
+            onClick={handleSearch}
+            disabled={isLoading || !query.trim()}
+            className="w-full px-4 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:shadow-lg hover:shadow-primary/20"
+          >
+            {isLoading ? 'Searching...' : 'Search'}
+          </button>
+
+          <div className="min-h-[200px] max-h-[400px] overflow-y-auto custom-scrollbar">
             {isLoading && (
-              <div className="text-center py-8" style={{ color: 'var(--color-text-secondary)' }}>
-                Looking up word...
+              <div className="flex items-center justify-center py-12">
+                <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
               </div>
             )}
             
             {notFound && (
-              <div className="text-center py-8" style={{ color: 'var(--color-text-secondary)' }}>
-                No definition found for "{query}"
+              <div className="text-center py-12">
+                <p className="text-muted-foreground text-lg">No definition found</p>
+                <p className="text-muted-foreground/60 text-sm mt-2">Try a different word</p>
               </div>
             )}
             
             {result && (
-              <div className="space-y-4">
-                <div className="flex items-baseline gap-2">
-                  <span className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{result.word}</span>
-                  {result.phonetic && (
-                    <span style={{ color: 'var(--color-text-secondary)' }}>{result.phonetic}</span>
+              <div className="space-y-6 p-4 bg-secondary/30 rounded-lg border border-border/50">
+                <div className="space-y-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3">
+                        <h3 className="text-2xl font-display font-bold text-primary">{result.word}</h3>
+                        <button className="p-2 rounded-full hover:bg-primary/10 transition-colors group">
+                          <Volume2 className="w-4 h-4 text-muted-foreground group-hover:text-primary" />
+                        </button>
+                      </div>
+                      <p className="text-sm text-accent font-medium mt-1">{result.partOfSpeech}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="pt-2 border-t border-border/50">
+                    <p className="text-lg text-foreground leading-relaxed">{result.translation}</p>
+                  </div>
+                  
+                  {result.example && (
+                    <div className="mt-4 p-4 rounded-lg bg-background/50 border-l-4 border-accent">
+                      <p className="text-sm italic text-muted-foreground leading-relaxed">
+                        "{result.example}"
+                      </p>
+                      {result.exampleTranslation && (
+                        <p className="text-sm text-muted-foreground/80 mt-2 leading-relaxed">
+                          → {result.exampleTranslation}
+                        </p>
+                      )}
+                    </div>
                   )}
                 </div>
-                
-                {result.meanings.map((meaning, idx) => (
-                  <div key={idx} className="space-y-2">
-                    <span className="text-sm font-medium text-blue-400 italic">
-                      {meaning.partOfSpeech}
-                    </span>
-                    <ol className="list-decimal list-inside space-y-2">
-                      {meaning.definitions.map((def, defIdx) => (
-                        <li key={defIdx} className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                          {def.definition}
-                          {def.example && (
-                            <p className="italic ml-4 mt-1" style={{ color: 'var(--color-text-muted)' }}>
-                              "{def.example}"
-                            </p>
-                          )}
-                        </li>
-                      ))}
-                    </ol>
-                  </div>
-                ))}
               </div>
             )}
             
             {!isLoading && !notFound && !result && (
-              <div className="text-center py-8" style={{ color: 'var(--color-text-muted)' }}>
-                Enter a word to look up its definition
+              <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                <BookOpen className="w-16 h-16 mb-4 opacity-30" />
+                <p className="text-lg">Search for any word</p>
+                <p className="text-sm opacity-60 mt-1">Translations and definitions</p>
               </div>
             )}
           </div>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

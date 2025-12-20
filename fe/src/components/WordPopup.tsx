@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Volume2, BookPlus, X, Sparkles } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 
 interface WordPopupProps {
   word: string;
@@ -9,6 +10,7 @@ interface WordPopupProps {
   position: { x: number; y: number };
   onClose: () => void;
   onAddToDictionary: (word: string, translation: string, context?: string) => void;
+  children?: React.ReactNode;
 }
 
 export const WordPopup = ({ 
@@ -16,12 +18,13 @@ export const WordPopup = ({
   translation, 
   partOfSpeech,
   example,
-  position, 
   onClose, 
-  onAddToDictionary 
+  onAddToDictionary,
+  children
 }: WordPopupProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
+  const [open, setOpen] = useState(true);
 
   const handlePlayAudio = () => {
     setIsPlaying(true);
@@ -35,84 +38,64 @@ export const WordPopup = ({
   const handleAddToDictionary = () => {
     onAddToDictionary(word, translation, example);
     setIsAdded(true);
-    setTimeout(() => onClose(), 800);
+    setTimeout(() => {
+      setOpen(false);
+      onClose();
+    }, 800);
   };
 
   const getPartOfSpeechColor = (pos?: string) => {
-    if (!pos) return '#6366f1';
+    if (!pos) return 'bg-primary/80';
     const lower = pos.toLowerCase();
-    if (lower.includes('noun')) return '#8b5cf6';
-    if (lower.includes('verb')) return '#ec4899';
-    if (lower.includes('adj')) return '#10b981';
-    if (lower.includes('adv')) return '#f59e0b';
-    return '#6366f1';
+    if (lower.includes('noun')) return 'bg-violet-500';
+    if (lower.includes('verb')) return 'bg-pink-500';
+    if (lower.includes('adj')) return 'bg-emerald-500';
+    if (lower.includes('adv')) return 'bg-amber-500';
+    return 'bg-primary/80';
   };
 
   return (
-    <>
-      <div 
-        className="fixed inset-0 z-40"
-        onClick={onClose}
-      />
-      <div
-        className="fixed z-50 rounded-xl shadow-2xl border backdrop-blur-sm"
-        style={{
-          top: `${Math.min(position.y, window.innerHeight - 300)}px`,
-          left: `${Math.min(position.x, window.innerWidth - 380)}px`,
-          backgroundColor: 'rgba(17, 24, 39, 0.95)',
-          borderColor: 'rgba(255, 255, 255, 0.1)',
-          minWidth: '340px',
-          maxWidth: '380px',
-          animation: 'slideIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)',
-        }}
+    <Popover open={open} onOpenChange={(isOpen) => {
+      setOpen(isOpen);
+      if (!isOpen) onClose();
+    }}>
+      <PopoverTrigger asChild>
+        {children || <span className="cursor-pointer">{word}</span>}
+      </PopoverTrigger>
+      <PopoverContent 
+        className="w-[380px] bg-card/95 backdrop-blur-xl border-primary/20 shadow-2xl p-5"
+        sideOffset={8}
       >
-        <div className="p-5">
+        <div>
           <div className="flex items-start justify-between mb-4">
             <div className="flex-1">
               <div className="flex items-baseline gap-2 mb-2">
-                <h3 
-                  className="font-bold text-xl tracking-tight"
-                  style={{ 
-                    color: '#fff',
-                    fontFamily: 'ui-serif, Georgia, serif'
-                  }}
-                >
+                <h3 className="font-display font-bold text-xl tracking-tight text-foreground">
                   {word}
                 </h3>
                 {partOfSpeech && (
-                  <span 
-                    className="text-[10px] px-2 py-0.5 rounded-full font-medium uppercase tracking-wider"
-                    style={{ 
-                      backgroundColor: getPartOfSpeechColor(partOfSpeech),
-                      color: 'white',
-                      letterSpacing: '0.05em'
-                    }}
-                  >
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium uppercase tracking-wider text-white ${getPartOfSpeechColor(partOfSpeech)}`}>
                     {partOfSpeech}
                   </span>
                 )}
               </div>
-              <p className="text-base leading-relaxed" style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+              <p className="text-base leading-relaxed text-muted-foreground">
                 {translation}
               </p>
               {example && (
-                <div 
-                  className="mt-3 pt-3 border-t"
-                  style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}
-                >
-                  <p 
-                    className="text-xs italic leading-relaxed"
-                    style={{ color: 'rgba(255, 255, 255, 0.5)' }}
-                  >
+                <div className="mt-3 pt-3 border-t border-border/50">
+                  <p className="text-xs italic leading-relaxed text-muted-foreground/80">
                     "{example}"
                   </p>
                 </div>
               )}
             </div>
             <button
-              onClick={onClose}
-              className="p-1.5 rounded-lg hover:bg-white/10 transition-all"
-              style={{ color: 'rgba(255, 255, 255, 0.5)' }}
+              onClick={() => {
+                setOpen(false);
+                onClose();
+              }}
+              className="p-1.5 rounded-lg hover:bg-muted/50 transition-all text-muted-foreground hover:text-foreground"
             >
               <X className="w-4 h-4" />
             </button>
@@ -122,12 +105,7 @@ export const WordPopup = ({
             <button
               onClick={handlePlayAudio}
               disabled={isPlaying}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 font-medium text-sm"
-              style={{ 
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                color: 'white',
-                boxShadow: '0 4px 14px rgba(102, 126, 234, 0.4)'
-              }}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 font-medium text-sm bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-lg shadow-primary/40"
             >
               <Volume2 className="w-4 h-4" />
               <span>{isPlaying ? 'Playing...' : 'Listen'}</span>
@@ -136,12 +114,11 @@ export const WordPopup = ({
             <button
               onClick={handleAddToDictionary}
               disabled={isAdded}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border transition-all hover:scale-[1.02] active:scale-[0.98] font-medium text-sm disabled:opacity-50"
-              style={{
-                borderColor: isAdded ? '#10b981' : 'rgba(255, 255, 255, 0.2)',
-                color: isAdded ? '#10b981' : 'white',
-                backgroundColor: isAdded ? 'rgba(16, 185, 129, 0.1)' : 'rgba(255, 255, 255, 0.05)',
-              }}
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border transition-all hover:scale-[1.02] active:scale-[0.98] font-medium text-sm disabled:opacity-50 ${
+                isAdded 
+                  ? 'border-emerald-500 text-emerald-500 bg-emerald-500/10' 
+                  : 'border-border/50 text-foreground bg-muted/30 hover:bg-muted/50'
+              }`}
             >
               {isAdded ? (
                 <>
@@ -157,20 +134,7 @@ export const WordPopup = ({
             </button>
           </div>
         </div>
-
-        <style>{`
-          @keyframes slideIn {
-            from {
-              opacity: 0;
-              transform: translateY(-10px) scale(0.95);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0) scale(1);
-            }
-          }
-        `}</style>
-      </div>
-    </>
+      </PopoverContent>
+    </Popover>
   );
 };
