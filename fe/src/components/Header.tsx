@@ -4,7 +4,6 @@ import { StreakDisplay } from './StreakDisplay';
 import { SoundToggle } from './SoundToggle';
 import { ThemeSelector } from './ThemeSelector';
 import { Logo } from './Logo';
-import { DailyProgressIndicator } from './DailyProgressIndicator';
 
 export function Header() {
   return (
@@ -41,7 +40,6 @@ export function Header() {
           </nav>
         </div>
         <div className="flex items-center gap-3">
-          <DailyProgressIndicator />
           <StreakDisplay />
           <CreditsDisplay />
           <SoundToggle />
