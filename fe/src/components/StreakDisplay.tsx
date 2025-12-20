@@ -163,6 +163,8 @@ export function StreakDisplay() {
   }
 
   const milestone = getMilestoneMessage(streakData.currentStreak);
+  const goalAchieved = dailyProgress?.goalAchieved ?? false;
+  const isActiveToday = dailyProgress ? dailyProgress.progressCount > 0 : false;
 
   const handleMouseEnter = () => {
     if (containerRef.current) {
@@ -182,8 +184,6 @@ export function StreakDisplay() {
       setShowTooltip(true);
     }
   };
-
-  const goalAchieved = dailyProgress?.goalAchieved || false;
 
   return (
     <motion.div
