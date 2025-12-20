@@ -80,9 +80,10 @@ export const DictionaryPanel = ({ isOpen, onClose, userId }: DictionaryPanelProp
     <>
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-opacity duration-300 ${
+        className={`fixed inset-0 z-40 backdrop-blur-sm transition-opacity duration-300 ${
           isOpen ? 'opacity-100' : 'pointer-events-none opacity-0'
         }`}
+        style={{ backgroundColor: 'rgba(0, 0, 0, 0.4)' }}
         onClick={onClose}
       />
 
@@ -92,40 +93,52 @@ export const DictionaryPanel = ({ isOpen, onClose, userId }: DictionaryPanelProp
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
         style={{
-          background: 'linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%)',
-          borderLeft: '1px solid rgba(139, 92, 246, 0.2)',
+          backgroundColor: 'var(--color-surface-dark)',
+          borderLeft: '1px solid var(--color-border)',
         }}
       >
+        {/* Gradient overlay for depth */}
+        <div
+          className="pointer-events-none absolute inset-0 opacity-40"
+          style={{
+            background: `radial-gradient(ellipse 70% 50% at 50% 0%, rgba(var(--color-primary-rgb), 0.15), transparent 60%)`,
+          }}
+        />
+
         {/* Header */}
         <div
-          className="relative border-b px-6 py-5"
+          className="relative z-10 border-b px-6 py-5"
           style={{
-            borderColor: 'rgba(255, 255, 255, 0.1)',
-            background: 'linear-gradient(180deg, rgba(139, 92, 246, 0.1) 0%, transparent 100%)',
+            borderColor: 'var(--color-border)',
+            background: `linear-gradient(180deg, rgba(var(--color-primary-rgb), 0.08) 0%, transparent 100%)`,
           }}
         >
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div
-                className="flex h-10 w-10 items-center justify-center rounded-lg"
-                style={{ background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)' }}
+                className="flex h-10 w-10 items-center justify-center rounded-xl shadow-lg"
+                style={{
+                  background: `linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%)`,
+                }}
               >
-                <BookOpen className="h-5 w-5 text-white" />
+                <BookOpen className="h-5 w-5" style={{ color: 'var(--color-text-primary)' }} />
               </div>
               <div>
                 <h2
-                  className="text-xl font-bold text-white"
-                  style={{ fontFamily: 'ui-serif, Georgia, serif' }}
+                  className="font-display text-xl font-bold"
+                  style={{ color: 'var(--color-text-primary)' }}
                 >
                   My Dictionary
                 </h2>
-                <p className="text-xs text-white/50">{words.length} words saved</p>
+                <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                  {words.length} words saved
+                </p>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="rounded-lg p-2 transition-colors hover:bg-white/10"
-              style={{ color: 'rgba(255, 255, 255, 0.7)' }}
+              className="rounded-lg p-2 transition-colors hover:bg-white/5"
+              style={{ color: 'var(--color-text-secondary)' }}
             >
               <X className="h-5 w-5" />
             </button>
@@ -133,57 +146,88 @@ export const DictionaryPanel = ({ isOpen, onClose, userId }: DictionaryPanelProp
 
           {/* Search */}
           <div className="relative">
-            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-white/40" />
+            <Search
+              className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
+              style={{ color: 'var(--color-text-muted)' }}
+            />
             <input
               type="text"
               placeholder="Search words..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-lg py-2.5 pr-4 pl-10 text-sm transition-all outline-none"
+              className="w-full rounded-lg py-2.5 pr-4 pl-10 text-sm outline-none transition-all focus:ring-2"
               style={{
-                backgroundColor: 'rgba(0, 0, 0, 0.3)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                color: 'white',
+                backgroundColor: 'var(--color-surface)',
+                border: '1px solid var(--color-border)',
+                color: 'var(--color-text-primary)',
+                boxShadow: '0 0 0 0 rgba(var(--color-primary-rgb), 0)',
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = 'var(--color-primary)';
+                e.target.style.boxShadow = '0 0 0 3px rgba(var(--color-primary-rgb), 0.1)';
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = 'var(--color-border)';
+                e.target.style.boxShadow = '0 0 0 0 rgba(var(--color-primary-rgb), 0)';
               }}
             />
           </div>
         </div>
 
         {/* Word List */}
-        <div className="h-[calc(100%-160px)] space-y-2 overflow-y-auto px-4 py-4">
+        <div className="custom-scrollbar relative z-10 h-[calc(100%-200px)] space-y-2 overflow-y-auto px-4 py-4">
           {isLoading ? (
             <div className="flex h-32 items-center justify-center">
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-purple-500 border-t-transparent" />
+              <div
+                className="h-8 w-8 animate-spin rounded-full border-2 border-t-transparent"
+                style={{ borderColor: 'var(--color-primary)' }}
+              />
             </div>
           ) : filteredWords.length === 0 ? (
-            <div className="flex h-32 flex-col items-center justify-center text-white/40">
-              <Sparkles className="mb-3 h-12 w-12 opacity-50" />
+            <div
+              className="flex h-32 flex-col items-center justify-center"
+              style={{ color: 'var(--color-text-muted)' }}
+            >
+              <Sparkles className="mb-3 h-12 w-12 animate-pulse opacity-50" />
               <p className="text-sm">
                 {searchQuery ? 'No words found' : 'Start building your vocabulary!'}
               </p>
             </div>
           ) : (
-            filteredWords.map((word) => (
+            filteredWords.map((word, index) => (
               <Card
                 key={word.id}
                 className={cn(
-                  'group cursor-pointer transition-all hover:scale-[1.02]',
+                  'group cursor-pointer border transition-all duration-200 hover:scale-[1.02]',
                   selectedWord?.id === word.id
-                    ? 'border-purple-500/40 bg-purple-900/20'
-                    : 'bg-card/5 border-border/10'
+                    ? 'shadow-lg'
+                    : 'shadow-sm hover:shadow-md'
                 )}
+                style={{
+                  backgroundColor:
+                    selectedWord?.id === word.id
+                      ? 'var(--color-surface-elevated)'
+                      : 'var(--color-surface)',
+                  borderColor:
+                    selectedWord?.id === word.id
+                      ? 'var(--color-primary)'
+                      : 'var(--color-border)',
+                  animationDelay: `${index * 0.03}s`,
+                }}
                 onClick={() => setSelectedWord(word)}
               >
                 <CardContent className="p-4">
                   <div className="mb-2 flex items-start justify-between">
                     <div className="flex-1">
                       <h3
-                        className="mb-1 text-lg font-bold text-white"
-                        style={{ fontFamily: 'ui-serif, Georgia, serif' }}
+                        className="font-display mb-1 text-lg font-bold"
+                        style={{ color: 'var(--color-text-primary)' }}
                       >
                         {word.word}
                       </h3>
-                      <p className="text-sm text-white/70">{word.translation}</p>
+                      <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                        {word.translation}
+                      </p>
                     </div>
                     <button
                       onClick={(e) => {
@@ -191,19 +235,22 @@ export const DictionaryPanel = ({ isOpen, onClose, userId }: DictionaryPanelProp
                         handleDelete(word.id);
                       }}
                       className="rounded-lg p-1.5 opacity-0 transition-all group-hover:opacity-100 hover:bg-red-500/20"
-                      style={{ color: '#ef4444' }}
+                      style={{ color: 'var(--color-error)' }}
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
 
                   {word.context && (
-                    <p className="mb-2 line-clamp-2 text-xs text-white/40 italic">
+                    <p
+                      className="mb-2 line-clamp-2 text-xs italic"
+                      style={{ color: 'var(--color-text-muted)' }}
+                    >
                       "{word.context}"
                     </p>
                   )}
 
-                  <div className="flex items-center gap-2 text-xs text-white/30">
+                  <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--color-text-muted)' }}>
                     <Calendar className="h-3 w-3" />
                     <span>{formatDate(word.createdAt)}</span>
                   </div>
@@ -215,15 +262,19 @@ export const DictionaryPanel = ({ isOpen, onClose, userId }: DictionaryPanelProp
 
         {/* Footer Stats */}
         <div
-          className="absolute right-0 bottom-0 left-0 border-t px-6 py-4"
+          className="absolute right-0 bottom-0 left-0 z-10 border-t px-6 py-4"
           style={{
-            borderColor: 'rgba(255, 255, 255, 0.1)',
-            background: 'linear-gradient(0deg, rgba(139, 92, 246, 0.1) 0%, transparent 100%)',
+            borderColor: 'var(--color-border)',
+            backgroundColor: 'var(--color-surface-dark)',
+            background: `linear-gradient(0deg, rgba(var(--color-primary-rgb), 0.08) 0%, transparent 100%)`,
           }}
         >
-          <div className="flex items-center justify-between text-xs text-white/50">
-            <span>Keep learning! 📚</span>
-            <span>
+          <div className="flex items-center justify-between text-xs" style={{ color: 'var(--color-text-muted)' }}>
+            <span className="flex items-center gap-2">
+              <span className="text-base">📚</span>
+              Keep learning!
+            </span>
+            <span className="font-medium">
               {filteredWords.length} of {words.length}
             </span>
           </div>

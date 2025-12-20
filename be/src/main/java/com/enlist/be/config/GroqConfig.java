@@ -13,4 +13,12 @@ public class GroqConfig {
     private String model;
     private int maxTokens;
     private double temperature;
+    private WordTranslation wordTranslation;
+
+    @Data
+    public static class WordTranslation {
+        private String model;
+        private int maxTokens;
+        private double temperature;
+    }
 }

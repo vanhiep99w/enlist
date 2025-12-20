@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { BookOpen } from 'lucide-react';
+import { toast } from 'sonner';
 import {
   createSession,
   getSession,
@@ -52,6 +53,7 @@ export function ParagraphSession({ paragraphId }: Props) {
     translation?: string;
     partOfSpeech?: string;
     example?: string;
+    exampleTranslation?: string;
     position: { x: number; y: number };
     isLoading?: boolean;
   } | null>(null);
@@ -168,12 +170,16 @@ export function ParagraphSession({ paragraphId }: Props) {
           translation: result.translation,
           partOfSpeech: result.partOfSpeech,
           example: result.example,
+          exampleTranslation: result.exampleTranslation,
           position: sel,
           isLoading: false,
         });
       } catch (error) {
         console.error('Failed to translate word:', error);
         setWordPopup(null);
+        toast.error('Translation failed', {
+          description: 'Could not translate the selected word. Please try again.',
+        });
       } finally {
         setIsTranslatingWord(false);
       }
@@ -723,8 +729,21 @@ export function ParagraphSession({ paragraphId }: Props) {
                   boxShadow: '0 -4px 20px -4px rgba(0, 0, 0, 0.3)',
                 }}
               >
-                {/* Subtle gradient accent */}
-                <div className="absolute top-0 right-0 left-0 h-0.5 bg-gradient-to-r from-blue-500/50 via-purple-500/50 to-cyan-500/50" />
+                {/* Elegant accent bar - matching Dictionary theme */}
+                <div 
+                  className="absolute top-0 right-0 left-0 h-1 overflow-hidden"
+                  style={{
+                    background: 'linear-gradient(90deg, rgba(139, 92, 246, 0.3) 0%, rgba(139, 92, 246, 0.6) 50%, rgba(139, 92, 246, 0.3) 100%)'
+                  }}
+                >
+                  <div 
+                    className="absolute inset-0 animate-pulse"
+                    style={{
+                      background: 'linear-gradient(90deg, transparent 0%, rgba(139, 92, 246, 0.8) 50%, transparent 100%)',
+                      filter: 'blur(4px)'
+                    }}
+                  />
+                </div>
 
                 {/* Current sentence indicator - more compact */}
                 <div className="mb-2 flex items-center gap-2">
@@ -1180,7 +1199,7 @@ export function ParagraphSession({ paragraphId }: Props) {
       {/* Floating Sidebar - Premium Glass Design */}
       {session && (
         <div
-          className={`fixed top-1/2 right-4 z-40 flex hidden -translate-y-1/2 flex-col gap-4 transition-all duration-300 md:flex ${sidebarCollapsed ? 'translate-x-[calc(100%-12px)]' : ''}`}
+          className={`fixed top-1/2 right-4 z-40 -translate-y-1/2 flex-col gap-4 transition-all duration-300 hidden md:flex ${sidebarCollapsed ? 'translate-x-[calc(100%-12px)]' : ''}`}
         >
           {/* Collapse/Expand Toggle */}
           <button
@@ -1207,7 +1226,7 @@ export function ParagraphSession({ paragraphId }: Props) {
 
           {/* Dictionary Button - Premium Card */}
           <button
-            onClick={() => setShowDictionary(true)}
+            onClick={() => setShowDictionaryPanel(true)}
             className="group relative flex flex-col items-center justify-center gap-2 overflow-hidden rounded-3xl p-5 shadow-2xl ring-1 shadow-black/30 ring-white/5 backdrop-blur-xl transition-all duration-300 hover:scale-105 hover:border-violet-500/50 hover:shadow-violet-500/20"
             style={{
               backgroundColor: 'var(--color-surface)',
@@ -1359,6 +1378,7 @@ export function ParagraphSession({ paragraphId }: Props) {
           translation={wordPopup.translation}
           partOfSpeech={wordPopup.partOfSpeech}
           example={wordPopup.example}
+          exampleTranslation={wordPopup.exampleTranslation}
           position={wordPopup.position}
           isLoading={wordPopup.isLoading}
           onClose={() => {

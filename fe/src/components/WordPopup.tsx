@@ -7,6 +7,7 @@ interface WordPopupProps {
   translation?: string;
   partOfSpeech?: string;
   example?: string;
+  exampleTranslation?: string;
   position: { x: number; y: number };
   onClose: () => void;
   onAddToDictionary: (word: string, translation: string, context?: string) => void;
@@ -18,6 +19,7 @@ export const WordPopup = ({
   translation,
   partOfSpeech,
   example,
+  exampleTranslation,
   position,
   onClose,
   onAddToDictionary,
@@ -146,13 +148,23 @@ export const WordPopup = ({
                 </div>
 
                 {/* Example - Fixed height container */}
-                <div className="mt-2 min-h-[36px] pt-2">
+                <div className="mt-2 min-h-[56px] pt-2">
                   {isLoading ? (
-                    <div className="bg-muted/30 h-3 w-3/4 animate-pulse rounded-full" />
+                    <div className="space-y-2">
+                      <div className="bg-muted/30 h-3 w-3/4 animate-pulse rounded-full" />
+                      <div className="bg-muted/20 h-3 w-2/3 animate-pulse rounded-full" />
+                    </div>
                   ) : example ? (
-                    <p className="text-muted-foreground/70 line-clamp-2 text-xs italic">
-                      "{example}"
-                    </p>
+                    <div className="space-y-1">
+                      <p className="text-muted-foreground/70 line-clamp-2 text-xs italic">
+                        "{example}"
+                      </p>
+                      {exampleTranslation && (
+                        <p className="text-muted-foreground/50 line-clamp-2 text-xs">
+                          "{exampleTranslation}"
+                        </p>
+                      )}
+                    </div>
                   ) : (
                     <div className="h-3" /> // Spacer to maintain height
                   )}

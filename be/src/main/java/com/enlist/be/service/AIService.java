@@ -674,26 +674,29 @@ public class AIService {
 
     public Map<String, String> translateWord(String word) {
         String prompt = String.format("""
-                Translate this single English word or phrase to Vietnamese.
+                Detect the language of this word/phrase and translate it:
+                - If ENGLISH -> translate to Vietnamese
+                - If VIETNAMESE -> translate to English
+                
                 Word/Phrase: %s
                 
                 Respond with ONLY valid JSON (no markdown, no explanation):
                 {
                   "word": "%s",
-                  "translation": "<Vietnamese translation>",
+                  "translation": "<translation in target language>",
                   "partOfSpeech": "<noun|verb|adjective|adverb|phrase|preposition|conjunction|etc>",
-                  "example": "<example sentence in English using this word>",
-                  "exampleTranslation": "<Vietnamese translation of the example>"
+                  "example": "<example sentence using this word in its original language>",
+                  "exampleTranslation": "<translation of the example to target language>"
                 }
                 """, word, word);
 
         Map<String, Object> requestBody = Map.of(
-                "model", groqConfig.getModel(),
+                "model", groqConfig.getWordTranslation().getModel(),
                 "messages", List.of(
                         Map.of("role", "user", "content", prompt)
                 ),
-                "max_tokens", 500,
-                "temperature", 0.3
+                "max_tokens", groqConfig.getWordTranslation().getMaxTokens(),
+                "temperature", groqConfig.getWordTranslation().getTemperature()
         );
 
         try {
@@ -703,21 +706,28 @@ public class AIService {
                     .bodyToMono(String.class)
                     .block();
 
+            log.info("Groq API response for word '{}': {}", word, response);
+
             JsonNode root = objectMapper.readTree(response);
             String content = root.path("choices").get(0).path("message").path("content").asText();
+            log.info("AI content before cleaning: {}", content);
+            
             content = cleanJsonContent(content);
+            log.info("AI content after cleaning: {}", content);
 
             JsonNode translationNode = objectMapper.readTree(content);
-            return Map.of(
+            Map<String, String> result = Map.of(
                     "word", translationNode.path("word").asText(word),
                     "translation", translationNode.path("translation").asText(""),
                     "partOfSpeech", translationNode.path("partOfSpeech").asText(""),
                     "example", translationNode.path("example").asText(""),
                     "exampleTranslation", translationNode.path("exampleTranslation").asText("")
             );
+            log.info("Translation result: {}", result);
+            return result;
         } catch (Exception e) {
-            log.error("Error translating word: {}", e.getMessage(), e);
-            return Map.of("word", word, "translation", word, "partOfSpeech", "", "example", "", "exampleTranslation", "");
+            log.error("Error translating word '{}': {}", word, e.getMessage(), e);
+            return Map.of("word", word, "translation", "", "partOfSpeech", "", "example", "", "exampleTranslation", "");
         }
     }
 }

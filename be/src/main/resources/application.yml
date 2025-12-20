@@ -21,6 +21,11 @@ groq:
     model: openai/gpt-oss-safeguard-20b
     max-tokens: 4000
     temperature: 0.3
+    # Word translation specific config
+    word-translation:
+      model: llama-3.1-8b-instant
+      max-tokens: 1000
+      temperature: 0.3
 
 server:
   port: 8081
