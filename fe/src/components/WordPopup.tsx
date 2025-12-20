@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Volume2, BookmarkPlus, X, Check, Loader2 } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import { ttsService } from '../services/ttsService';
 
 interface WordPopupProps {
   word: string;
@@ -29,13 +30,18 @@ export const WordPopup = ({
   const [isAdded, setIsAdded] = useState(false);
   const [open, setOpen] = useState(true);
 
-  const handlePlayAudio = () => {
+  const handlePlayAudio = async () => {
     setIsPlaying(true);
-    const utterance = new SpeechSynthesisUtterance(word);
-    utterance.lang = 'en-US';
-    utterance.rate = 0.85;
-    utterance.onend = () => setIsPlaying(false);
-    window.speechSynthesis.speak(utterance);
+    try {
+      await ttsService.speakWithFallback(word, {
+        speed: 0.85,
+        voice: 'en-US-Standard-C',
+      });
+    } catch (error) {
+      console.error('Failed to play audio:', error);
+    } finally {
+      setIsPlaying(false);
+    }
   };
 
   const handleAddToDictionary = () => {

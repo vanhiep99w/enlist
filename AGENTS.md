@@ -17,7 +17,8 @@
 - **be/**: Spring Boot 3.2.x backend (Java 17+) with Spring Security 6.x, JPA, PostgreSQL 15.x, Redis 7.x. REST API at `/api/*`
 - **fe/**: React 18.x + TanStack Router + Vite + Vitest + TypeScript + Tailwind CSS + Axios frontend (port 5173)
 - **AI Integration**: Groq API (llama-3.1-8b-instant) or Ollama (llama3.2:3b) for translation evaluation via AIService
-- **Key Services**: TranslationService, FeedbackService, AchievementService
+- **TTS Integration**: ttsforfree.com API for high-quality word pronunciation with browser fallback
+- **Key Services**: TranslationService, FeedbackService, AchievementService, TTSService
 - **DB Tables**: users, exercises, submissions, achievements, progress, feedback
 
 ## API Endpoints
