@@ -24,6 +24,8 @@ public class SentenceSubmissionResponse {
     private Integer naturalnessScore;
     private int pointsEarned;
     private boolean skipped;
+    private int retryAttempt;
+    private Long parentSubmissionId;
     private boolean isLastSentence;
     private int nextSentenceIndex;
     private String nextSentence;
@@ -43,6 +45,8 @@ public class SentenceSubmissionResponse {
                 .naturalnessScore(submission.getNaturalnessScore())
                 .pointsEarned(submission.getPointsEarned())
                 .skipped(Boolean.TRUE.equals(submission.getSkipped()))
+                .retryAttempt(submission.getRetryAttempt() != null ? submission.getRetryAttempt() : 0)
+                .parentSubmissionId(submission.getParentSubmission() != null ? submission.getParentSubmission().getId() : null)
                 .isLastSentence(isLastSentence)
                 .nextSentenceIndex(nextSentenceIndex)
                 .nextSentence(nextSentence)

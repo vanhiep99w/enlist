@@ -38,16 +38,27 @@ export function DictionaryModal({ isOpen, onClose }: Props) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onClose}>
+    <div 
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in duration-200" 
+      onClick={onClose}
+    >
       <div 
-        className="bg-gray-800 rounded-lg border border-gray-700 w-full max-w-md max-h-[80vh] overflow-hidden"
+        className="backdrop-blur-xl rounded-2xl w-full max-w-md max-h-[80vh] overflow-hidden shadow-2xl shadow-black/50 ring-1 ring-white/5 animate-in zoom-in-95 slide-in-from-bottom-4 duration-300"
+        style={{ backgroundColor: 'var(--color-surface-dark)', opacity: 0.8, borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--color-border)' }}
         onClick={e => e.stopPropagation()}
       >
-        <div className="p-4 border-b border-gray-700 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-200">📖 Dictionary</h2>
+        <div 
+          className="p-4 flex items-center justify-between bg-gradient-to-r from-purple-500/10 to-transparent"
+          style={{ borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: 'var(--color-border)' }}
+        >
+          <h2 className="text-lg font-semibold flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
+            <span className="text-xl">📖</span>
+            <span>Dictionary</span>
+          </h2>
           <button 
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-200"
+            className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/10 transition-all duration-200"
+            style={{ color: 'var(--color-text-secondary)' }}
           >
             ✕
           </button>
@@ -61,13 +72,14 @@ export function DictionaryModal({ isOpen, onClose }: Props) {
               onChange={e => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Enter a word..."
-              className="flex-1 bg-gray-900 border border-gray-600 rounded-lg px-3 py-2 text-gray-200 placeholder-gray-500 focus:outline-none focus:border-blue-500"
+              className="flex-1 backdrop-blur-sm rounded-xl px-4 py-2.5 placeholder-gray-500 focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 transition-all duration-200"
+              style={{ backgroundColor: 'var(--color-surface)', borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
               autoFocus
             />
             <button
               onClick={handleSearch}
               disabled={isLoading || !query.trim()}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-5 py-2.5 bg-purple-600/90 backdrop-blur-sm text-white rounded-xl font-medium hover:bg-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:shadow-lg hover:shadow-purple-500/25"
             >
               {isLoading ? '...' : 'Look up'}
             </button>
@@ -75,13 +87,13 @@ export function DictionaryModal({ isOpen, onClose }: Props) {
           
           <div className="overflow-y-auto max-h-[50vh]">
             {isLoading && (
-              <div className="text-center text-gray-400 py-8">
+              <div className="text-center py-8" style={{ color: 'var(--color-text-secondary)' }}>
                 Looking up word...
               </div>
             )}
             
             {notFound && (
-              <div className="text-center text-gray-400 py-8">
+              <div className="text-center py-8" style={{ color: 'var(--color-text-secondary)' }}>
                 No definition found for "{query}"
               </div>
             )}
@@ -89,9 +101,9 @@ export function DictionaryModal({ isOpen, onClose }: Props) {
             {result && (
               <div className="space-y-4">
                 <div className="flex items-baseline gap-2">
-                  <span className="text-xl font-bold text-gray-200">{result.word}</span>
+                  <span className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{result.word}</span>
                   {result.phonetic && (
-                    <span className="text-gray-400">{result.phonetic}</span>
+                    <span style={{ color: 'var(--color-text-secondary)' }}>{result.phonetic}</span>
                   )}
                 </div>
                 
@@ -102,10 +114,10 @@ export function DictionaryModal({ isOpen, onClose }: Props) {
                     </span>
                     <ol className="list-decimal list-inside space-y-2">
                       {meaning.definitions.map((def, defIdx) => (
-                        <li key={defIdx} className="text-gray-300 text-sm">
+                        <li key={defIdx} className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                           {def.definition}
                           {def.example && (
-                            <p className="text-gray-500 italic ml-4 mt-1">
+                            <p className="italic ml-4 mt-1" style={{ color: 'var(--color-text-muted)' }}>
                               "{def.example}"
                             </p>
                           )}
@@ -118,7 +130,7 @@ export function DictionaryModal({ isOpen, onClose }: Props) {
             )}
             
             {!isLoading && !notFound && !result && (
-              <div className="text-center text-gray-500 py-8">
+              <div className="text-center py-8" style={{ color: 'var(--color-text-muted)' }}>
                 Enter a word to look up its definition
               </div>
             )}

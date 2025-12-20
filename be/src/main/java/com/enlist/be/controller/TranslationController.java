@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/translate")
 @RequiredArgsConstructor
@@ -29,5 +31,11 @@ public class TranslationController {
                 .build();
 
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/word")
+    public ResponseEntity<Map<String, String>> translateWord(@RequestBody String word) {
+        Map<String, String> translation = aiService.translateWord(word);
+        return ResponseEntity.ok(translation);
     }
 }

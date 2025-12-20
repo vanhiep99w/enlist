@@ -11,4 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SentenceSubmitRequest {
     private String userTranslation;
+    private Boolean isRetry;
+    private Long parentSubmissionId;
 }

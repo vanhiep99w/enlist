@@ -1,5 +1,6 @@
 package com.enlist.be.controller;
 
+import com.enlist.be.dto.PaginatedResponse;
 import com.enlist.be.dto.ParagraphCreateRequest;
 import com.enlist.be.dto.ParagraphResponse;
 import com.enlist.be.service.ParagraphService;
@@ -18,10 +19,21 @@ public class ParagraphController {
     private final ParagraphService paragraphService;
 
     @GetMapping
-    public ResponseEntity<List<ParagraphResponse>> getAllParagraphs(
+    public ResponseEntity<PaginatedResponse<ParagraphResponse>> getAllParagraphs(
             @RequestParam(required = false) String difficulty,
-            @RequestParam(required = false) String topic) {
-        return ResponseEntity.ok(paragraphService.getAllParagraphs(difficulty, topic));
+            @RequestParam(required = false) String topic,
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int pageSize,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(defaultValue = "asc") String sortOrder) {
+        return ResponseEntity.ok(paragraphService.getParagraphsPaginated(
+                difficulty, topic, search, page, pageSize, sortBy, sortOrder));
+    }
+
+    @GetMapping("/topics")
+    public ResponseEntity<List<String>> getAllTopics() {
+        return ResponseEntity.ok(paragraphService.getAllTopics());
     }
 
     @GetMapping("/{id}")

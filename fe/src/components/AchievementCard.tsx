@@ -20,9 +20,10 @@ export function AchievementCard({ achievement, isNew = false }: Props) {
 
   return (
     <div
-      className={`relative bg-gray-700 rounded-lg p-4 text-center transition-all duration-300 ${
+      className={`relative rounded-lg p-4 text-center transition-all duration-300 ${
         isNew ? 'ring-2 ring-yellow-400 animate-pulse' : ''
       }`}
+      style={{ backgroundColor: 'var(--color-surface-light)' }}
     >
       {isNew && (
         <div className="absolute -top-2 -right-2 bg-yellow-400 text-gray-900 text-xs font-bold px-2 py-0.5 rounded-full">
@@ -30,19 +31,19 @@ export function AchievementCard({ achievement, isNew = false }: Props) {
         </div>
       )}
       <div className="text-3xl mb-2">{icon}</div>
-      <div className="text-sm font-medium text-gray-200">{achievement.title}</div>
+      <div className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>{achievement.title}</div>
       {achievement.description && (
-        <div className="text-xs text-gray-400 mt-1">{achievement.description}</div>
+        <div className="text-xs mt-1" style={{ color: 'var(--color-text-secondary)' }}>{achievement.description}</div>
       )}
       {hasProgress && (
         <div className="mt-2">
-          <div className="h-1.5 bg-gray-600 rounded-full overflow-hidden">
+          <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--color-surface-elevated)' }}>
             <div
               className="h-full bg-green-500 transition-all duration-300"
               style={{ width: `${Math.min(100, (achievement.progress! / achievement.target!) * 100)}%` }}
             />
           </div>
-          <div className="text-xs text-gray-400 mt-1">
+          <div className="text-xs mt-1" style={{ color: 'var(--color-text-secondary)' }}>
             {achievement.progress}/{achievement.target}
           </div>
         </div>

@@ -1,0 +1,7 @@
+---
+title: Biến đổi khí hậu và Việt Nam
+topic: environment
+difficulty: HARD
+---
+
+Việt Nam được xác định là một trong những quốc gia chịu ảnh hưởng nặng nề nhất từ biến đổi khí hậu. Đồng bằng sông Cửu Long, "vựa lúa" cả nước, đang đối mặt với xâm nhập mặn và thiếu nước ngọt nghiêm trọng. Các hiện tượng thời tiết cực đoan như bão, lũ lụt và hạn hán xảy ra với tần suất chưa từng thấy. Mực nước biển dâng cao khiến hàng triệu người dân ven biển có nguy cơ mất nhà cửa. Nông nghiệp, thủy sản và du lịch đang gánh chịu tác động to lớn từ sự biến đổi này. Câu "nước đến chân mới nhảy" không còn phù hợp khi ứng phó biến đổi khí hậu đòi hỏi hành động ngay. Tại COP26, Việt Nam cam kết đạt phát thải ròng bằng không vào năm hai không năm mươi. Chuyển đổi sang năng lượng tái tạo, đặc biệt điện gió và điện mặt trời, là con đường tất yếu. Trồng rừng và phục hồi hệ sinh thái suy thoái đóng vai trò then chốt trong hấp thụ carbon. Chính sách thích ứng biến đổi khí hậu cần được lồng ghép vào mọi kế hoạch phát triển kinh tế xã hội. Giáo dục và nâng cao nhận thức cộng đồng là nền tảng cho những thay đổi hành vi bền vững. Hợp tác quốc tế là điều không thể thiếu để giải quyết vấn đề mang tính toàn cầu này. Doanh nghiệp cần chuyển đổi mô hình kinh doanh theo hướng xanh và bền vững. Mỗi người dân với những hành động nhỏ hàng ngày đều có thể góp phần bảo vệ hành tinh. Cuối cùng, cuộc chiến chống biến đổi khí hậu là cuộc chiến "không của riêng ai" đòi hỏi sự chung tay.

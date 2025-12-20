@@ -21,7 +21,7 @@ public class SentenceSubmission {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "session_id", nullable = false)
+    @JoinColumn(name = "session_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private ParagraphSession session;
 
     @Column(name = "sentence_index", nullable = false)
@@ -65,7 +65,7 @@ public class SentenceSubmission {
     private Integer retryAttempt = 0;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_submission_id")
+    @JoinColumn(name = "parent_submission_id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private SentenceSubmission parentSubmission;
 
     @PrePersist

@@ -32,7 +32,7 @@ public class ParagraphSession {
     private Long userId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "paragraph_id", nullable = false)
+    @JoinColumn(name = "paragraph_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private Paragraph paragraph;
 
     @Column(name = "current_sentence_index")

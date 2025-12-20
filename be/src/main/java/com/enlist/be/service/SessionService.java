@@ -70,7 +70,18 @@ public class SessionService {
 
         Paragraph paragraph = session.getParagraph();
         List<String> sentences = paragraph.getSentences();
-        int currentIndex = session.getCurrentSentenceIndex();
+        
+        boolean isRetry = Boolean.TRUE.equals(request.getIsRetry()) && request.getParentSubmissionId() != null;
+        SentenceSubmission parentSubmission = null;
+        int currentIndex;
+        
+        if (isRetry) {
+            parentSubmission = submissionRepository.findById(request.getParentSubmissionId())
+                    .orElseThrow(() -> new RuntimeException("Parent submission not found: " + request.getParentSubmissionId()));
+            currentIndex = parentSubmission.getSentenceIndex();
+        } else {
+            currentIndex = session.getCurrentSentenceIndex();
+        }
 
         if (currentIndex >= sentences.size()) {
             throw new RuntimeException("No more sentences to translate");
@@ -94,13 +105,18 @@ public class SessionService {
         );
 
         double accuracy = calculateAccuracy(feedback);
-        int pointsEarned = calculatePoints(accuracy);
+        int pointsEarned = isRetry ? 0 : calculatePoints(accuracy);
 
         String feedbackJson = null;
         try {
             feedbackJson = objectMapper.writeValueAsString(feedback);
         } catch (JsonProcessingException e) {
             log.error("Error serializing feedback", e);
+        }
+
+        int retryAttempt = 0;
+        if (isRetry) {
+            retryAttempt = (parentSubmission.getRetryAttempt() != null ? parentSubmission.getRetryAttempt() : 0) + 1;
         }
 
         SentenceSubmission submission = SentenceSubmission.builder()
@@ -116,18 +132,22 @@ public class SessionService {
                 .feedbackJson(feedbackJson)
                 .pointsEarned(pointsEarned)
                 .skipped(false)
+                .retryAttempt(retryAttempt)
+                .parentSubmission(parentSubmission)
                 .build();
 
         submissionRepository.save(submission);
 
-        session.setTotalPoints(session.getTotalPoints() + pointsEarned);
+        if (!isRetry) {
+            session.setTotalPoints(session.getTotalPoints() + pointsEarned);
+        }
 
         boolean passedThreshold = accuracy >= 80.0;
         boolean isLastSentence = session.isLastSentence();
         int nextIndex = currentIndex;
         String nextSentence = null;
 
-        if (passedThreshold) {
+        if (passedThreshold && !isRetry) {
             if (!isLastSentence) {
                 session.advanceToNextSentence();
                 nextIndex = session.getCurrentSentenceIndex();

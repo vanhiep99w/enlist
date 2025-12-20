@@ -671,4 +671,53 @@ public class AIService {
                 .correctTranslation("")
                 .build();
     }
+
+    public Map<String, String> translateWord(String word) {
+        String prompt = String.format("""
+                Translate this single English word or phrase to Vietnamese.
+                Word/Phrase: %s
+                
+                Respond with ONLY valid JSON (no markdown, no explanation):
+                {
+                  "word": "%s",
+                  "translation": "<Vietnamese translation>",
+                  "partOfSpeech": "<noun|verb|adjective|adverb|phrase|preposition|conjunction|etc>",
+                  "example": "<example sentence in English using this word>",
+                  "exampleTranslation": "<Vietnamese translation of the example>"
+                }
+                """, word, word);
+
+        Map<String, Object> requestBody = Map.of(
+                "model", groqConfig.getModel(),
+                "messages", List.of(
+                        Map.of("role", "user", "content", prompt)
+                ),
+                "max_tokens", 500,
+                "temperature", 0.3
+        );
+
+        try {
+            String response = groqClient.post()
+                    .bodyValue(requestBody)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
+
+            JsonNode root = objectMapper.readTree(response);
+            String content = root.path("choices").get(0).path("message").path("content").asText();
+            content = cleanJsonContent(content);
+
+            JsonNode translationNode = objectMapper.readTree(content);
+            return Map.of(
+                    "word", translationNode.path("word").asText(word),
+                    "translation", translationNode.path("translation").asText(""),
+                    "partOfSpeech", translationNode.path("partOfSpeech").asText(""),
+                    "example", translationNode.path("example").asText(""),
+                    "exampleTranslation", translationNode.path("exampleTranslation").asText("")
+            );
+        } catch (Exception e) {
+            log.error("Error translating word: {}", e.getMessage(), e);
+            return Map.of("word", word, "translation", word, "partOfSpeech", "", "example", "", "exampleTranslation", "");
+        }
+    }
 }

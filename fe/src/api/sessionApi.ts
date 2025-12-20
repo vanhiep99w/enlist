@@ -1,14 +1,24 @@
 import axios from 'axios';
-import type { Paragraph, Session, SessionProgress, SentenceSubmissionResponse } from '../types/session';
+import type { Paragraph, PaginatedResponse, ParagraphFilters, Session, SessionProgress, SentenceSubmissionResponse } from '../types/session';
 
 const API_BASE = 'http://localhost:8081/api';
 
-export async function getParagraphs(difficulty?: string, topic?: string): Promise<Paragraph[]> {
+export async function getParagraphs(filters: ParagraphFilters = {}): Promise<PaginatedResponse<Paragraph>> {
   const params = new URLSearchParams();
-  if (difficulty) params.append('difficulty', difficulty);
-  if (topic) params.append('topic', topic);
+  if (filters.difficulty) params.append('difficulty', filters.difficulty);
+  if (filters.topic) params.append('topic', filters.topic);
+  if (filters.search) params.append('search', filters.search);
+  if (filters.page !== undefined) params.append('page', String(filters.page));
+  if (filters.pageSize !== undefined) params.append('pageSize', String(filters.pageSize));
+  if (filters.sortBy) params.append('sortBy', filters.sortBy);
+  if (filters.sortOrder) params.append('sortOrder', filters.sortOrder);
   
-  const response = await axios.get<Paragraph[]>(`${API_BASE}/paragraphs`, { params });
+  const response = await axios.get<PaginatedResponse<Paragraph>>(`${API_BASE}/paragraphs`, { params });
+  return response.data;
+}
+
+export async function getTopics(): Promise<string[]> {
+  const response = await axios.get<string[]>(`${API_BASE}/paragraphs/topics`);
   return response.data;
 }
 
@@ -39,11 +49,16 @@ export async function getSession(sessionId: number): Promise<Session> {
 
 export async function submitSentenceTranslation(
   sessionId: number,
-  userTranslation: string
+  userTranslation: string,
+  options?: { isRetry?: boolean; parentSubmissionId?: number }
 ): Promise<SentenceSubmissionResponse> {
   const response = await axios.post<SentenceSubmissionResponse>(
     `${API_BASE}/sessions/${sessionId}/submit`,
-    { userTranslation }
+    { 
+      userTranslation,
+      isRetry: options?.isRetry,
+      parentSubmissionId: options?.parentSubmissionId
+    }
   );
   return response.data;
 }

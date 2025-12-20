@@ -1,31 +1,43 @@
 import { Link } from '@tanstack/react-router';
 import { CreditsDisplay } from './CreditsDisplay';
+import { StreakDisplay } from './StreakDisplay';
+import { SoundToggle } from './SoundToggle';
+import { ThemeSelector } from './ThemeSelector';
+import { Logo } from './Logo';
 
 export function Header() {
   return (
-    <header className="bg-gray-900 border-b border-gray-800 px-6 py-3">
+    <header className="border-b px-6 py-3" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-surface-light)' }}>
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <div className="flex items-center gap-6">
-          <Link to="/" className="text-xl font-bold text-white hover:text-yellow-400 transition-colors">
-            🌏 Enlist
+          <Link to="/" className="flex items-center gap-3 text-2xl font-bold transition-colors hover:text-amber-500" style={{ color: 'var(--color-text-primary)' }}>
+            <Logo size={42} />
+            <span>Enlist</span>
           </Link>
           <nav className="flex items-center gap-4">
             <Link
               to="/"
-              className="text-gray-300 hover:text-white transition-colors [&.active]:text-yellow-400"
+              className="transition-colors [&.active]:text-amber-500 hover-underline"
+              style={{ color: 'var(--color-text-secondary)' }}
               activeOptions={{ exact: true }}
             >
               Practice
             </Link>
             <Link
               to="/paragraphs"
-              className="text-gray-300 hover:text-white transition-colors [&.active]:text-yellow-400"
+              className="transition-colors [&.active]:text-amber-500 hover-underline"
+              style={{ color: 'var(--color-text-secondary)' }}
             >
               Paragraphs
             </Link>
           </nav>
         </div>
-        <CreditsDisplay />
+        <div className="flex items-center gap-3">
+          <StreakDisplay />
+          <CreditsDisplay />
+          <SoundToggle />
+          <ThemeSelector />
+        </div>
       </div>
     </header>
   );

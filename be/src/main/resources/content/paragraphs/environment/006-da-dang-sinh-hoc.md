@@ -1,0 +1,7 @@
+---
+title: Bảo tồn đa dạng sinh học
+topic: environment
+difficulty: HARD
+---
+
+Việt Nam sở hữu kho tàng đa dạng sinh học phong phú bậc nhất thế giới với nhiều loài đặc hữu quý hiếm. Tuy nhiên, nhiều loài đang đứng trước bờ vực tuyệt chủng do mất môi trường sống và nạn săn bắt trái phép. Diện tích rừng tự nhiên, "lá phổi xanh" của đất nước, đã suy giảm đáng kể trong những thập kỷ qua. Các khu bảo tồn thiên nhiên và vườn quốc gia được thành lập nhằm gìn giữ hệ sinh thái quan trọng. Nạn buôn bán động vật hoang dã bất hợp pháp vẫn diễn biến phức tạp tại Việt Nam. Các loài như tê tê, hổ và gấu đang bị săn lùng ráo riết để phục vụ tiêu dùng phi pháp. Câu "của bền tại người" nhắc nhở trách nhiệm bảo vệ di sản thiên nhiên cho thế hệ mai sau. Giáo dục cộng đồng về giá trị đa dạng sinh học là chìa khóa thay đổi nhận thức và hành vi. Du lịch sinh thái bền vững có thể tạo sinh kế cho dân địa phương và góp phần bảo tồn. Việc khôi phục hệ sinh thái suy thoái như rừng ngập mặn và rạn san hô đang được triển khai tích cực. Hợp tác quốc tế trong bảo tồn ngày càng được tăng cường với hỗ trợ từ WWF và IUCN. Luật bảo vệ động vật hoang dã đã được hoàn thiện song việc thực thi vẫn còn nhiều bất cập. Công nghệ gene và viễn thám đang mở ra những phương pháp bảo tồn hiệu quả chưa từng có. Sự tham gia của cộng đồng địa phương là yếu tố quyết định thành công của mọi nỗ lực bảo tồn. Cuối cùng, bảo vệ đa dạng sinh học là điều kiện tiên quyết cho sự sinh tồn và phát triển bền vững của loài người.

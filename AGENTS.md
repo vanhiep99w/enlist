@@ -25,6 +25,7 @@
 - **Frontend**: TypeScript strict; TanStack Router; functional React; Tailwind CSS
 - **Naming**: camelCase (JS/TS), PascalCase (components/classes), snake_case (DB columns)
 - **Error Handling**: Backend custom exceptions; frontend try/catch with error states
+- **Database**: Do NOT create actual Foreign Keys (FK) in the database - use application-level references only
 
 ## Issue Tracking with bd (beads)
 

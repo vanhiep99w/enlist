@@ -1,10 +1,15 @@
 package com.enlist.be.service;
 
+import com.enlist.be.dto.PaginatedResponse;
 import com.enlist.be.dto.ParagraphCreateRequest;
 import com.enlist.be.dto.ParagraphResponse;
 import com.enlist.be.entity.Paragraph;
 import com.enlist.be.repository.ParagraphRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,6 +36,35 @@ public class ParagraphService {
         return paragraphs.stream()
                 .map(ParagraphResponse::fromEntity)
                 .toList();
+    }
+
+    public PaginatedResponse<ParagraphResponse> getParagraphsPaginated(
+            String difficulty,
+            String topic,
+            String search,
+            int page,
+            int pageSize,
+            String sortBy,
+            String sortOrder) {
+        
+        Sort sort = Sort.by(
+            "desc".equalsIgnoreCase(sortOrder) ? Sort.Direction.DESC : Sort.Direction.ASC,
+            sortBy != null ? sortBy : "id"
+        );
+        Pageable pageable = PageRequest.of(page, pageSize, sort);
+        
+        Page<Paragraph> paragraphPage = paragraphRepository.findWithFilters(
+                difficulty,
+                topic,
+                search,
+                pageable
+        );
+        
+        return PaginatedResponse.fromPage(paragraphPage, ParagraphResponse::fromEntity);
+    }
+
+    public List<String> getAllTopics() {
+        return paragraphRepository.findAllTopics();
     }
 
     public ParagraphResponse getParagraphById(Long id) {

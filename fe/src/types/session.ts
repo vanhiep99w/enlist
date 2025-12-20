@@ -8,6 +8,26 @@ export interface Paragraph {
   sentences: string[];
 }
 
+export interface PaginatedResponse<T> {
+  content: T[];
+  page: number;
+  pageSize: number;
+  totalElements: number;
+  totalPages: number;
+  first: boolean;
+  last: boolean;
+}
+
+export interface ParagraphFilters {
+  difficulty?: string;
+  topic?: string;
+  search?: string;
+  page?: number;
+  pageSize?: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
 export interface CompletedSentenceData {
   correctTranslation: string;
   userTranslation: string;
@@ -58,6 +78,8 @@ export interface SentenceSubmissionResponse {
   naturalnessScore: number;
   pointsEarned: number;
   skipped: boolean;
+  retryAttempt: number;
+  parentSubmissionId: number | null;
   isLastSentence: boolean;
   nextSentenceIndex: number;
   nextSentence: string | null;

@@ -24,9 +24,14 @@ export function SentenceTooltip({ children }: Props) {
   return (
     <span 
       ref={tooltipRef}
-      className={`absolute bottom-full mb-2 px-3 py-2 bg-gray-800 text-gray-300 text-sm rounded-lg z-50 border border-gray-600 w-80 whitespace-normal shadow-xl ${
+      className={`absolute bottom-full mb-2 px-3 py-2 text-sm rounded-lg z-50 border w-80 whitespace-normal shadow-xl ${
         position === 'right' ? 'right-0' : 'left-0'
       }`}
+      style={{ 
+        backgroundColor: 'var(--color-surface)', 
+        color: 'var(--color-text-secondary)', 
+        borderColor: 'var(--color-border)' 
+      }}
     >
       {children}
     </span>

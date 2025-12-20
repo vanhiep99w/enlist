@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import { useSoundEffects } from '../hooks/useSoundEffects';
 
 interface Props {
   show: boolean;
@@ -9,10 +10,21 @@ interface Props {
 export function SuccessAnimation({ show, accuracy, onComplete }: Props) {
   const [isVisible, setIsVisible] = useState(false);
   const [particles, setParticles] = useState<Array<{ id: number; x: number; y: number; color: string }>>([]);
+  const { playSuccessSound, playPerfectSound } = useSoundEffects();
+  const hasPlayedRef = useRef(false);
 
   useEffect(() => {
     if (show) {
       setIsVisible(true);
+      
+      if (!hasPlayedRef.current) {
+        hasPlayedRef.current = true;
+        if (accuracy >= 95) {
+          playPerfectSound();
+        } else if (accuracy >= 85) {
+          playSuccessSound();
+        }
+      }
       
       // Generate confetti particles
       const newParticles = Array.from({ length: 12 }, (_, i) => ({
@@ -30,8 +42,10 @@ export function SuccessAnimation({ show, accuracy, onComplete }: Props) {
       }, 1500);
 
       return () => clearTimeout(timer);
+    } else {
+      hasPlayedRef.current = false;
     }
-  }, [show, onComplete]);
+  }, [show, onComplete, accuracy, playSuccessSound, playPerfectSound]);
 
   if (!isVisible) return null;
 

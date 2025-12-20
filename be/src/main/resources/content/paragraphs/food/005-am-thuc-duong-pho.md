@@ -1,0 +1,7 @@
+---
+title: Văn hóa ẩm thực đường phố Việt Nam
+topic: food
+difficulty: HARD
+---
+
+Ẩm thực đường phố là phần không thể tách rời trong bản sắc văn hóa ẩm thực Việt Nam. Từ Hà Nội cổ kính đến Sài Gòn nhộn nhịp, mỗi thành phố đều sở hữu món ăn đường phố đặc trưng. Điều khiến du khách ngỡ ngàng là món ăn được chế biến ngay trước mắt, đảm bảo sự tươi ngon tuyệt đối. Những quán vỉa hè với bàn ghế nhựa thấp đã trở thành biểu tượng văn hóa đặc sắc. Không gian mộc mạc ấy tạo nên "tình nghĩa gánh hàng rong" giữa người bán và người mua. Du khách quốc tế bị cuốn hút bởi sự đa dạng phong phú và giá cả phải chăng của ẩm thực đường phố. Nhiều tạp chí ẩm thực danh tiếng đã vinh danh các món ăn đường phố Việt Nam trong danh sách trải nghiệm không thể bỏ qua. Tuy nhiên, vấn đề vệ sinh an toàn thực phẩm vẫn là mối quan ngại cần được cải thiện. Quan niệm "ăn cho no, không ăn cho sạch" đang dần thay đổi khi người tiêu dùng ý thức hơn về sức khỏe. Chính quyền địa phương đang triển khai các chương trình quản lý và nâng cao chất lượng quán ăn đường phố. Việc cấp chứng nhận vệ sinh cho các hộ kinh doanh nhỏ lẻ đang được đẩy mạnh thực hiện. Một số thành phố đã quy hoạch khu phố ẩm thực, vừa bảo tồn văn hóa vừa đảm bảo tiêu chuẩn vệ sinh. Bất chấp thách thức, ẩm thực đường phố vẫn được coi là linh hồn của đời sống ẩm thực Việt Nam. Nó không chỉ thỏa mãn nhu cầu ăn uống mà còn là không gian văn hóa gắn kết cộng đồng. Di sản ẩm thực đường phố cần được bảo tồn như tài sản văn hóa phi vật thể quý giá của dân tộc.
