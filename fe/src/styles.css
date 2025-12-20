@@ -217,23 +217,23 @@
   --color-accent-light: #db7e6a;
   --color-accent-dark: #a54d3a;
   
-  /* Surfaces: Warm sand and cream */
-  --color-surface-dark: #f5ebe0;
-  --color-surface: #faf6f0;
-  --color-surface-light: #fffefa;
-  --color-surface-elevated: #ede4d8;
+  /* Surfaces: Warm sand and cream - softer tones */
+  --color-surface-dark: #e8ddd0;
+  --color-surface: #f0e8dc;
+  --color-surface-light: #f5ede3;
+  --color-surface-elevated: #ddd2c4;
   
   /* RGB variants for rgba() usage */
-  --color-surface-rgb: 250, 246, 240;
-  --color-surface-dark-rgb: 245, 235, 224;
-  --color-surface-elevated-rgb: 237, 228, 216;
-  --color-border-rgb: 212, 200, 184;
+  --color-surface-rgb: 240, 232, 220;
+  --color-surface-dark-rgb: 232, 221, 208;
+  --color-surface-elevated-rgb: 221, 210, 196;
+  --color-border-rgb: 200, 186, 168;
   
-  /* Text: Rich browns */
-  --color-text-primary: #292118;
-  --color-text-secondary: #5c4e3d;
-  --color-text-muted: #8b7a64;
-  --color-border: #d4c8b8;
+  /* Text: Rich browns - slightly darker for better contrast */
+  --color-text-primary: #1f1812;
+  --color-text-secondary: #4a3d2e;
+  --color-text-muted: #7a6b58;
+  --color-border: #c8baa8;
   
   /* Theme-specific glow colors */
   --glow-primary: rgba(220, 139, 59, 0.25);

@@ -30,21 +30,19 @@ const scoreConfigs: ScoreConfig[] = [
 ];
 
 function getScoreColor(score: number): string {
-  if (score >= 80) return 'text-green-500';
-  if (score >= 60) return 'text-yellow-500';
-  return 'text-red-500';
+  if (score >= 80) return 'var(--color-primary)';
+  if (score >= 60) return 'var(--color-accent)';
+  return 'var(--color-text-muted)';
 }
 
 function getScoreStrokeColor(score: number): string {
-  if (score >= 80) return 'stroke-green-500';
-  if (score >= 60) return 'stroke-yellow-500';
-  return 'stroke-red-500';
+  if (score >= 80) return 'var(--color-primary)';
+  if (score >= 60) return 'var(--color-accent)';
+  return 'var(--color-text-muted)';
 }
 
-function getScoreTrackColor(score: number): string {
-  if (score >= 80) return 'stroke-green-900';
-  if (score >= 60) return 'stroke-yellow-900';
-  return 'stroke-red-900';
+function getScoreTrackColor(): string {
+  return 'var(--color-surface-elevated)';
 }
 
 interface CircularProgressProps {
@@ -127,7 +125,7 @@ function CircularProgress({
             r={actualRadius}
             fill="none"
             strokeWidth={isOverall ? strokeWidth * 1.5 : strokeWidth}
-            className={getScoreTrackColor(score)}
+            style={{ stroke: getScoreTrackColor() }}
           />
           <circle
             cx={actualSize / 2}
@@ -136,8 +134,8 @@ function CircularProgress({
             fill="none"
             strokeWidth={isOverall ? strokeWidth * 1.5 : strokeWidth}
             strokeLinecap="round"
-            className={getScoreStrokeColor(score)}
             style={{
+              stroke: getScoreStrokeColor(score),
               strokeDasharray: actualCircumference,
               strokeDashoffset: actualOffset,
               transition: 'stroke-dashoffset 0.8s cubic-bezier(0.33, 1, 0.68, 1)',
@@ -145,7 +143,7 @@ function CircularProgress({
           />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className={`${isOverall ? 'text-xl' : 'text-sm'} font-bold ${getScoreColor(score)} tabular-nums`}>
+          <span className={`${isOverall ? 'text-xl' : 'text-sm'} font-bold tabular-nums`} style={{ color: getScoreColor(score) }}>
             {displayScore}%
           </span>
         </div>

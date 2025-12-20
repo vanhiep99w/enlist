@@ -17,9 +17,9 @@ const FEEDBACK_MODE_KEY = 'feedbackMode';
 type FeedbackMode = 'quick' | 'detailed';
 
 const errorTypeBadgeColors: Record<TranslationError['type'], string> = {
-  GRAMMAR: 'bg-purple-900 text-purple-300',
-  WORD_CHOICE: 'bg-blue-900 text-blue-300',
-  NATURALNESS: 'bg-orange-900 text-orange-300',
+  GRAMMAR: 'bg-purple-500/20 text-purple-400 border border-purple-500/30',
+  WORD_CHOICE: 'bg-blue-500/20 text-blue-400 border border-blue-500/30',
+  NATURALNESS: 'bg-orange-500/20 text-orange-400 border border-orange-500/30',
 };
 
 const errorTypeLabels: Record<TranslationError['type'], string> = {
@@ -123,12 +123,16 @@ function CollapsibleTipsSection({ feedback, isExpanded, onToggle }: CollapsibleT
     <Card className="overflow-hidden">
       <button
         onClick={onToggle}
-        className="w-full flex items-center justify-between p-3 bg-gradient-to-r from-indigo-900/50 to-purple-900/50 hover:from-indigo-900/70 hover:to-purple-900/70 transition-colors"
+        className="w-full flex items-center justify-between p-3 transition-colors"
+        style={{ 
+          backgroundColor: 'var(--color-surface-elevated)',
+          borderBottom: '1px solid var(--color-border)'
+        }}
       >
         <div className="flex items-center gap-2">
           <span className="text-lg">📖</span>
-          <span className="text-sm font-medium text-card-foreground">Learning Tips</span>
-          <Badge className="bg-indigo-900 text-indigo-300 text-xs">
+          <span className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>Learning Tips</span>
+          <Badge className="bg-primary/20 text-primary border border-primary/30 text-xs">
             {tipCount}
           </Badge>
         </div>
@@ -297,9 +301,12 @@ export function FeedbackPanel({ feedback, userTranslation, showDetailedPrompt, o
 
       {/* Suggestion Line with inline error highlighting */}
       {userTranslation && feedback.errors.length > 0 && (
-        <div className="bg-amber-900/30 border border-amber-700 rounded-lg p-3">
+        <div className="border rounded-lg p-3" style={{ 
+          backgroundColor: 'var(--color-surface-elevated)',
+          borderColor: 'var(--color-border)'
+        }}>
           <div className="flex items-start gap-2">
-            <span className="text-amber-400 text-sm font-medium shrink-0">📝 Your answer:</span>
+            <span className="text-sm font-medium shrink-0" style={{ color: 'var(--color-text-primary)' }}>📝 Your answer:</span>
             <div className="text-sm">
               <SuggestionLine userTranslation={userTranslation} errors={feedback.errors} />
             </div>
@@ -308,10 +315,13 @@ export function FeedbackPanel({ feedback, userTranslation, showDetailedPrompt, o
       )}
 
       {/* Correct Translation - Compact */}
-      <div className="bg-green-900/30 border border-green-700 rounded-lg p-3">
+      <div className="border rounded-lg p-3" style={{
+        backgroundColor: 'var(--color-surface-elevated)',
+        borderColor: 'var(--color-border)'
+      }}>
         <div className="flex items-baseline gap-2">
-          <span className="text-green-400 text-sm font-medium whitespace-nowrap">✓ Correct:</span>
-          <p className="text-green-300 text-sm font-medium">
+          <span className="text-sm font-medium whitespace-nowrap" style={{ color: 'var(--color-primary)' }}>✓ Correct:</span>
+          <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
             {feedback.correctTranslation}
           </p>
         </div>
@@ -353,10 +363,13 @@ export function FeedbackPanel({ feedback, userTranslation, showDetailedPrompt, o
 
       {/* Overall Comment (Nhận xét) */}
       {feedback.overallComment && (
-        <div className="bg-indigo-900/30 border border-indigo-700 rounded-lg p-3">
+        <div className="border rounded-lg p-3" style={{
+          backgroundColor: 'var(--color-surface-elevated)',
+          borderColor: 'var(--color-border)'
+        }}>
           <div className="flex items-start gap-2">
-            <span className="text-indigo-400 text-sm font-medium shrink-0">💬 Nhận xét:</span>
-            <p className="text-sm text-indigo-300">{feedback.overallComment}</p>
+            <span className="text-sm font-medium shrink-0" style={{ color: 'var(--color-text-primary)' }}>💬 Nhận xét:</span>
+            <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>{feedback.overallComment}</p>
           </div>
         </div>
       )}
