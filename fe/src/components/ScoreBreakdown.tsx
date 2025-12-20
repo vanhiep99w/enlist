@@ -175,8 +175,8 @@ function CircularProgress({
 export function ScoreBreakdown({ scores }: Props) {
   return (
     <div 
-      className="rounded-lg p-4"
-      style={{ backgroundColor: 'var(--color-surface)', borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--color-border)' }}
+      className="rounded-lg p-4 border-2"
+      style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
     >
       <div className="flex items-center justify-center gap-6">
         <CircularProgress
