@@ -11,6 +11,7 @@ import { WordPopup } from './WordPopup';
 import { KeyboardShortcutsModal } from './KeyboardShortcutsModal';
 import { SentenceTooltip } from './SentenceTooltip';
 import { SuccessAnimation } from './SuccessAnimation';
+import { AchievementUnlockModal } from './AchievementUnlockModal';
 import { Tooltip } from './Tooltip';
 import { TooltipProvider } from './ui/tooltip';
 import { AutoResizeTextarea, type AutoResizeTextareaRef } from './AutoResizeTextarea';
@@ -22,6 +23,7 @@ import {
   useSkipSentence,
 } from '../hooks/useSession';
 import type { SentenceSubmissionResponse, CompletedSentenceData } from '../types/session';
+import type { Achievement } from '../types/user';
 
 const SIDEBAR_COLLAPSED_KEY = 'sidebarCollapsed';
 
@@ -61,6 +63,7 @@ export function ParagraphSession({ paragraphId }: Props) {
     word: string;
     position: { x: number; y: number };
   } | null>(null);
+  const [unlockedAchievement, setUnlockedAchievement] = useState<Achievement | null>(null);
   const paragraphRef = useRef<HTMLDivElement>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -216,11 +219,64 @@ export function ParagraphSession({ paragraphId }: Props) {
           },
         };
         setCompletedData(newCompletedData);
+
+        // Check for achievements
+        checkForAchievements(result);
+      }
+
+      // Session completed achievement
+      if (result.isLastSentence && passedThreshold) {
+        const sessionCompletedAchievement: Achievement = {
+          id: 'session_completed',
+          title: 'Session Master',
+          description: 'Completed a full paragraph session!',
+          icon: '🎯',
+        };
+        setTimeout(() => {
+          setUnlockedAchievement(sessionCompletedAchievement);
+          toast.success('Achievement Unlocked!', {
+            description: sessionCompletedAchievement.title,
+          });
+        }, 1500);
       }
     } catch (err) {
       toast.error('Failed to submit translation', {
         description: err instanceof Error ? err.message : 'Unknown error',
       });
+    }
+  };
+
+  const checkForAchievements = (result: SentenceSubmissionResponse) => {
+    // Perfect score achievement (100% accuracy)
+    if (result.accuracy === 100) {
+      const achievement: Achievement = {
+        id: 'perfect_score',
+        title: 'Perfect Translation!',
+        description: 'Achieved 100% accuracy on a sentence',
+        icon: '🏆',
+      };
+      setTimeout(() => {
+        setUnlockedAchievement(achievement);
+        toast.success('Achievement Unlocked!', {
+          description: achievement.title,
+        });
+      }, 1000);
+    }
+
+    // Bright Mind achievement (95%+ accuracy)
+    if (result.accuracy >= 95 && result.accuracy < 100) {
+      const achievement: Achievement = {
+        id: 'bright_mind',
+        title: 'Bright Mind',
+        description: 'Scored 95%+ accuracy',
+        icon: '💡',
+      };
+      setTimeout(() => {
+        setUnlockedAchievement(achievement);
+        toast.success('Achievement Unlocked!', {
+          description: achievement.title,
+        });
+      }, 1000);
     }
   };
 
@@ -1348,6 +1404,12 @@ export function ParagraphSession({ paragraphId }: Props) {
           isOpen={showDictionaryPanel}
           onClose={() => setShowDictionaryPanel(false)}
           userId={1} // TODO: Get actual userId
+        />
+
+        {/* Achievement Unlock Modal */}
+        <AchievementUnlockModal
+          achievement={unlockedAchievement}
+          onClose={() => setUnlockedAchievement(null)}
         />
       </div>
     </TooltipProvider>
