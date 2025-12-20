@@ -4,6 +4,10 @@
 
 - **Backend (be/)**: `./mvnw spring-boot:run` | Build: `./mvnw clean package` | Test: `./mvnw test` | Single test: `./mvnw test -Dtest=ClassName#methodName`
 - **Frontend (fe/)**: `bun run dev` | Build: `bun run build` | Test: `bun run test` | Single test: `bun run test -- path/to/file.test.ts`
+- **Frontend Quality**: Before completing ANY FE task, MUST run:
+  1. `cd fe && bun run lint:fix` (auto-fix linting issues)
+  2. `cd fe && bun run lint` (verify no remaining issues)
+  3. Only mark task as complete if lint passes with 0 errors/warnings
 
 ## Architecture
 

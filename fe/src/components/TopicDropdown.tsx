@@ -58,7 +58,10 @@ export function TopicDropdown({ topics, selectedTopic, onTopicChange }: TopicDro
 
   return (
     <Select value={displayValue} onValueChange={handleValueChange}>
-      <SelectTrigger className="bg-background border-border/30 hover:border-primary/50 focus:ring-primary/30 w-[240px] transition-all">
+      <SelectTrigger
+        className="hover:border-primary/50 focus:ring-primary/30 w-[240px] border transition-all"
+        style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-surface)' }}
+      >
         <SelectValue placeholder="All Topics" />
       </SelectTrigger>
       <SelectContent className="bg-card/95 border-primary/20 backdrop-blur-xl">

@@ -1,5 +1,10 @@
 import axios from 'axios';
-import type { UserCredits, SpendCreditsRequest, SpendCreditsResponse, DailyProgress } from '../types/user';
+import type {
+  UserCredits,
+  SpendCreditsRequest,
+  SpendCreditsResponse,
+  DailyProgress,
+} from '../types/user';
 
 const API_BASE = 'http://localhost:8081/api';
 
@@ -22,9 +27,8 @@ export async function getDailyProgress(userId: number): Promise<DailyProgress> {
 }
 
 export async function setDailyGoal(userId: number, dailyGoal: number): Promise<DailyProgress> {
-  const response = await axios.put<DailyProgress>(
-    `${API_BASE}/users/${userId}/daily-goal`,
-    { dailyGoal }
-  );
+  const response = await axios.put<DailyProgress>(`${API_BASE}/users/${userId}/daily-goal`, {
+    dailyGoal,
+  });
   return response.data;
 }

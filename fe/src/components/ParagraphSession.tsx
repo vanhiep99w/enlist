@@ -597,257 +597,283 @@ export function ParagraphSession({ paragraphId }: Props) {
   return (
     <TooltipProvider delayDuration={200}>
       <div className="min-h-screen" style={{ backgroundColor: 'var(--color-surface-dark)' }}>
-      {/* Success Animation */}
-      <SuccessAnimation
-        show={showSuccessAnimation}
-        accuracy={lastSubmission?.accuracy || 0}
-        onComplete={() => setShowSuccessAnimation(false)}
-      />
+        {/* Success Animation */}
+        <SuccessAnimation
+          show={showSuccessAnimation}
+          accuracy={lastSubmission?.accuracy || 0}
+          onComplete={() => setShowSuccessAnimation(false)}
+        />
 
-      {/* Compact Header */}
-      <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--color-border)' }}>
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
-          {/* Left: Title + Sentence counter */}
-          <div className="flex min-w-0 items-center gap-3">
-            <h1
-              className="font-display truncate text-base font-semibold"
-              style={{ color: 'var(--color-text-primary)' }}
-            >
-              {session.paragraphTitle}
-            </h1>
-            <span
-              className="shrink-0 rounded-full px-2 py-0.5 text-xs"
-              style={{
-                backgroundColor: 'var(--color-surface-light)',
-                color: 'var(--color-text-muted)',
-              }}
-            >
-              {session.currentSentenceIndex + 1}/{session.totalSentences}
-            </span>
-          </div>
-
-          {/* Right: Compact progress bar */}
-          <div className="flex shrink-0 items-center gap-3">
-            {/* Dictionary Button */}
-            <button
-              onClick={() => setShowDictionaryPanel(true)}
-              className="rounded-lg p-2 transition-all hover:scale-110 active:scale-95"
-              style={{
-                background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
-                boxShadow: '0 4px 14px rgba(139, 92, 246, 0.4)',
-              }}
-              title="Open Dictionary (Ctrl+B)"
-            >
-              <BookOpen className="h-5 w-5 text-white" />
-            </button>
-
-            <div className="hidden w-32 items-center gap-2 sm:flex">
-              <div
-                className="h-1.5 flex-1 overflow-hidden rounded-full"
-                style={{ backgroundColor: 'var(--color-surface-light)' }}
+        {/* Compact Header */}
+        <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--color-border)' }}>
+          <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
+            {/* Left: Title + Sentence counter */}
+            <div className="flex min-w-0 items-center gap-3">
+              <h1
+                className="font-display truncate text-base font-semibold"
+                style={{ color: 'var(--color-text-primary)' }}
               >
-                <div
-                  className="h-full bg-emerald-500 transition-all duration-500"
-                  style={{ width: `${progressPercent}%` }}
-                />
-              </div>
-              <span className="text-xs font-medium text-emerald-400">
-                {Math.round(progressPercent)}%
+                {session.paragraphTitle}
+              </h1>
+              <span
+                className="shrink-0 rounded-full px-2 py-0.5 text-xs"
+                style={{
+                  backgroundColor: 'var(--color-surface-light)',
+                  color: 'var(--color-text-muted)',
+                }}
+              >
+                {session.currentSentenceIndex + 1}/{session.totalSentences}
               </span>
+            </div>
+
+            {/* Right: Compact progress bar */}
+            <div className="flex shrink-0 items-center gap-3">
+              {/* Dictionary Button */}
+              <button
+                onClick={() => setShowDictionaryPanel(true)}
+                className="rounded-lg p-2 transition-all hover:scale-110 active:scale-95"
+                style={{
+                  background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+                  boxShadow: '0 4px 14px rgba(139, 92, 246, 0.4)',
+                }}
+                title="Open Dictionary (Ctrl+B)"
+              >
+                <BookOpen className="h-5 w-5 text-white" />
+              </button>
+
+              <div className="hidden w-32 items-center gap-2 sm:flex">
+                <div
+                  className="h-1.5 flex-1 overflow-hidden rounded-full"
+                  style={{ backgroundColor: 'var(--color-surface-light)' }}
+                >
+                  <div
+                    className="h-full bg-emerald-500 transition-all duration-500"
+                    style={{ width: `${progressPercent}%` }}
+                  />
+                </div>
+                <span className="text-xs font-medium text-emerald-400">
+                  {Math.round(progressPercent)}%
+                </span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Main Content */}
-      <div className="mx-auto max-w-7xl px-4 py-2">
-        {session.status === 'COMPLETED' ? (
-          <div
-            className="rounded-lg p-8 text-center"
-            style={{ backgroundColor: 'var(--color-surface)' }}
-          >
-            <div className="mb-4 text-6xl">🎉</div>
-            <h2 className="mb-2 text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
-              Session Complete!
-            </h2>
-            <p className="mb-6" style={{ color: 'var(--color-text-secondary)' }}>
-              You've completed all {session.totalSentences} sentences
-            </p>
-            <div className="mb-6 flex justify-center gap-8">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-yellow-400">{session.totalPoints}</div>
-                <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                  Total Points
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-green-400">
-                  {session.averageAccuracy.toFixed(1)}%
-                </div>
-                <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                  Average Accuracy
-                </div>
-              </div>
-            </div>
-            <button
-              onClick={() => navigate({ to: '/paragraphs' })}
-              className="rounded-lg bg-blue-600 px-6 py-3 font-medium hover:bg-blue-700"
-              style={{ color: 'var(--color-text-primary)' }}
+        {/* Main Content */}
+        <div className="mx-auto max-w-7xl px-4 py-2">
+          {session.status === 'COMPLETED' ? (
+            <div
+              className="rounded-lg p-8 text-center"
+              style={{ backgroundColor: 'var(--color-surface)' }}
             >
-              Back to Paragraphs
-            </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            {/* Left Column - Exercise (Redesigned for long content) */}
-            <div className="flex flex-col gap-3" style={{ height: 'calc(100vh - 90px)' }}>
-              {/* Paragraph Display - Compact with auto height */}
-              <div
-                className="relative overflow-hidden rounded-xl"
-                style={{
-                  backgroundColor: 'var(--color-surface)',
-                  borderColor: 'var(--color-border)',
-                  borderWidth: '1px',
-                  borderStyle: 'solid',
-                  maxHeight: 'calc(100vh - 300px)',
-                }}
+              <div className="mb-4 text-6xl">🎉</div>
+              <h2
+                className="mb-2 text-2xl font-bold"
+                style={{ color: 'var(--color-text-primary)' }}
               >
-                {/* Scrollable content */}
-                <div
-                  ref={paragraphRef}
-                  className="custom-scrollbar overflow-y-auto p-4 pr-3"
-                  style={{ scrollBehavior: 'smooth' }}
-                >
-                  {renderHighlightedParagraph()}
+                Session Complete!
+              </h2>
+              <p className="mb-6" style={{ color: 'var(--color-text-secondary)' }}>
+                You've completed all {session.totalSentences} sentences
+              </p>
+              <div className="mb-6 flex justify-center gap-8">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-yellow-400">{session.totalPoints}</div>
+                  <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                    Total Points
+                  </div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-green-400">
+                    {session.averageAccuracy.toFixed(1)}%
+                  </div>
+                  <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                    Average Accuracy
+                  </div>
                 </div>
               </div>
-
-              {/* Translation Input - Always visible, fixed at bottom */}
-              <div
-                className="relative shrink-0 overflow-hidden rounded-xl p-4"
-                style={{
-                  backgroundColor: 'var(--color-surface)',
-                  borderColor: 'var(--color-border)',
-                  borderWidth: '1px',
-                  borderStyle: 'solid',
-                  boxShadow: '0 -4px 20px -4px rgba(0, 0, 0, 0.3)',
-                }}
+              <button
+                onClick={() => navigate({ to: '/paragraphs' })}
+                className="rounded-lg bg-blue-600 px-6 py-3 font-medium hover:bg-blue-700"
+                style={{ color: 'var(--color-text-primary)' }}
               >
-                {/* Elegant accent bar - matching Dictionary theme */}
+                Back to Paragraphs
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              {/* Left Column - Exercise (Redesigned for long content) */}
+              <div className="flex flex-col gap-3" style={{ height: 'calc(100vh - 90px)' }}>
+                {/* Paragraph Display - Compact with auto height */}
                 <div
-                  className="absolute top-0 right-0 left-0 h-1 overflow-hidden"
+                  className="relative overflow-hidden rounded-xl"
                   style={{
-                    background:
-                      'linear-gradient(90deg, rgba(139, 92, 246, 0.3) 0%, rgba(139, 92, 246, 0.6) 50%, rgba(139, 92, 246, 0.3) 100%)',
+                    backgroundColor: 'var(--color-surface)',
+                    borderColor: 'var(--color-border)',
+                    borderWidth: '1px',
+                    borderStyle: 'solid',
+                    maxHeight: 'calc(100vh - 300px)',
                   }}
                 >
+                  {/* Scrollable content */}
                   <div
-                    className="absolute inset-0 animate-pulse"
+                    ref={paragraphRef}
+                    className="custom-scrollbar overflow-y-auto p-4 pr-3"
+                    style={{ scrollBehavior: 'smooth' }}
+                  >
+                    {renderHighlightedParagraph()}
+                  </div>
+                </div>
+
+                {/* Translation Input - Always visible, fixed at bottom */}
+                <div
+                  className="relative shrink-0 overflow-hidden rounded-xl p-4"
+                  style={{
+                    backgroundColor: 'var(--color-surface)',
+                    borderColor: 'var(--color-border)',
+                    borderWidth: '1px',
+                    borderStyle: 'solid',
+                    boxShadow: '0 -4px 20px -4px rgba(0, 0, 0, 0.3)',
+                  }}
+                >
+                  {/* Elegant accent bar - matching Dictionary theme */}
+                  <div
+                    className="absolute top-0 right-0 left-0 h-1 overflow-hidden"
                     style={{
                       background:
-                        'linear-gradient(90deg, transparent 0%, rgba(139, 92, 246, 0.8) 50%, transparent 100%)',
-                      filter: 'blur(4px)',
+                        'linear-gradient(90deg, rgba(139, 92, 246, 0.3) 0%, rgba(139, 92, 246, 0.6) 50%, rgba(139, 92, 246, 0.3) 100%)',
                     }}
+                  >
+                    <div
+                      className="absolute inset-0 animate-pulse"
+                      style={{
+                        background:
+                          'linear-gradient(90deg, transparent 0%, rgba(139, 92, 246, 0.8) 50%, transparent 100%)',
+                        filter: 'blur(4px)',
+                      }}
+                    />
+                  </div>
+
+                  {/* Current sentence indicator - more compact */}
+                  <div className="mb-2 flex items-center gap-2">
+                    <div
+                      className="flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium"
+                      style={{
+                        backgroundColor: 'var(--color-surface-light)',
+                        color: 'var(--color-text-secondary)',
+                      }}
+                    >
+                      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-orange-400" />
+                      Sentence {session.currentSentenceIndex + 1}
+                    </div>
+                    <span className="truncate text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                      {session.allSentences[session.currentSentenceIndex]?.slice(0, 40)}...
+                    </span>
+                  </div>
+
+                  <AutoResizeTextarea
+                    ref={textareaRef}
+                    placeholder="Type your English translation here... (Ctrl+Enter to submit)"
+                    value={userTranslation}
+                    onChange={(e) => setUserTranslation(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (
+                        e.ctrlKey &&
+                        e.key === 'Enter' &&
+                        userTranslation.trim() &&
+                        !isSubmitting &&
+                        !lastSubmission
+                      ) {
+                        e.preventDefault();
+                        handleSubmit();
+                      }
+                    }}
+                    disabled={isSubmitting || lastSubmission !== null}
+                    minRows={1}
+                    maxRows={3}
+                    optimalRange={{ min: 30, max: 150 }}
                   />
-                </div>
 
-                {/* Current sentence indicator - more compact */}
-                <div className="mb-2 flex items-center gap-2">
-                  <div
-                    className="flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium"
-                    style={{
-                      backgroundColor: 'var(--color-surface-light)',
-                      color: 'var(--color-text-secondary)',
-                    }}
-                  >
-                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-orange-400" />
-                    Sentence {session.currentSentenceIndex + 1}
-                  </div>
-                  <span className="truncate text-xs" style={{ color: 'var(--color-text-muted)' }}>
-                    {session.allSentences[session.currentSentenceIndex]?.slice(0, 40)}...
-                  </span>
-                </div>
+                  {error && (
+                    <div className="mt-3 rounded-lg border border-red-700 bg-red-900/50 p-3 text-sm text-red-300">
+                      {error}
+                    </div>
+                  )}
 
-                <AutoResizeTextarea
-                  ref={textareaRef}
-                  placeholder="Type your English translation here... (Ctrl+Enter to submit)"
-                  value={userTranslation}
-                  onChange={(e) => setUserTranslation(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (
-                      e.ctrlKey &&
-                      e.key === 'Enter' &&
-                      userTranslation.trim() &&
-                      !isSubmitting &&
-                      !lastSubmission
-                    ) {
-                      e.preventDefault();
-                      handleSubmit();
-                    }
-                  }}
-                  disabled={isSubmitting || lastSubmission !== null}
-                  minRows={1}
-                  maxRows={3}
-                  optimalRange={{ min: 30, max: 150 }}
-                />
-
-                {error && (
-                  <div className="mt-3 rounded-lg border border-red-700 bg-red-900/50 p-3 text-sm text-red-300">
-                    {error}
-                  </div>
-                )}
-
-                <div className="mt-3 flex items-center justify-between">
-                  <button
-                    onClick={handleQuit}
-                    className="flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-all hover:opacity-80"
-                    style={{
-                      backgroundColor: 'var(--color-surface)',
-                      color: 'var(--color-text-secondary)',
-                      borderColor: 'var(--color-border)',
-                    }}
-                  >
-                    ← Quit
-                  </button>
-
-                  <div className="flex items-center gap-2">
+                  <div className="mt-3 flex items-center justify-between">
                     <button
-                      onClick={handleSkip}
-                      disabled={isSubmitting || session.totalCredits <= 0}
-                      className="flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm transition-all hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
+                      onClick={handleQuit}
+                      className="flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-all hover:opacity-80"
                       style={{
                         backgroundColor: 'var(--color-surface)',
                         color: 'var(--color-text-secondary)',
                         borderColor: 'var(--color-border)',
                       }}
                     >
-                      💡 Hint
+                      ← Quit
                     </button>
 
-                    {lastSubmission ? (
-                      lastSubmission.accuracy >= 80 ? (
-                        <div className="flex gap-2">
-                          <Tooltip
-                            content={
-                              <span className="flex items-center gap-2">
-                                <kbd
-                                  className="rounded px-1.5 py-0.5 text-xs"
-                                  style={{ backgroundColor: 'var(--color-surface-light)' }}
-                                >
-                                  Ctrl+'
-                                </kbd>{' '}
-                                Practice again
-                              </span>
-                            }
-                          >
-                            <button
-                              onClick={handleOptionalRetry}
-                              className="flex items-center gap-2 rounded-lg bg-purple-600 px-3 py-2 text-sm font-medium hover:bg-purple-700"
-                              style={{ color: 'var(--color-text-primary)' }}
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={handleSkip}
+                        disabled={isSubmitting || session.totalCredits <= 0}
+                        className="flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm transition-all hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
+                        style={{
+                          backgroundColor: 'var(--color-surface)',
+                          color: 'var(--color-text-secondary)',
+                          borderColor: 'var(--color-border)',
+                        }}
+                      >
+                        💡 Hint
+                      </button>
+
+                      {lastSubmission ? (
+                        lastSubmission.accuracy >= 80 ? (
+                          <div className="flex gap-2">
+                            <Tooltip
+                              content={
+                                <span className="flex items-center gap-2">
+                                  <kbd
+                                    className="rounded px-1.5 py-0.5 text-xs"
+                                    style={{ backgroundColor: 'var(--color-surface-light)' }}
+                                  >
+                                    Ctrl+'
+                                  </kbd>{' '}
+                                  Practice again
+                                </span>
+                              }
                             >
-                              🔄 Retry
-                            </button>
-                          </Tooltip>
+                              <button
+                                onClick={handleOptionalRetry}
+                                className="flex items-center gap-2 rounded-lg bg-purple-600 px-3 py-2 text-sm font-medium hover:bg-purple-700"
+                                style={{ color: 'var(--color-text-primary)' }}
+                              >
+                                🔄 Retry
+                              </button>
+                            </Tooltip>
+                            <Tooltip
+                              content={
+                                <span className="flex items-center gap-2">
+                                  <kbd
+                                    className="rounded px-1.5 py-0.5 text-xs"
+                                    style={{ backgroundColor: 'var(--color-surface-light)' }}
+                                  >
+                                    Ctrl+↵
+                                  </kbd>{' '}
+                                  Continue
+                                </span>
+                              }
+                            >
+                              <button
+                                onClick={handleNextSentence}
+                                className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium hover:bg-green-700"
+                                style={{ color: 'var(--color-text-primary)' }}
+                              >
+                                Next →
+                              </button>
+                            </Tooltip>
+                          </div>
+                        ) : (
                           <Tooltip
                             content={
                               <span className="flex items-center gap-2">
@@ -857,551 +883,537 @@ export function ParagraphSession({ paragraphId }: Props) {
                                 >
                                   Ctrl+↵
                                 </kbd>{' '}
-                                Continue
+                                Try again
                               </span>
                             }
                           >
                             <button
-                              onClick={handleNextSentence}
-                              className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium hover:bg-green-700"
-                              style={{ color: 'var(--color-text-primary)' }}
+                              onClick={handleRetry}
+                              className="flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-all"
+                              style={{
+                                backgroundColor: 'var(--color-accent)',
+                                color: 'var(--color-text-primary)',
+                                borderColor: 'var(--color-accent-dark)',
+                              }}
                             >
-                              Next →
+                              🔄 Retry (80%+)
                             </button>
                           </Tooltip>
-                        </div>
-                      ) : (
-                        <Tooltip
-                          content={
-                            <span className="flex items-center gap-2">
-                              <kbd
-                                className="rounded px-1.5 py-0.5 text-xs"
-                                style={{ backgroundColor: 'var(--color-surface-light)' }}
-                              >
-                                Ctrl+↵
-                              </kbd>{' '}
-                              Try again
-                            </span>
-                          }
+                        )
+                      ) : retryingSubmission ? (
+                        <button
+                          onClick={handleSubmit}
+                          disabled={isSubmitting || !userTranslation.trim()}
+                          className="flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium hover:bg-purple-700 disabled:cursor-not-allowed disabled:opacity-50"
+                          style={{ color: 'var(--color-text-primary)' }}
                         >
-                          <button
-                            onClick={handleRetry}
-                            className="flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-all"
-                            style={{
-                              backgroundColor: 'var(--color-accent)',
-                              color: 'var(--color-text-primary)',
-                              borderColor: 'var(--color-accent-dark)',
-                            }}
-                          >
-                            🔄 Retry (80%+)
-                          </button>
-                        </Tooltip>
-                      )
-                    ) : retryingSubmission ? (
-                      <button
-                        onClick={handleSubmit}
-                        disabled={isSubmitting || !userTranslation.trim()}
-                        className="flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium hover:bg-purple-700 disabled:cursor-not-allowed disabled:opacity-50"
-                        style={{ color: 'var(--color-text-primary)' }}
-                      >
-                        {isSubmitting ? (
-                          <>
-                            <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24">
-                              <circle
-                                className="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                strokeWidth="4"
-                                fill="none"
-                              />
-                              <path
-                                className="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                              />
-                            </svg>
-                            ...
-                          </>
-                        ) : (
-                          <>Retry #{retryingSubmission.retryAttempt + 2}</>
-                        )}
-                      </button>
-                    ) : (
-                      <button
-                        onClick={handleSubmit}
-                        disabled={isSubmitting || !userTranslation.trim()}
-                        className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 px-5 py-2 text-sm font-medium shadow-lg shadow-blue-500/25 transition-all hover:from-blue-700 hover:to-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
-                        style={{ color: 'var(--color-text-primary)' }}
-                      >
-                        {isSubmitting ? (
-                          <>
-                            <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24">
-                              <circle
-                                className="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                strokeWidth="4"
-                                fill="none"
-                              />
-                              <path
-                                className="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                              />
-                            </svg>
-                            Checking...
-                          </>
-                        ) : (
-                          <>Submit</>
-                        )}
-                      </button>
-                    )}
+                          {isSubmitting ? (
+                            <>
+                              <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24">
+                                <circle
+                                  className="opacity-25"
+                                  cx="12"
+                                  cy="12"
+                                  r="10"
+                                  stroke="currentColor"
+                                  strokeWidth="4"
+                                  fill="none"
+                                />
+                                <path
+                                  className="opacity-75"
+                                  fill="currentColor"
+                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                                />
+                              </svg>
+                              ...
+                            </>
+                          ) : (
+                            <>Retry #{retryingSubmission.retryAttempt + 2}</>
+                          )}
+                        </button>
+                      ) : (
+                        <button
+                          onClick={handleSubmit}
+                          disabled={isSubmitting || !userTranslation.trim()}
+                          className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 px-5 py-2 text-sm font-medium shadow-lg shadow-blue-500/25 transition-all hover:from-blue-700 hover:to-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
+                          style={{ color: 'var(--color-text-primary)' }}
+                        >
+                          {isSubmitting ? (
+                            <>
+                              <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24">
+                                <circle
+                                  className="opacity-25"
+                                  cx="12"
+                                  cy="12"
+                                  r="10"
+                                  stroke="currentColor"
+                                  strokeWidth="4"
+                                  fill="none"
+                                />
+                                <path
+                                  className="opacity-75"
+                                  fill="currentColor"
+                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                                />
+                              </svg>
+                              Checking...
+                            </>
+                          ) : (
+                            <>Submit</>
+                          )}
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Right Column - Feedback */}
-            <div className="custom-scrollbar space-y-4 lg:max-h-[calc(100vh-90px)] lg:overflow-y-auto">
-              {/* Feedback Panel */}
-              {isSubmitting ? (
-                <TypingIndicator
-                  message="AI is thinking..."
-                  submessage="Analyzing your translation"
-                />
-              ) : lastSubmission?.feedback ? (
-                <div className="space-y-4">
-                  {/* Retry Comparison */}
-                  {lastSubmission.retryAttempt > 0 && previousAttempt && (
-                    <div className="flex items-center justify-between rounded-lg border border-purple-700 bg-purple-900/30 px-3 py-2">
-                      <span className="text-sm text-purple-300">
-                        🔄 Retry #{lastSubmission.retryAttempt}
-                      </span>
-                      <div className="flex items-center gap-3 text-sm">
-                        <span
-                          className={
-                            previousAttempt.accuracy >= 80 ? 'text-green-400' : 'text-gray-400'
-                          }
-                        >
-                          {Math.round(previousAttempt.accuracy)}%
+              {/* Right Column - Feedback */}
+              <div className="custom-scrollbar space-y-4 lg:max-h-[calc(100vh-90px)] lg:overflow-y-auto">
+                {/* Feedback Panel */}
+                {isSubmitting ? (
+                  <TypingIndicator
+                    message="AI is thinking..."
+                    submessage="Analyzing your translation"
+                  />
+                ) : lastSubmission?.feedback ? (
+                  <div className="space-y-4">
+                    {/* Retry Comparison */}
+                    {lastSubmission.retryAttempt > 0 && previousAttempt && (
+                      <div className="flex items-center justify-between rounded-lg border border-purple-700 bg-purple-900/30 px-3 py-2">
+                        <span className="text-sm text-purple-300">
+                          🔄 Retry #{lastSubmission.retryAttempt}
                         </span>
-                        <span style={{ color: 'var(--color-text-muted)' }}>→</span>
-                        <span
-                          className={`font-bold ${lastSubmission.accuracy >= 80 ? 'text-green-400' : 'text-orange-400'}`}
-                        >
-                          {Math.round(lastSubmission.accuracy)}%
-                        </span>
-                        {lastSubmission.accuracy !== previousAttempt.accuracy && (
+                        <div className="flex items-center gap-3 text-sm">
                           <span
                             className={
-                              lastSubmission.accuracy > previousAttempt.accuracy
-                                ? 'text-green-400'
-                                : 'text-red-400'
+                              previousAttempt.accuracy >= 80 ? 'text-green-400' : 'text-gray-400'
                             }
                           >
-                            {lastSubmission.accuracy > previousAttempt.accuracy ? '+' : ''}
-                            {Math.round(lastSubmission.accuracy - previousAttempt.accuracy)}%
+                            {Math.round(previousAttempt.accuracy)}%
                           </span>
-                        )}
+                          <span style={{ color: 'var(--color-text-muted)' }}>→</span>
+                          <span
+                            className={`font-bold ${lastSubmission.accuracy >= 80 ? 'text-green-400' : 'text-orange-400'}`}
+                          >
+                            {Math.round(lastSubmission.accuracy)}%
+                          </span>
+                          {lastSubmission.accuracy !== previousAttempt.accuracy && (
+                            <span
+                              className={
+                                lastSubmission.accuracy > previousAttempt.accuracy
+                                  ? 'text-green-400'
+                                  : 'text-red-400'
+                              }
+                            >
+                              {lastSubmission.accuracy > previousAttempt.accuracy ? '+' : ''}
+                              {Math.round(lastSubmission.accuracy - previousAttempt.accuracy)}%
+                            </span>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  )}
-                  <ScoreBreakdown
-                    scores={{
-                      grammarScore: lastSubmission.grammarScore,
-                      wordChoiceScore: lastSubmission.wordChoiceScore,
-                      naturalnessScore: lastSubmission.naturalnessScore,
-                      overallScore: Math.round(lastSubmission.accuracy),
-                    }}
-                  />
-                  <FeedbackPanel
-                    feedback={lastSubmission.feedback}
-                    userTranslation={lastSubmission.userTranslation}
-                  />
-                </div>
-              ) : lastSubmission?.skipped ? (
-                <div
-                  className="rounded-lg p-6"
-                  style={{
-                    backgroundColor: 'var(--color-surface)',
-                    borderColor: 'var(--color-border)',
-                    borderWidth: '1px',
-                    borderStyle: 'solid',
-                  }}
-                >
-                  <h3
-                    className="mb-2 text-lg font-semibold"
-                    style={{ color: 'var(--color-text-secondary)' }}
-                  >
-                    Sentence Skipped
-                  </h3>
-                  <p style={{ color: 'var(--color-text-muted)' }}>
-                    You used 1 credit to skip this sentence.
-                  </p>
-                </div>
-              ) : (
-                <div
-                  className="group relative overflow-hidden rounded-2xl p-8 text-center backdrop-blur-sm"
-                  style={{
-                    backgroundColor: 'var(--color-card-translucent)',
-                    border: '1px solid var(--color-border)',
-                  }}
-                >
-                  {/* Decorative background elements */}
-                  <div className="absolute inset-0 opacity-30">
-                    <div
-                      className="absolute -top-8 -right-8 h-32 w-32 rounded-full blur-2xl transition-all duration-500 group-hover:opacity-70"
-                      style={{ backgroundColor: 'var(--color-accent)', opacity: 0.1 }}
+                    )}
+                    <ScoreBreakdown
+                      scores={{
+                        grammarScore: lastSubmission.grammarScore,
+                        wordChoiceScore: lastSubmission.wordChoiceScore,
+                        naturalnessScore: lastSubmission.naturalnessScore,
+                        overallScore: Math.round(lastSubmission.accuracy),
+                      }}
                     />
-                    <div
-                      className="absolute -bottom-8 -left-8 h-24 w-24 rounded-full blur-2xl transition-all duration-500 group-hover:opacity-70"
-                      style={{ backgroundColor: 'var(--color-primary)', opacity: 0.1 }}
+                    <FeedbackPanel
+                      feedback={lastSubmission.feedback}
+                      userTranslation={lastSubmission.userTranslation}
                     />
                   </div>
-
-                  {/* Animated illustration */}
-                  <div className="relative mb-6">
-                    <svg className="mx-auto h-20 w-20" viewBox="0 0 80 80" fill="none">
-                      {/* Chat bubble base */}
-                      <rect
-                        x="10"
-                        y="20"
-                        width="45"
-                        height="32"
-                        rx="8"
-                        style={{ fill: 'var(--color-card-solid)', stroke: 'var(--color-border)' }}
-                        strokeWidth="1.5"
-                      />
-                      <circle
-                        cx="22"
-                        cy="36"
-                        r="3"
-                        style={{ fill: 'var(--color-text-muted)' }}
-                        className="animate-pulse"
-                      />
-                      <circle
-                        cx="32"
-                        cy="36"
-                        r="3"
-                        style={{ fill: 'var(--color-text-muted)' }}
-                        className="animate-pulse"
-                      />
-                      <circle
-                        cx="42"
-                        cy="36"
-                        r="3"
-                        style={{ fill: 'var(--color-text-muted)' }}
-                        className="animate-pulse"
-                      />
-                      {/* Arrow pointing to bubble */}
-                      <path d="M10 46 L6 52 L14 52 Z" style={{ fill: 'var(--color-card-solid)' }} />
-
-                      {/* Decorative sparkles */}
-                      <circle
-                        cx="62"
-                        cy="28"
-                        r="2"
-                        style={{ fill: 'var(--color-accent)', opacity: 0.6 }}
-                        className="animate-sparkle"
-                      />
-                      <circle
-                        cx="68"
-                        cy="38"
-                        r="1.5"
-                        style={{ fill: 'var(--color-primary)', opacity: 0.6 }}
-                        className="animate-sparkle"
-                      />
-                      <path
-                        d="M58 45 L60 48 L58 51 L55 48 Z"
-                        style={{ fill: 'var(--color-accent)', opacity: 0.4 }}
-                        className="animate-sparkle"
-                      />
-                    </svg>
-                  </div>
-
-                  <h3
-                    className="font-display relative mb-2 text-lg font-semibold"
-                    style={{ color: 'var(--color-text-primary)' }}
-                  >
-                    Awaiting Your Translation
-                  </h3>
-                  <p
-                    className="relative mx-auto max-w-xs text-sm"
-                    style={{ color: 'var(--color-text-muted)' }}
-                  >
-                    Type your translation and submit to receive AI-powered feedback
-                  </p>
-
-                  {/* Keyboard hint */}
+                ) : lastSubmission?.skipped ? (
                   <div
-                    className="relative mt-4 flex items-center justify-center gap-2 text-xs"
-                    style={{ color: 'var(--color-text-muted)' }}
+                    className="rounded-lg p-6"
+                    style={{
+                      backgroundColor: 'var(--color-surface)',
+                      borderColor: 'var(--color-border)',
+                      borderWidth: '1px',
+                      borderStyle: 'solid',
+                    }}
                   >
-                    <kbd
-                      className="rounded px-2 py-1"
-                      style={{
-                        backgroundColor: 'var(--color-surface-elevated)',
-                        borderColor: 'var(--color-border)',
-                        borderWidth: '1px',
-                        borderStyle: 'solid',
-                        color: 'var(--color-text-secondary)',
-                      }}
+                    <h3
+                      className="mb-2 text-lg font-semibold"
+                      style={{ color: 'var(--color-text-secondary)' }}
                     >
-                      Ctrl
-                    </kbd>
-                    <span>+</span>
-                    <kbd
-                      className="rounded px-2 py-1"
-                      style={{
-                        backgroundColor: 'var(--color-surface-elevated)',
-                        borderColor: 'var(--color-border)',
-                        borderWidth: '1px',
-                        borderStyle: 'solid',
-                        color: 'var(--color-text-secondary)',
-                      }}
-                    >
-                      Enter
-                    </kbd>
-                    <span style={{ color: 'var(--color-text-muted)' }}>to submit</span>
+                      Sentence Skipped
+                    </h3>
+                    <p style={{ color: 'var(--color-text-muted)' }}>
+                      You used 1 credit to skip this sentence.
+                    </p>
                   </div>
+                ) : (
+                  <div
+                    className="group relative overflow-hidden rounded-2xl p-8 text-center backdrop-blur-sm"
+                    style={{
+                      backgroundColor: 'var(--color-card-translucent)',
+                      border: '1px solid var(--color-border)',
+                    }}
+                  >
+                    {/* Decorative background elements */}
+                    <div className="absolute inset-0 opacity-30">
+                      <div
+                        className="absolute -top-8 -right-8 h-32 w-32 rounded-full blur-2xl transition-all duration-500 group-hover:opacity-70"
+                        style={{ backgroundColor: 'var(--color-accent)', opacity: 0.1 }}
+                      />
+                      <div
+                        className="absolute -bottom-8 -left-8 h-24 w-24 rounded-full blur-2xl transition-all duration-500 group-hover:opacity-70"
+                        style={{ backgroundColor: 'var(--color-primary)', opacity: 0.1 }}
+                      />
+                    </div>
+
+                    {/* Animated illustration */}
+                    <div className="relative mb-6">
+                      <svg className="mx-auto h-20 w-20" viewBox="0 0 80 80" fill="none">
+                        {/* Chat bubble base */}
+                        <rect
+                          x="10"
+                          y="20"
+                          width="45"
+                          height="32"
+                          rx="8"
+                          style={{ fill: 'var(--color-card-solid)', stroke: 'var(--color-border)' }}
+                          strokeWidth="1.5"
+                        />
+                        <circle
+                          cx="22"
+                          cy="36"
+                          r="3"
+                          style={{ fill: 'var(--color-text-muted)' }}
+                          className="animate-pulse"
+                        />
+                        <circle
+                          cx="32"
+                          cy="36"
+                          r="3"
+                          style={{ fill: 'var(--color-text-muted)' }}
+                          className="animate-pulse"
+                        />
+                        <circle
+                          cx="42"
+                          cy="36"
+                          r="3"
+                          style={{ fill: 'var(--color-text-muted)' }}
+                          className="animate-pulse"
+                        />
+                        {/* Arrow pointing to bubble */}
+                        <path
+                          d="M10 46 L6 52 L14 52 Z"
+                          style={{ fill: 'var(--color-card-solid)' }}
+                        />
+
+                        {/* Decorative sparkles */}
+                        <circle
+                          cx="62"
+                          cy="28"
+                          r="2"
+                          style={{ fill: 'var(--color-accent)', opacity: 0.6 }}
+                          className="animate-sparkle"
+                        />
+                        <circle
+                          cx="68"
+                          cy="38"
+                          r="1.5"
+                          style={{ fill: 'var(--color-primary)', opacity: 0.6 }}
+                          className="animate-sparkle"
+                        />
+                        <path
+                          d="M58 45 L60 48 L58 51 L55 48 Z"
+                          style={{ fill: 'var(--color-accent)', opacity: 0.4 }}
+                          className="animate-sparkle"
+                        />
+                      </svg>
+                    </div>
+
+                    <h3
+                      className="font-display relative mb-2 text-lg font-semibold"
+                      style={{ color: 'var(--color-text-primary)' }}
+                    >
+                      Awaiting Your Translation
+                    </h3>
+                    <p
+                      className="relative mx-auto max-w-xs text-sm"
+                      style={{ color: 'var(--color-text-muted)' }}
+                    >
+                      Type your translation and submit to receive AI-powered feedback
+                    </p>
+
+                    {/* Keyboard hint */}
+                    <div
+                      className="relative mt-4 flex items-center justify-center gap-2 text-xs"
+                      style={{ color: 'var(--color-text-muted)' }}
+                    >
+                      <kbd
+                        className="rounded px-2 py-1"
+                        style={{
+                          backgroundColor: 'var(--color-surface-elevated)',
+                          borderColor: 'var(--color-border)',
+                          borderWidth: '1px',
+                          borderStyle: 'solid',
+                          color: 'var(--color-text-secondary)',
+                        }}
+                      >
+                        Ctrl
+                      </kbd>
+                      <span>+</span>
+                      <kbd
+                        className="rounded px-2 py-1"
+                        style={{
+                          backgroundColor: 'var(--color-surface-elevated)',
+                          borderColor: 'var(--color-border)',
+                          borderWidth: '1px',
+                          borderStyle: 'solid',
+                          color: 'var(--color-text-secondary)',
+                        }}
+                      >
+                        Enter
+                      </kbd>
+                      <span style={{ color: 'var(--color-text-muted)' }}>to submit</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+        <DictionaryModal isOpen={showDictionary} onClose={() => setShowDictionary(false)} />
+        <KeyboardShortcutsModal isOpen={showShortcuts} onClose={() => setShowShortcuts(false)} />
+
+        {/* Keyboard shortcuts hint */}
+        {session && session.status !== 'COMPLETED' && (
+          <div className="fixed right-4 bottom-4 z-30 hidden md:block">
+            <button
+              onClick={() => setShowShortcuts(true)}
+              className="flex items-center gap-1 text-xs transition-colors"
+              style={{ color: 'var(--color-text-muted)' }}
+            >
+              Press{' '}
+              <kbd
+                className="rounded px-1.5 py-0.5 text-xs"
+                style={{
+                  backgroundColor: 'var(--color-surface)',
+                  borderColor: 'var(--color-border)',
+                  borderWidth: '1px',
+                  borderStyle: 'solid',
+                }}
+              >
+                ?
+              </kbd>{' '}
+              for shortcuts
+            </button>
+          </div>
+        )}
+
+        {/* Floating Sidebar - Premium Glass Design */}
+        {session && (
+          <div
+            className={`fixed top-1/2 right-4 z-40 hidden -translate-y-1/2 flex-col gap-4 transition-all duration-300 md:flex ${sidebarCollapsed ? 'translate-x-[calc(100%-12px)]' : ''}`}
+          >
+            {/* Collapse/Expand Toggle */}
+            <button
+              onClick={toggleSidebar}
+              className="group absolute top-1/2 -left-4 flex h-16 w-8 -translate-y-1/2 items-center justify-center rounded-l-2xl shadow-xl backdrop-blur-xl transition-all duration-300"
+              style={{
+                backgroundColor: 'var(--color-surface)',
+                border: '1px solid var(--color-border)',
+                color: 'var(--color-text-secondary)',
+              }}
+              title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            >
+              <svg
+                className={`h-4 w-4 transition-transform duration-300 ${sidebarCollapsed ? 'rotate-180' : ''}`}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              >
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+            </button>
+
+            {/* Dictionary Button - Premium Card */}
+            <button
+              onClick={() => setShowDictionaryPanel(true)}
+              className="group relative flex flex-col items-center justify-center gap-2 overflow-hidden rounded-3xl p-5 shadow-2xl ring-1 shadow-black/30 ring-white/5 backdrop-blur-xl transition-all duration-300 hover:scale-105 hover:border-violet-500/50 hover:shadow-violet-500/20"
+              style={{
+                backgroundColor: 'var(--color-surface)',
+                border: '1px solid var(--color-border)',
+                color: 'var(--color-text-secondary)',
+              }}
+              title="Dictionary (Ctrl+D)"
+            >
+              {/* Hover gradient overlay */}
+              <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-violet-600/0 via-violet-600/0 to-purple-600/0 transition-all duration-300 group-hover:from-violet-600/10 group-hover:via-violet-600/5 group-hover:to-purple-600/10" />
+
+              {/* Icon container with glow */}
+              <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500/20 to-purple-500/10 transition-all duration-300 group-hover:from-violet-500/30 group-hover:to-purple-500/20 group-hover:shadow-lg group-hover:shadow-violet-500/20">
+                <svg
+                  className="h-6 w-6 text-violet-400 transition-colors group-hover:text-violet-300"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                  <path
+                    d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    fill="none"
+                  />
+                  <path
+                    d="M8 7h8M8 11h6"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </div>
+
+              <span
+                className={`text-xs font-medium transition-all duration-300 group-hover:text-violet-300 ${sidebarCollapsed ? 'scale-0 opacity-0' : 'scale-100 opacity-100'}`}
+                style={{ color: 'var(--color-text-secondary)' }}
+              >
+                Dictionary
+              </span>
+
+              {/* Keyboard shortcut hint */}
+              <div
+                className={`absolute right-1 bottom-1 rounded px-1.5 py-0.5 text-[9px] opacity-0 transition-opacity group-hover:opacity-100 ${sidebarCollapsed ? 'hidden' : ''}`}
+                style={{
+                  backgroundColor: 'var(--color-surface-dark)',
+                  color: 'var(--color-text-muted)',
+                }}
+              >
+                Ctrl+D
+              </div>
+            </button>
+
+            {/* Accuracy Display - Premium Card */}
+            <div
+              className="group relative flex flex-col items-center justify-center overflow-hidden rounded-3xl p-5 shadow-2xl ring-1 shadow-black/30 ring-white/5 backdrop-blur-xl transition-all duration-300 hover:scale-105 hover:border-emerald-500/50 hover:shadow-emerald-500/20"
+              style={{
+                backgroundColor: 'var(--color-surface)',
+                border: '1px solid var(--color-border)',
+              }}
+              title="Session Accuracy"
+            >
+              {/* Hover gradient overlay */}
+              <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-emerald-600/0 via-emerald-600/0 to-teal-600/0 transition-all duration-300 group-hover:from-emerald-600/10 group-hover:via-emerald-600/5 group-hover:to-teal-600/10" />
+
+              {/* Circular progress ring */}
+              <div className="relative h-14 w-14">
+                <svg className="h-14 w-14 -rotate-90" viewBox="0 0 56 56">
+                  <circle
+                    cx="28"
+                    cy="28"
+                    r="24"
+                    fill="none"
+                    style={{ stroke: 'var(--color-surface-light)' }}
+                    strokeWidth="4"
+                  />
+                  <circle
+                    cx="28"
+                    cy="28"
+                    r="24"
+                    fill="none"
+                    className="stroke-emerald-500 transition-all duration-700 ease-out"
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                    strokeDasharray={`${session.averageAccuracy * 1.51} 151`}
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-sm font-bold text-emerald-400 transition-colors group-hover:text-emerald-300">
+                    {session.averageAccuracy.toFixed(0)}%
+                  </span>
                 </div>
-              )}
+              </div>
+
+              <span
+                className={`mt-2 text-xs font-medium transition-all duration-300 group-hover:text-emerald-300 ${sidebarCollapsed ? 'mt-0 h-0 scale-0 opacity-0' : 'scale-100 opacity-100'}`}
+                style={{ color: 'var(--color-text-secondary)' }}
+              >
+                Accuracy
+              </span>
             </div>
           </div>
         )}
-      </div>
-      <DictionaryModal isOpen={showDictionary} onClose={() => setShowDictionary(false)} />
-      <KeyboardShortcutsModal isOpen={showShortcuts} onClose={() => setShowShortcuts(false)} />
 
-      {/* Keyboard shortcuts hint */}
-      {session && session.status !== 'COMPLETED' && (
-        <div className="fixed right-4 bottom-4 z-30 hidden md:block">
-          <button
-            onClick={() => setShowShortcuts(true)}
-            className="flex items-center gap-1 text-xs transition-colors"
-            style={{ color: 'var(--color-text-muted)' }}
-          >
-            Press{' '}
-            <kbd
-              className="rounded px-1.5 py-0.5 text-xs"
+        {/* Mobile Bottom Bar - Dictionary & Accuracy */}
+        {session && (
+          <div className="fixed bottom-4 left-1/2 z-40 flex -translate-x-1/2 gap-3 md:hidden">
+            <button
+              onClick={() => setShowDictionary(true)}
+              className="flex items-center gap-2.5 rounded-2xl px-5 py-2.5 shadow-xl ring-1 shadow-black/30 ring-white/5 backdrop-blur-xl transition-all active:scale-95"
               style={{
                 backgroundColor: 'var(--color-surface)',
-                borderColor: 'var(--color-border)',
-                borderWidth: '1px',
-                borderStyle: 'solid',
+                border: '1px solid var(--color-border)',
+                color: 'var(--color-text-secondary)',
               }}
+              title="Dictionary (Ctrl+D)"
             >
-              ?
-            </kbd>{' '}
-            for shortcuts
-          </button>
-        </div>
-      )}
-
-      {/* Floating Sidebar - Premium Glass Design */}
-      {session && (
-        <div
-          className={`fixed top-1/2 right-4 z-40 hidden -translate-y-1/2 flex-col gap-4 transition-all duration-300 md:flex ${sidebarCollapsed ? 'translate-x-[calc(100%-12px)]' : ''}`}
-        >
-          {/* Collapse/Expand Toggle */}
-          <button
-            onClick={toggleSidebar}
-            className="group absolute top-1/2 -left-4 flex h-16 w-8 -translate-y-1/2 items-center justify-center rounded-l-2xl shadow-xl backdrop-blur-xl transition-all duration-300"
-            style={{
-              backgroundColor: 'var(--color-surface)',
-              border: '1px solid var(--color-border)',
-              color: 'var(--color-text-secondary)',
-            }}
-            title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          >
-            <svg
-              className={`h-4 w-4 transition-transform duration-300 ${sidebarCollapsed ? 'rotate-180' : ''}`}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            >
-              <path d="M15 18l-6-6 6-6" />
-            </svg>
-          </button>
-
-          {/* Dictionary Button - Premium Card */}
-          <button
-            onClick={() => setShowDictionaryPanel(true)}
-            className="group relative flex flex-col items-center justify-center gap-2 overflow-hidden rounded-3xl p-5 shadow-2xl ring-1 shadow-black/30 ring-white/5 backdrop-blur-xl transition-all duration-300 hover:scale-105 hover:border-violet-500/50 hover:shadow-violet-500/20"
-            style={{
-              backgroundColor: 'var(--color-surface)',
-              border: '1px solid var(--color-border)',
-              color: 'var(--color-text-secondary)',
-            }}
-            title="Dictionary (Ctrl+D)"
-          >
-            {/* Hover gradient overlay */}
-            <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-violet-600/0 via-violet-600/0 to-purple-600/0 transition-all duration-300 group-hover:from-violet-600/10 group-hover:via-violet-600/5 group-hover:to-purple-600/10" />
-
-            {/* Icon container with glow */}
-            <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500/20 to-purple-500/10 transition-all duration-300 group-hover:from-violet-500/30 group-hover:to-purple-500/20 group-hover:shadow-lg group-hover:shadow-violet-500/20">
-              <svg
-                className="h-6 w-6 text-violet-400 transition-colors group-hover:text-violet-300"
-                viewBox="0 0 24 24"
-                fill="currentColor"
+              <span className="text-lg">📖</span>
+              <span
+                className="text-xs font-medium"
+                style={{ color: 'var(--color-text-secondary)' }}
               >
-                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-                <path
-                  d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  fill="none"
-                />
-                <path
-                  d="M8 7h8M8 11h6"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </div>
-
-            <span
-              className={`text-xs font-medium transition-all duration-300 group-hover:text-violet-300 ${sidebarCollapsed ? 'scale-0 opacity-0' : 'scale-100 opacity-100'}`}
-              style={{ color: 'var(--color-text-secondary)' }}
-            >
-              Dictionary
-            </span>
-
-            {/* Keyboard shortcut hint */}
+                Dictionary
+              </span>
+            </button>
             <div
-              className={`absolute right-1 bottom-1 rounded px-1.5 py-0.5 text-[9px] opacity-0 transition-opacity group-hover:opacity-100 ${sidebarCollapsed ? 'hidden' : ''}`}
+              className="flex items-center gap-2.5 rounded-2xl px-5 py-2.5 shadow-xl ring-1 shadow-black/30 ring-white/5 backdrop-blur-xl"
               style={{
-                backgroundColor: 'var(--color-surface-dark)',
-                color: 'var(--color-text-muted)',
+                backgroundColor: 'var(--color-surface)',
+                border: '1px solid var(--color-border)',
               }}
             >
-              Ctrl+D
-            </div>
-          </button>
-
-          {/* Accuracy Display - Premium Card */}
-          <div
-            className="group relative flex flex-col items-center justify-center overflow-hidden rounded-3xl p-5 shadow-2xl ring-1 shadow-black/30 ring-white/5 backdrop-blur-xl transition-all duration-300 hover:scale-105 hover:border-emerald-500/50 hover:shadow-emerald-500/20"
-            style={{
-              backgroundColor: 'var(--color-surface)',
-              border: '1px solid var(--color-border)',
-            }}
-            title="Session Accuracy"
-          >
-            {/* Hover gradient overlay */}
-            <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-emerald-600/0 via-emerald-600/0 to-teal-600/0 transition-all duration-300 group-hover:from-emerald-600/10 group-hover:via-emerald-600/5 group-hover:to-teal-600/10" />
-
-            {/* Circular progress ring */}
-            <div className="relative h-14 w-14">
-              <svg className="h-14 w-14 -rotate-90" viewBox="0 0 56 56">
-                <circle
-                  cx="28"
-                  cy="28"
-                  r="24"
-                  fill="none"
-                  style={{ stroke: 'var(--color-surface-light)' }}
-                  strokeWidth="4"
-                />
-                <circle
-                  cx="28"
-                  cy="28"
-                  r="24"
-                  fill="none"
-                  className="stroke-emerald-500 transition-all duration-700 ease-out"
-                  strokeWidth="4"
-                  strokeLinecap="round"
-                  strokeDasharray={`${session.averageAccuracy * 1.51} 151`}
-                />
-              </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-sm font-bold text-emerald-400 transition-colors group-hover:text-emerald-300">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-emerald-500/60 bg-emerald-500/10">
+                <span className="text-[10px] font-bold text-emerald-400">
                   {session.averageAccuracy.toFixed(0)}%
                 </span>
               </div>
-            </div>
-
-            <span
-              className={`mt-2 text-xs font-medium transition-all duration-300 group-hover:text-emerald-300 ${sidebarCollapsed ? 'mt-0 h-0 scale-0 opacity-0' : 'scale-100 opacity-100'}`}
-              style={{ color: 'var(--color-text-secondary)' }}
-            >
-              Accuracy
-            </span>
-          </div>
-        </div>
-      )}
-
-      {/* Mobile Bottom Bar - Dictionary & Accuracy */}
-      {session && (
-        <div className="fixed bottom-4 left-1/2 z-40 flex -translate-x-1/2 gap-3 md:hidden">
-          <button
-            onClick={() => setShowDictionary(true)}
-            className="flex items-center gap-2.5 rounded-2xl px-5 py-2.5 shadow-xl ring-1 shadow-black/30 ring-white/5 backdrop-blur-xl transition-all active:scale-95"
-            style={{
-              backgroundColor: 'var(--color-surface)',
-              border: '1px solid var(--color-border)',
-              color: 'var(--color-text-secondary)',
-            }}
-            title="Dictionary (Ctrl+D)"
-          >
-            <span className="text-lg">📖</span>
-            <span className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
-              Dictionary
-            </span>
-          </button>
-          <div
-            className="flex items-center gap-2.5 rounded-2xl px-5 py-2.5 shadow-xl ring-1 shadow-black/30 ring-white/5 backdrop-blur-xl"
-            style={{
-              backgroundColor: 'var(--color-surface)',
-              border: '1px solid var(--color-border)',
-            }}
-          >
-            <div className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-emerald-500/60 bg-emerald-500/10">
-              <span className="text-[10px] font-bold text-emerald-400">
-                {session.averageAccuracy.toFixed(0)}%
+              <span
+                className="text-xs font-medium"
+                style={{ color: 'var(--color-text-secondary)' }}
+              >
+                Accuracy
               </span>
             </div>
-            <span className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
-              Accuracy
-            </span>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Dictionary Modal (old) */}
-      <DictionaryModal isOpen={showDictionary} onClose={() => setShowDictionary(false)} />
+        {/* Dictionary Modal (old) */}
+        <DictionaryModal isOpen={showDictionary} onClose={() => setShowDictionary(false)} />
 
-      {/* Word Popup */}
-      {wordPopup && (
-        <WordPopup
-          word={wordPopup.word}
-          translation={wordPopup.translation}
-          partOfSpeech={wordPopup.partOfSpeech}
-          example={wordPopup.example}
-          exampleTranslation={wordPopup.exampleTranslation}
-          position={wordPopup.position}
-          isLoading={wordPopup.isLoading}
-          onClose={() => {
-            setWordPopup(null);
-            window.getSelection()?.removeAllRanges();
-          }}
-          onAddToDictionary={handleAddToDictionary}
+        {/* Word Popup */}
+        {wordPopup && (
+          <WordPopup
+            word={wordPopup.word}
+            translation={wordPopup.translation}
+            partOfSpeech={wordPopup.partOfSpeech}
+            example={wordPopup.example}
+            exampleTranslation={wordPopup.exampleTranslation}
+            position={wordPopup.position}
+            isLoading={wordPopup.isLoading}
+            onClose={() => {
+              setWordPopup(null);
+              window.getSelection()?.removeAllRanges();
+            }}
+            onAddToDictionary={handleAddToDictionary}
+          />
+        )}
+
+        {/* Dictionary Panel */}
+        <DictionaryPanel
+          isOpen={showDictionaryPanel}
+          onClose={() => setShowDictionaryPanel(false)}
+          userId={1} // TODO: Get actual userId
         />
-      )}
-
-      {/* Dictionary Panel */}
-      <DictionaryPanel
-        isOpen={showDictionaryPanel}
-        onClose={() => setShowDictionaryPanel(false)}
-        userId={1} // TODO: Get actual userId
-      />
-    </div>
+      </div>
     </TooltipProvider>
   );
 }

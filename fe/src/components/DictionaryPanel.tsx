@@ -155,7 +155,7 @@ export const DictionaryPanel = ({ isOpen, onClose, userId }: DictionaryPanelProp
               placeholder="Search words..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-lg py-2.5 pr-4 pl-10 text-sm outline-none transition-all focus:ring-2"
+              className="w-full rounded-lg py-2.5 pr-4 pl-10 text-sm transition-all outline-none focus:ring-2"
               style={{
                 backgroundColor: 'var(--color-surface)',
                 border: '1px solid var(--color-border)',
@@ -199,9 +199,7 @@ export const DictionaryPanel = ({ isOpen, onClose, userId }: DictionaryPanelProp
                 key={word.id}
                 className={cn(
                   'group cursor-pointer border transition-all duration-200 hover:scale-[1.02]',
-                  selectedWord?.id === word.id
-                    ? 'shadow-lg'
-                    : 'shadow-sm hover:shadow-md'
+                  selectedWord?.id === word.id ? 'shadow-lg' : 'shadow-sm hover:shadow-md'
                 )}
                 style={{
                   backgroundColor:
@@ -209,9 +207,7 @@ export const DictionaryPanel = ({ isOpen, onClose, userId }: DictionaryPanelProp
                       ? 'var(--color-surface-elevated)'
                       : 'var(--color-surface)',
                   borderColor:
-                    selectedWord?.id === word.id
-                      ? 'var(--color-primary)'
-                      : 'var(--color-border)',
+                    selectedWord?.id === word.id ? 'var(--color-primary)' : 'var(--color-border)',
                   animationDelay: `${index * 0.03}s`,
                 }}
                 onClick={() => setSelectedWord(word)}
@@ -250,7 +246,10 @@ export const DictionaryPanel = ({ isOpen, onClose, userId }: DictionaryPanelProp
                     </p>
                   )}
 
-                  <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                  <div
+                    className="flex items-center gap-2 text-xs"
+                    style={{ color: 'var(--color-text-muted)' }}
+                  >
                     <Calendar className="h-3 w-3" />
                     <span>{formatDate(word.createdAt)}</span>
                   </div>
@@ -269,7 +268,10 @@ export const DictionaryPanel = ({ isOpen, onClose, userId }: DictionaryPanelProp
             background: `linear-gradient(0deg, rgba(var(--color-primary-rgb), 0.08) 0%, transparent 100%)`,
           }}
         >
-          <div className="flex items-center justify-between text-xs" style={{ color: 'var(--color-text-muted)' }}>
+          <div
+            className="flex items-center justify-between text-xs"
+            style={{ color: 'var(--color-text-muted)' }}
+          >
             <span className="flex items-center gap-2">
               <span className="text-base">📚</span>
               Keep learning!

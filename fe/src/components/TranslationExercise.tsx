@@ -254,10 +254,7 @@ export function TranslationExercise({ exercise }: Props) {
           {result && (
             <div className="animate-in fade-in space-y-6 duration-300">
               <ScoreBreakdown scores={result.feedback.scores} />
-              <FeedbackPanel
-                feedback={result.feedback}
-                userTranslation={userTranslation}
-              />
+              <FeedbackPanel feedback={result.feedback} userTranslation={userTranslation} />
             </div>
           )}
         </div>

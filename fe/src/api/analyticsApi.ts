@@ -9,12 +9,16 @@ export async function getDetailedErrorAnalytics(userId: number): Promise<ErrorAn
 }
 
 export async function getErrorDistribution(userId: number): Promise<ErrorDistribution> {
-  const response = await axios.get<ErrorDistribution>(`${API_BASE}/analytics/errors/${userId}/distribution`);
+  const response = await axios.get<ErrorDistribution>(
+    `${API_BASE}/analytics/errors/${userId}/distribution`
+  );
   return response.data;
 }
 
 export async function getErrorTrends(userId: number, days: number = 7): Promise<ErrorTrend> {
-  const response = await axios.get<ErrorTrend>(`${API_BASE}/analytics/errors/${userId}/trends?days=${days}`);
+  const response = await axios.get<ErrorTrend>(
+    `${API_BASE}/analytics/errors/${userId}/trends?days=${days}`
+  );
   return response.data;
 }
 

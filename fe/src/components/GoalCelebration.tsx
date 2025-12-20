@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+/* eslint-disable react-hooks/purity */
+import { useEffect, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Trophy, Sparkles, Star } from 'lucide-react';
 
@@ -11,11 +12,27 @@ export function GoalCelebration({ isAchieved, onComplete }: Props) {
   const [show, setShow] = useState(false);
   const [hasShown, setHasShown] = useState(false);
 
+  // Pre-generate random values for confetti to avoid impure functions during render
+  const confettiData = useMemo(() => {
+    const data = [];
+    for (let i = 0; i < 50; i++) {
+      data.push({
+        randomY: 600 + Math.random() * 200,
+        randomX: (Math.random() - 0.5) * 400,
+        randomRotate: Math.random() * 720 - 360,
+        randomDuration: 2 + Math.random() * 1,
+        randomDelay: Math.random() * 0.5,
+        randomLeft: Math.random() * 100,
+      });
+    }
+    return data;
+  }, []);
+
   useEffect(() => {
     if (isAchieved && !hasShown) {
       setShow(true);
       setHasShown(true);
-      
+
       const timer = setTimeout(() => {
         setShow(false);
         onComplete?.();
@@ -55,7 +72,8 @@ export function GoalCelebration({ isAchieved, onComplete }: Props) {
             <div
               className="relative overflow-hidden rounded-3xl p-12 text-center"
               style={{
-                background: 'linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(251, 146, 60, 0.15))',
+                background:
+                  'linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(251, 146, 60, 0.15))',
                 border: '2px solid rgba(251, 191, 36, 0.4)',
                 boxShadow: '0 0 60px rgba(251, 191, 36, 0.3)',
               }}
@@ -79,7 +97,10 @@ export function GoalCelebration({ isAchieved, onComplete }: Props) {
                     boxShadow: '0 8px 32px rgba(251, 191, 36, 0.5)',
                   }}
                 >
-                  <Trophy size={80} style={{ color: '#fff', filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.2))' }} />
+                  <Trophy
+                    size={80}
+                    style={{ color: '#fff', filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.2))' }}
+                  />
                 </div>
               </motion.div>
 
@@ -138,36 +159,42 @@ export function GoalCelebration({ isAchieved, onComplete }: Props) {
                     {i % 3 === 0 ? (
                       <Star
                         size={16 + Math.random() * 12}
-                        style={{ color: ['#fbbf24', '#fb923c', '#fef3c7'][i % 3], fill: 'currentColor' }}
+                        style={{
+                          color: ['#fbbf24', '#fb923c', '#fef3c7'][i % 3],
+                          fill: 'currentColor',
+                        }}
                       />
                     ) : (
                       <Sparkles
                         size={16 + Math.random() * 12}
-                        style={{ color: ['#fbbf24', '#fb923c', '#fef3c7'][i % 3], fill: 'currentColor' }}
+                        style={{
+                          color: ['#fbbf24', '#fb923c', '#fef3c7'][i % 3],
+                          fill: 'currentColor',
+                        }}
                       />
                     )}
                   </motion.div>
                 );
               })}
 
-              {[...Array(50)].map((_, i) => (
+              {confettiData.map((data, i) => (
                 <motion.div
                   key={`confetti-${i}`}
                   className="pointer-events-none absolute h-2 w-2 rounded-full"
                   style={{
-                    left: `${Math.random() * 100}%`,
+                    left: `${data.randomLeft}%`,
                     top: '-10%',
                     background: ['#fbbf24', '#fb923c', '#fef3c7', '#22d3ee'][i % 4],
                   }}
                   animate={{
-                    y: [0, 600 + Math.random() * 200],
-                    x: [0, (Math.random() - 0.5) * 400],
-                    rotate: [0, Math.random() * 720 - 360],
+                    y: [0, data.randomY],
+                    x: [0, data.randomX],
+                    rotate: [0, data.randomRotate],
                     opacity: [1, 1, 0],
                   }}
                   transition={{
-                    duration: 2 + Math.random() * 1,
-                    delay: Math.random() * 0.5,
+                    duration: data.randomDuration,
+                    delay: data.randomDelay,
                     ease: 'easeIn',
                   }}
                 />

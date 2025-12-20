@@ -30,6 +30,7 @@ public class SessionService {
     private final ErrorAnalyticsRepository errorAnalyticsRepository;
     private final AIService aiService;
     private final CreditsService creditsService;
+    private final DailyGoalService dailyGoalService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Transactional
@@ -153,7 +154,10 @@ public class SessionService {
         int nextIndex = currentIndex;
         String nextSentence = null;
 
+        // Increment daily progress when user passes a sentence (not retry)
         if (passedThreshold && !isRetry) {
+            dailyGoalService.incrementDailyProgress(session.getUserId());
+            
             if (!isLastSentence) {
                 session.advanceToNextSentence();
                 nextIndex = session.getCurrentSentenceIndex();

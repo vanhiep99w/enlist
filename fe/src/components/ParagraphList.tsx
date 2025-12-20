@@ -160,7 +160,7 @@ export function ParagraphList() {
 
         {/* Main card */}
         <div
-          className={`hover-lift relative h-full cursor-pointer overflow-hidden rounded-xl border border-l-4 border-[var(--color-border)] bg-[var(--color-surface)] ${styles.accent} ${showAccentGlow ? 'ring-1 ring-cyan-500/20' : ''} `}
+          className={`hover-lift relative h-full cursor-pointer overflow-hidden rounded-xl border-[var(--color-border)] bg-[var(--color-surface)] ${styles.accent} ${showAccentGlow ? 'ring-1 ring-cyan-500/20' : ''} `}
         >
           {/* Geometric decorative element */}
           {isFeatured && (

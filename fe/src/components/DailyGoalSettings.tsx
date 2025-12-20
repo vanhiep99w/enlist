@@ -63,12 +63,13 @@ export function DailyGoalSettings() {
       animate={{ opacity: 1, y: 0 }}
       className="relative overflow-hidden rounded-2xl p-6"
       style={{
-        background: 'linear-gradient(135deg, rgba(var(--color-surface-elevated-rgb), 0.8), rgba(var(--color-surface-rgb), 0.6))',
+        background:
+          'linear-gradient(135deg, rgba(var(--color-surface-elevated-rgb), 0.8), rgba(var(--color-surface-rgb), 0.6))',
         border: '1.5px solid rgba(var(--color-border-rgb), 0.4)',
         backdropFilter: 'blur(12px)',
       }}
     >
-      <div className="absolute top-0 right-0 w-32 h-32 opacity-10 pointer-events-none">
+      <div className="pointer-events-none absolute top-0 right-0 h-32 w-32 opacity-10">
         <Target size={128} style={{ color: 'var(--color-primary)' }} />
       </div>
 
@@ -109,7 +110,10 @@ export function DailyGoalSettings() {
               >
                 {progress.dailyGoal}
               </span>
-              <span className="text-xl font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+              <span
+                className="text-xl font-medium"
+                style={{ color: 'var(--color-text-secondary)' }}
+              >
                 sentences
               </span>
             </div>
@@ -144,7 +148,8 @@ export function DailyGoalSettings() {
                 <Minus size={18} />
               </motion.button>
 
-              <div className="flex-1 flex items-center justify-center rounded-xl py-4"
+              <div
+                className="flex flex-1 items-center justify-center rounded-xl py-4"
                 style={{
                   background: 'rgba(0, 0, 0, 0.2)',
                   border: '2px solid var(--color-primary)',
@@ -163,7 +168,10 @@ export function DailyGoalSettings() {
                     fontFamily: 'var(--font-display)',
                   }}
                 />
-                <span className="ml-2 text-lg font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+                <span
+                  className="ml-2 text-lg font-medium"
+                  style={{ color: 'var(--color-text-secondary)' }}
+                >
                   sentences
                 </span>
               </div>

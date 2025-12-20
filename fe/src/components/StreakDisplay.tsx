@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'motion/react';
 import { getDailyProgress } from '../api/userApi';
@@ -68,14 +68,23 @@ function StreakTooltip({
           <>
             <div>
               <div className="mb-1 flex items-center justify-between">
-                <span className="text-xs font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+                <span
+                  className="text-xs font-semibold"
+                  style={{ color: 'var(--color-text-primary)' }}
+                >
                   Today's Progress
                 </span>
-                <span className="text-xs font-bold" style={{ color: dailyProgress.goalAchieved ? '#22c55e' : 'var(--color-primary)' }}>
+                <span
+                  className="text-xs font-bold"
+                  style={{ color: dailyProgress.goalAchieved ? '#22c55e' : 'var(--color-primary)' }}
+                >
                   {dailyProgress.progressCount}/{dailyProgress.dailyGoal} sentences
                 </span>
               </div>
-              <div className="relative h-2 overflow-hidden rounded-full" style={{ background: 'rgba(0, 0, 0, 0.2)' }}>
+              <div
+                className="relative h-2 overflow-hidden rounded-full"
+                style={{ background: 'rgba(0, 0, 0, 0.2)' }}
+              >
                 <div
                   className="absolute inset-y-0 left-0 rounded-full transition-all duration-500"
                   style={{
@@ -186,18 +195,18 @@ export function StreakDisplay() {
   const data = MOCK_STREAK_DATA;
   const userId = 1;
 
-  useEffect(() => {
-    loadDailyProgress();
-  }, []);
-
-  const loadDailyProgress = async () => {
+  const loadDailyProgress = useCallback(async () => {
     try {
       const progress = await getDailyProgress(userId);
       setDailyProgress(progress);
     } catch (error) {
       console.error('Failed to load daily progress:', error);
     }
-  };
+  }, [userId]);
+
+  useEffect(() => {
+    loadDailyProgress();
+  }, [loadDailyProgress]);
 
   const milestone = getMilestoneMessage(data.currentStreak);
   const isActiveToday = data.weekDays[0];
@@ -228,28 +237,28 @@ export function StreakDisplay() {
       ref={containerRef}
       className="relative flex cursor-pointer items-center gap-2.5 rounded-xl px-3.5 py-2 transition-all hover:scale-105"
       style={{
-        backgroundColor: goalAchieved 
-          ? 'rgba(251, 191, 36, 0.1)' 
-          : 'var(--color-surface-light)',
+        backgroundColor: goalAchieved ? 'rgba(251, 191, 36, 0.1)' : 'var(--color-surface-light)',
         borderWidth: '1px',
         borderStyle: 'solid',
-        borderColor: goalAchieved 
-          ? 'rgba(251, 191, 36, 0.3)' 
-          : 'var(--color-border)',
+        borderColor: goalAchieved ? 'rgba(251, 191, 36, 0.3)' : 'var(--color-border)',
       }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={() => setShowTooltip(false)}
-      animate={goalAchieved ? {
-        boxShadow: [
-          '0 0 0 rgba(251, 191, 36, 0)',
-          '0 0 12px rgba(251, 191, 36, 0.3)',
-          '0 0 0 rgba(251, 191, 36, 0)',
-        ]
-      } : {}}
+      animate={
+        goalAchieved
+          ? {
+              boxShadow: [
+                '0 0 0 rgba(251, 191, 36, 0)',
+                '0 0 12px rgba(251, 191, 36, 0.3)',
+                '0 0 0 rgba(251, 191, 36, 0)',
+              ],
+            }
+          : {}
+      }
       transition={{ duration: 2, repeat: Infinity }}
     >
       {/* Flame icon with animation */}
-      <motion.span 
+      <motion.span
         className={`text-lg ${isActiveToday ? 'animate-flame' : 'opacity-50'}`}
         animate={goalAchieved ? { rotate: [0, -10, 10, -10, 0], scale: [1, 1.1, 1] } : {}}
         transition={{ duration: 0.5, repeat: goalAchieved ? Infinity : 0, repeatDelay: 2 }}
@@ -260,9 +269,9 @@ export function StreakDisplay() {
       {/* Daily Progress Count */}
       {dailyProgress && (
         <div className="flex items-baseline gap-1">
-          <span 
+          <span
             className="text-sm font-bold tabular-nums"
-            style={{ 
+            style={{
               color: goalAchieved ? '#fbbf24' : 'var(--color-text-primary)',
               fontFamily: 'var(--font-display)',
             }}
@@ -276,10 +285,7 @@ export function StreakDisplay() {
       )}
 
       {/* Separator */}
-      <div 
-        className="h-4 w-px" 
-        style={{ backgroundColor: 'var(--color-border)' }}
-      />
+      <div className="h-4 w-px" style={{ backgroundColor: 'var(--color-border)' }} />
 
       {/* Week grid */}
       <div className="flex items-center gap-0.5">
@@ -299,7 +305,14 @@ export function StreakDisplay() {
       <span className="text-sm font-bold text-amber-500 tabular-nums">{data.currentStreak}</span>
 
       {/* Tooltip - rendered via portal to document.body */}
-      {showTooltip && <StreakTooltip position={tooltipPos} data={data} milestone={milestone} dailyProgress={dailyProgress} />}
+      {showTooltip && (
+        <StreakTooltip
+          position={tooltipPos}
+          data={data}
+          milestone={milestone}
+          dailyProgress={dailyProgress}
+        />
+      )}
     </motion.div>
   );
 }

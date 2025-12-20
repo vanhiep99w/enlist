@@ -63,8 +63,8 @@ public class DailyGoalService {
 
         Map<String, Object> progress = new HashMap<>();
         progress.put("dailyGoal", user.getDailyGoal());
-        progress.put("progressCount", user.getDailyProgressCount());
-        progress.put("goalAchieved", user.getDailyProgressCount() >= user.getDailyGoal());
+        progress.put("dailyProgressCount", user.getDailyProgressCount());
+        progress.put("isGoalAchieved", user.getDailyProgressCount() >= user.getDailyGoal());
         progress.put("percentage", calculatePercentage(user.getDailyProgressCount(), user.getDailyGoal()));
         progress.put("lastResetDate", user.getLastProgressResetDate());
 

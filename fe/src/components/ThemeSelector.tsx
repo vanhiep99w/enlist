@@ -30,7 +30,10 @@ export function ThemeSelector() {
 
   return (
     <Select value={theme} onValueChange={(value) => setTheme(value as Theme)}>
-      <SelectTrigger className="bg-secondary/50 border-border/30 hover:border-primary/50 focus:ring-primary/30 w-[140px] transition-all">
+      <SelectTrigger
+        className="hover:border-primary/50 focus:ring-primary/30 w-[140px] border transition-all"
+        style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-surface)' }}
+      >
         <SelectValue />
       </SelectTrigger>
       <SelectContent className="bg-card/95 border-primary/20 backdrop-blur-xl">

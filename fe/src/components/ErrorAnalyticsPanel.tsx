@@ -39,9 +39,9 @@ export function ErrorAnalyticsPanel() {
 
   if (!analytics || analytics.distribution.totalErrors === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
+      <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
         <Brain size={64} style={{ color: 'var(--color-accent)', opacity: 0.3 }} className="mb-4" />
-        <p className="text-xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
+        <p className="mb-2 text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
           No errors yet!
         </p>
         <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
@@ -86,7 +86,8 @@ export function ErrorAnalyticsPanel() {
         animate={{ opacity: 1, y: 0 }}
         className="rounded-2xl p-6"
         style={{
-          background: 'linear-gradient(135deg, rgba(var(--color-surface-elevated-rgb), 0.8), rgba(var(--color-surface-rgb), 0.6))',
+          background:
+            'linear-gradient(135deg, rgba(var(--color-surface-elevated-rgb), 0.8), rgba(var(--color-surface-rgb), 0.6))',
           border: '1.5px solid rgba(var(--color-border-rgb), 0.4)',
           backdropFilter: 'blur(12px)',
         }}
@@ -130,7 +131,10 @@ export function ErrorAnalyticsPanel() {
                   <span className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>
                     {type.charAt(0) + type.slice(1).toLowerCase().replace('_', ' ')}
                   </span>
-                  <span className="text-sm font-mono" style={{ color: 'var(--color-text-secondary)' }}>
+                  <span
+                    className="font-mono text-sm"
+                    style={{ color: 'var(--color-text-secondary)' }}
+                  >
                     {count} ({percentage.toFixed(1)}%)
                   </span>
                 </div>
@@ -162,7 +166,8 @@ export function ErrorAnalyticsPanel() {
           transition={{ delay: 0.2 }}
           className="rounded-2xl p-6"
           style={{
-            background: 'linear-gradient(135deg, rgba(var(--color-surface-elevated-rgb), 0.8), rgba(var(--color-surface-rgb), 0.6))',
+            background:
+              'linear-gradient(135deg, rgba(var(--color-surface-elevated-rgb), 0.8), rgba(var(--color-surface-rgb), 0.6))',
             border: '1.5px solid rgba(var(--color-border-rgb), 0.4)',
             backdropFilter: 'blur(12px)',
           }}
@@ -213,7 +218,7 @@ export function ErrorAnalyticsPanel() {
                       {area.errorCategory.replace(/_/g, ' ')}
                     </span>
                     <span
-                      className="rounded-full px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider"
+                      className="rounded-full px-2.5 py-0.5 text-xs font-bold tracking-wider uppercase"
                       style={{
                         background: `${getSeverityColor(area.severity)}22`,
                         color: getSeverityColor(area.severity),
@@ -224,14 +229,22 @@ export function ErrorAnalyticsPanel() {
                   </div>
                   <div className="flex items-center gap-3 text-sm">
                     <span style={{ color: 'var(--color-text-secondary)' }}>
-                      {area.errorType.charAt(0) + area.errorType.slice(1).toLowerCase().replace('_', ' ')}
+                      {area.errorType.charAt(0) +
+                        area.errorType.slice(1).toLowerCase().replace('_', ' ')}
                     </span>
-                    <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>•</span>
+                    <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                      •
+                    </span>
                     <span style={{ color: 'var(--color-text-muted)' }}>
                       {area.count} occurrence{area.count > 1 ? 's' : ''}
                     </span>
-                    <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>•</span>
-                    <span className="font-mono text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                    <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                      •
+                    </span>
+                    <span
+                      className="font-mono text-xs"
+                      style={{ color: 'var(--color-text-muted)' }}
+                    >
                       {area.percentage.toFixed(1)}%
                     </span>
                   </div>
@@ -249,7 +262,8 @@ export function ErrorAnalyticsPanel() {
           transition={{ delay: 0.4 }}
           className="rounded-2xl p-6"
           style={{
-            background: 'linear-gradient(135deg, rgba(var(--color-surface-elevated-rgb), 0.8), rgba(var(--color-surface-rgb), 0.6))',
+            background:
+              'linear-gradient(135deg, rgba(var(--color-surface-elevated-rgb), 0.8), rgba(var(--color-surface-rgb), 0.6))',
             border: '1.5px solid rgba(var(--color-border-rgb), 0.4)',
             backdropFilter: 'blur(12px)',
           }}
@@ -292,7 +306,7 @@ export function ErrorAnalyticsPanel() {
               >
                 <div className="mb-2 flex items-center justify-between">
                   <span
-                    className="text-xs font-bold uppercase tracking-wider"
+                    className="text-xs font-bold tracking-wider uppercase"
                     style={{ color: getErrorTypeColor(error.errorType) }}
                   >
                     {error.errorType.replace('_', ' ')}
