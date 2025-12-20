@@ -673,22 +673,39 @@ public class AIService {
     }
 
     public Map<String, String> translateWord(String word) {
+        return translateWord(word, null);
+    }
+
+    public Map<String, String> translateWord(String word, String context) {
+        String contextSection = "";
+        if (context != null && !context.isEmpty()) {
+            contextSection = String.format("""
+                
+                SENTENCE CONTEXT:
+                "%s"
+                
+                Use this context to determine the correct meaning and choose the most appropriate translation.
+                """, context);
+        }
+
         String prompt = String.format("""
                 Detect the language of this word/phrase and translate it:
                 - If ENGLISH -> translate to Vietnamese
                 - If VIETNAMESE -> translate to English
-                
+                %s
                 Word/Phrase: %s
+                
+                IMPORTANT: Keep example sentences SHORT (maximum 10-15 words). Use simple, clear examples.
                 
                 Respond with ONLY valid JSON (no markdown, no explanation):
                 {
                   "word": "%s",
-                  "translation": "<translation in target language>",
+                  "translation": "<translation in target language based on context>",
                   "partOfSpeech": "<noun|verb|adjective|adverb|phrase|preposition|conjunction|etc>",
-                  "example": "<example sentence using this word in its original language>",
+                  "example": "<SHORT example sentence using this word - max 10-15 words>",
                   "exampleTranslation": "<translation of the example to target language>"
                 }
-                """, word, word);
+                """, contextSection, word, word);
 
         Map<String, Object> requestBody = Map.of(
                 "model", groqConfig.getWordTranslation().getModel(),

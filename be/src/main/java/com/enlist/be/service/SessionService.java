@@ -1,9 +1,11 @@
 package com.enlist.be.service;
 
 import com.enlist.be.dto.*;
+import com.enlist.be.entity.ErrorAnalytics;
 import com.enlist.be.entity.Paragraph;
 import com.enlist.be.entity.ParagraphSession;
 import com.enlist.be.entity.SentenceSubmission;
+import com.enlist.be.repository.ErrorAnalyticsRepository;
 import com.enlist.be.repository.ParagraphRepository;
 import com.enlist.be.repository.ParagraphSessionRepository;
 import com.enlist.be.repository.SentenceSubmissionRepository;
@@ -14,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -24,6 +27,7 @@ public class SessionService {
     private final ParagraphRepository paragraphRepository;
     private final ParagraphSessionRepository sessionRepository;
     private final SentenceSubmissionRepository submissionRepository;
+    private final ErrorAnalyticsRepository errorAnalyticsRepository;
     private final AIService aiService;
     private final CreditsService creditsService;
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -137,6 +141,8 @@ public class SessionService {
                 .build();
 
         submissionRepository.save(submission);
+
+        trackErrors(session.getUserId(), feedback);
 
         if (!isRetry) {
             session.setTotalPoints(session.getTotalPoints() + pointsEarned);
@@ -255,5 +261,96 @@ public class SessionService {
         if (accuracy >= 70) return 10;
         if (accuracy >= 60) return 5;
         return 2;
+    }
+
+    private void trackErrors(Long userId, TranslationFeedback feedback) {
+        if (feedback == null || feedback.getScores() == null) {
+            return;
+        }
+
+        ScoreBreakdown scores = feedback.getScores();
+        
+        if (scores.getGrammarScore() < 80) {
+            trackErrorCategory(userId, ErrorAnalytics.ErrorType.GRAMMAR, extractGrammarCategory(feedback));
+        }
+        
+        if (scores.getWordChoiceScore() < 80) {
+            trackErrorCategory(userId, ErrorAnalytics.ErrorType.WORD_CHOICE, extractWordChoiceCategory(feedback));
+        }
+        
+        if (scores.getNaturalnessScore() < 80) {
+            trackErrorCategory(userId, ErrorAnalytics.ErrorType.NATURALNESS, extractNaturalnessCategory(feedback));
+        }
+    }
+
+    private void trackErrorCategory(Long userId, ErrorAnalytics.ErrorType errorType, String errorCategory) {
+        if (errorCategory == null || errorCategory.isEmpty()) {
+            errorCategory = "general";
+        }
+
+        var existingError = errorAnalyticsRepository.findByUserIdAndErrorTypeAndErrorCategory(
+                userId, errorType, errorCategory);
+
+        if (existingError.isPresent()) {
+            ErrorAnalytics error = existingError.get();
+            error.incrementCount();
+            errorAnalyticsRepository.save(error);
+        } else {
+            ErrorAnalytics newError = ErrorAnalytics.builder()
+                    .userId(userId)
+                    .errorType(errorType)
+                    .errorCategory(errorCategory)
+                    .count(1)
+                    .lastOccurrence(LocalDateTime.now())
+                    .build();
+            errorAnalyticsRepository.save(newError);
+        }
+    }
+
+    private String extractGrammarCategory(TranslationFeedback feedback) {
+        if (feedback.getErrors() == null || feedback.getErrors().isEmpty()) {
+            return "general";
+        }
+        
+        for (TranslationError error : feedback.getErrors()) {
+            String errorType = error.getType().toLowerCase();
+            if (errorType.contains("article")) return "article";
+            if (errorType.contains("tense") || errorType.contains("verb")) return "verb_tense";
+            if (errorType.contains("preposition")) return "preposition";
+            if (errorType.contains("agreement") || errorType.contains("subject")) return "agreement";
+            if (errorType.contains("plural") || errorType.contains("number")) return "number";
+        }
+        
+        return "general";
+    }
+
+    private String extractWordChoiceCategory(TranslationFeedback feedback) {
+        if (feedback.getErrors() == null || feedback.getErrors().isEmpty()) {
+            return "general";
+        }
+        
+        for (TranslationError error : feedback.getErrors()) {
+            String errorType = error.getType().toLowerCase();
+            if (errorType.contains("vocabulary") || errorType.contains("word")) return "vocabulary";
+            if (errorType.contains("synonym")) return "synonym";
+            if (errorType.contains("collocation")) return "collocation";
+        }
+        
+        return "general";
+    }
+
+    private String extractNaturalnessCategory(TranslationFeedback feedback) {
+        if (feedback.getErrors() == null || feedback.getErrors().isEmpty()) {
+            return "general";
+        }
+        
+        for (TranslationError error : feedback.getErrors()) {
+            String errorType = error.getType().toLowerCase();
+            if (errorType.contains("flow") || errorType.contains("fluency")) return "flow";
+            if (errorType.contains("awkward") || errorType.contains("natural")) return "awkwardness";
+            if (errorType.contains("idiom")) return "idiom";
+        }
+        
+        return "general";
     }
 }

@@ -35,8 +35,8 @@ export interface SaveWordRequest {
   context?: string;
 }
 
-export const translateWord = async (word: string): Promise<WordTranslation> => {
-  const response = await axios.post<WordTranslation>(`${API_BASE_URL}/api/translate/word`, { word }, {
+export const translateWord = async (word: string, context?: string): Promise<WordTranslation> => {
+  const response = await axios.post<WordTranslation>(`${API_BASE_URL}/api/translate/word`, { word, context }, {
     headers: {
       'Content-Type': 'application/json',
     },

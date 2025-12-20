@@ -34,3 +34,11 @@ export type AchievementType =
   | 'speed_demon'
   | 'first_session'
   | 'points_milestone';
+
+export interface DailyProgress {
+  dailyGoal: number;
+  progressCount: number;
+  goalAchieved: boolean;
+  percentage: number;
+  lastResetDate: string;
+}

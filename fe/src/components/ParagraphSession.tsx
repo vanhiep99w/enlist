@@ -163,7 +163,8 @@ export function ParagraphSession({ paragraphId }: Props) {
 
       setIsTranslatingWord(true);
       try {
-        const result = await translateWord(sel.text);
+        const context = session?.currentSentence || undefined;
+        const result = await translateWord(sel.text, context);
         // Update popup with actual data
         setWordPopup({
           word: result.word,

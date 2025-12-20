@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -37,6 +38,17 @@ public class User {
     @Column(name = "sessions_completed")
     @Builder.Default
     private Integer sessionsCompleted = 0;
+
+    @Column(name = "daily_goal")
+    @Builder.Default
+    private Integer dailyGoal = 10;
+
+    @Column(name = "daily_progress_count")
+    @Builder.Default
+    private Integer dailyProgressCount = 0;
+
+    @Column(name = "last_progress_reset_date")
+    private LocalDate lastProgressResetDate;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

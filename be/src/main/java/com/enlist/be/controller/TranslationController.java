@@ -36,7 +36,8 @@ public class TranslationController {
     @PostMapping("/word")
     public ResponseEntity<Map<String, String>> translateWord(@RequestBody Map<String, String> requestBody) {
         String word = requestBody.getOrDefault("word", "");
-        Map<String, String> translation = aiService.translateWord(word);
+        String context = requestBody.getOrDefault("context", null);
+        Map<String, String> translation = aiService.translateWord(word, context);
         return ResponseEntity.ok(translation);
     }
 }
