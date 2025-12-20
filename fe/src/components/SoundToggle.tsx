@@ -6,10 +6,12 @@ export function SoundToggle() {
   return (
     <button
       onClick={toggleSounds}
-      className="p-2 rounded-lg border transition-colors hover:scale-105 active:scale-95"
+      className="h-10 px-3 rounded-lg transition-colors hover:scale-105 active:scale-95 flex items-center justify-center"
       style={{
-        backgroundColor: 'var(--color-surface-light)',
-        borderColor: 'var(--color-surface-elevated)',
+        backgroundColor: 'var(--color-surface)',
+        borderWidth: '1px',
+        borderStyle: 'solid',
+        borderColor: 'var(--color-border)',
       }}
       aria-label={soundEnabled ? 'Disable sound effects' : 'Enable sound effects'}
     >

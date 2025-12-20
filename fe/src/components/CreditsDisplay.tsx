@@ -17,7 +17,7 @@ export function CreditsDisplay() {
   return (
     <div className="flex items-center gap-4">
       <div 
-        className="flex items-center gap-2 px-3 py-1.5 rounded-lg"
+        className="flex items-center gap-2 h-10 px-3 rounded-lg"
         style={{ backgroundColor: 'var(--color-surface)', borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--color-border)' }}
       >
         <span className="text-lg">💰</span>
@@ -25,7 +25,7 @@ export function CreditsDisplay() {
         <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>credits</span>
       </div>
       <div 
-        className="flex items-center gap-2 px-3 py-1.5 rounded-lg"
+        className="flex items-center gap-2 h-10 px-3 rounded-lg"
         style={{ backgroundColor: 'var(--color-surface)', borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--color-border)' }}
       >
         <span className="text-lg">⭐</span>
@@ -33,7 +33,7 @@ export function CreditsDisplay() {
         <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>points</span>
       </div>
       <div 
-        className="flex items-center gap-2 px-3 py-1.5 rounded-lg"
+        className="flex items-center gap-2 h-10 px-3 rounded-lg"
         style={{ backgroundColor: 'var(--color-surface)', borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--color-border)' }}
       >
         <span className="text-lg">📚</span>
