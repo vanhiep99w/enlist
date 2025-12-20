@@ -466,6 +466,13 @@ public class AIService {
         }
 
         String correctTranslation = feedbackNode.path("correctTranslation").asText("");
+        
+        // Validation: Ensure correctTranslation is never empty
+        if (correctTranslation == null || correctTranslation.trim().isEmpty()) {
+            log.warn("AI response missing correctTranslation field - returning default feedback");
+            return createDefaultFeedback();
+        }
+        
         String overallComment = feedbackNode.path("overallComment").asText(null);
 
         List<GoodPoint> goodPoints = new ArrayList<>();

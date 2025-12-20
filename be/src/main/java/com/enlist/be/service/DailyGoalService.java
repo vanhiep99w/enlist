@@ -46,21 +46,20 @@ public class DailyGoalService {
         log.info("Updated daily goal for user {} to {}", userId, goal);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public Map<String, Object> getDailyProgress(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found: " + userId));
 
         if (user.getDailyGoal() == null) {
             user.setDailyGoal(10);
-            userRepository.save(user);
         }
         if (user.getDailyProgressCount() == null) {
             user.setDailyProgressCount(0);
-            userRepository.save(user);
         }
 
         resetProgressIfNeeded(user);
+        userRepository.save(user);
 
         Map<String, Object> progress = new HashMap<>();
         progress.put("dailyGoal", user.getDailyGoal());
@@ -72,12 +71,13 @@ public class DailyGoalService {
         return progress;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public boolean isGoalAchieved(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found: " + userId));
 
         resetProgressIfNeeded(user);
+        userRepository.save(user);
         return user.getDailyProgressCount() >= user.getDailyGoal();
     }
 
@@ -88,7 +88,6 @@ public class DailyGoalService {
         if (lastReset == null || lastReset.isBefore(today)) {
             user.setDailyProgressCount(0);
             user.setLastProgressResetDate(today);
-            userRepository.save(user);
             log.info("Reset daily progress for user {}", user.getId());
         }
     }
