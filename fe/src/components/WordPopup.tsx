@@ -30,7 +30,10 @@ export const WordPopup = ({
   const [isAdded, setIsAdded] = useState(false);
   const [open, setOpen] = useState(true);
 
-  const handlePlayAudio = async () => {
+  const handlePlayAudio = async (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    e?.preventDefault();
+
     setIsPlaying(true);
     try {
       await ttsService.speakWithFallback(word, {
@@ -113,6 +116,8 @@ export const WordPopup = ({
           sideOffset={40}
           align="start"
           alignOffset={40}
+          onPointerDownOutside={(e) => e.preventDefault()}
+          onInteractOutside={(e) => e.preventDefault()}
         >
           {/* Decorative top border gradient */}
           <div
@@ -120,7 +125,7 @@ export const WordPopup = ({
             style={{ backgroundSize: '200% 100%' }}
           />
 
-          <div className="p-4">
+          <div className="p-4" onClick={(e) => e.stopPropagation()}>
             {/* Header with close button */}
             <div className="mb-3 flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
@@ -194,7 +199,10 @@ export const WordPopup = ({
             <div className="mt-4 grid grid-cols-2 gap-2">
               {/* Listen button */}
               <button
-                onClick={handlePlayAudio}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handlePlayAudio(e);
+                }}
                 disabled={isPlaying || isLoading}
                 style={{ borderColor: 'var(--color-border)' }}
                 className="group bg-primary text-primary-foreground focus:ring-primary/50 relative overflow-hidden rounded-lg border-2 px-3 py-2.5 text-xs font-bold shadow-md transition-all hover:scale-[1.02] hover:shadow-lg hover:brightness-110 focus:ring-2 focus:outline-none active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
