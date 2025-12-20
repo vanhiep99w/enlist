@@ -70,7 +70,7 @@ class TTSService {
       const createResponse = await fetch(`${this.config.apiUrl}/api/tts/createby`, {
         method: 'POST',
         headers: {
-          'X-API-Key': '80807fb4-12c4-482a-acec-fc42da22d6af',
+          'X-API-Key': apiKey,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -82,9 +82,29 @@ class TTSService {
         }),
       });
 
-      const created = await createResponse.json();
+      console.log('Create response status:', createResponse.status);
+      console.log('Create response headers:', Object.fromEntries(createResponse.headers.entries()));
+
+      // Check if response has content
+      const responseText = await createResponse.text();
+      console.log('Create response text:', responseText);
+
+      if (!responseText) {
+        console.warn('API returned empty response, using browser TTS fallback');
+        throw new Error(`Empty response from API. Status: ${createResponse.status}`);
+      }
+
+      let created;
+      try {
+        created = JSON.parse(responseText);
+      } catch {
+        throw new Error(`Invalid JSON response: ${responseText.substring(0, 100)}`);
+      }
+
       if (!createResponse.ok || !created?.Id) {
-        throw new Error(created?.Message || `Create failed: ${createResponse.status}`);
+        throw new Error(
+          created?.Message || `Create failed: ${createResponse.status} - ${responseText}`
+        );
       }
 
       // Step 2: Poll for job completion
@@ -193,6 +213,7 @@ class TTSService {
    * Fallback to browser's built-in speech synthesis
    */
   async speakFallback(text: string, options: TTSOptions = {}): Promise<void> {
+    console.log('🔊 Using browser TTS fallback for:', text);
     return new Promise((resolve, reject) => {
       if (!window.speechSynthesis) {
         reject(new Error('Speech synthesis not supported'));
@@ -204,8 +225,14 @@ class TTSService {
       utterance.rate = 0.85;
       utterance.pitch = options.pitch ?? this.config.defaultPitch;
 
-      utterance.onend = () => resolve();
-      utterance.onerror = (error) => reject(error);
+      utterance.onend = () => {
+        console.log('✅ Browser TTS completed');
+        resolve();
+      };
+      utterance.onerror = (error) => {
+        console.error('❌ Browser TTS error:', error);
+        reject(error);
+      };
 
       window.speechSynthesis.speak(utterance);
     });
