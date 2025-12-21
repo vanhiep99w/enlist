@@ -5,6 +5,7 @@ import com.enlist.be.dto.ParagraphCreateRequest;
 import com.enlist.be.dto.ParagraphResponse;
 import com.enlist.be.dto.PreviousAttemptResponse;
 import com.enlist.be.service.ParagraphService;
+import com.enlist.be.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,8 +28,13 @@ public class ParagraphController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "12") int pageSize,
             @RequestParam(required = false) String sortBy,
-            @RequestParam(defaultValue = "asc") String sortOrder,
-            @RequestParam(required = false) Long userId) {
+            @RequestParam(defaultValue = "asc") String sortOrder) {
+        Long userId = null;
+        try {
+            userId = SecurityUtils.getCurrentUserId();
+        } catch (IllegalStateException e) {
+            // User not authenticated, userId will remain null
+        }
         return ResponseEntity.ok(paragraphService.getParagraphsPaginated(
                 difficulty, topic, search, page, pageSize, sortBy, sortOrder, userId));
     }
@@ -61,8 +67,8 @@ public class ParagraphController {
 
     @GetMapping("/{id}/previous-attempts")
     public ResponseEntity<List<PreviousAttemptResponse>> getPreviousAttempts(
-            @PathVariable Long id,
-            @RequestParam Long userId) {
+            @PathVariable Long id) {
+        Long userId = SecurityUtils.getCurrentUserId();
         return ResponseEntity.ok(paragraphService.getPreviousAttempts(id, userId));
     }
 }

@@ -2,6 +2,7 @@ package com.enlist.be.controller;
 
 import com.enlist.be.entity.User;
 import com.enlist.be.service.LeaderboardService;
+import com.enlist.be.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,8 +23,9 @@ public class LeaderboardController {
         return ResponseEntity.ok(leaderboardService.getGlobalLeaderboard(limit));
     }
 
-    @GetMapping("/rank/{userId}")
-    public ResponseEntity<Integer> getUserRank(@PathVariable Long userId) {
+    @GetMapping("/rank")
+    public ResponseEntity<Integer> getUserRank() {
+        Long userId = SecurityUtils.getCurrentUserId();
         return ResponseEntity.ok(leaderboardService.getUserRank(userId));
     }
 }
