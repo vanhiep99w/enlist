@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 
 export type Theme = 'midnight' | 'sunrise' | 'arctic' | 'desert';
 
@@ -48,12 +48,19 @@ export function useTheme() {
   }, []);
 
   const cycleTheme = useCallback(() => {
-    const currentIndex = THEMES.findIndex((t) => t.id === theme);
-    const nextIndex = (currentIndex + 1) % THEMES.length;
-    setTheme(THEMES[nextIndex].id);
-  }, [theme, setTheme]);
+    setThemeState((currentTheme) => {
+      const currentIndex = THEMES.findIndex((t) => t.id === currentTheme);
+      const nextIndex = (currentIndex + 1) % THEMES.length;
 
-  const currentThemeInfo = THEMES.find((t) => t.id === theme)!;
+      const root = document.documentElement;
+      root.classList.add('theme-transition');
+      setTimeout(() => root.classList.remove('theme-transition'), 300);
+
+      return THEMES[nextIndex].id;
+    });
+  }, []);
+
+  const currentThemeInfo = useMemo(() => THEMES.find((t) => t.id === theme)!, [theme]);
 
   return {
     theme,

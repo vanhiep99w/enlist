@@ -1,5 +1,5 @@
 import { Link, useNavigate } from '@tanstack/react-router';
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -24,7 +24,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { useDailyProgress, useStreak } from '../hooks/useUser';
 import { useDueCount } from '../hooks/useReview';
 
-const themeConfig: Record<Theme, { icon: React.ReactNode; label: string; color: string }> = {
+// Memoized outside component to prevent recreation
+const THEME_CONFIG: Record<Theme, { icon: React.ReactNode; label: string; color: string }> = {
   midnight: { icon: <Moon className="h-4 w-4" />, label: 'Midnight', color: 'text-violet-400' },
   sunrise: { icon: <Sunrise className="h-4 w-4" />, label: 'Sunrise', color: 'text-amber-400' },
   arctic: { icon: <Snowflake className="h-4 w-4" />, label: 'Arctic', color: 'text-sky-400' },
@@ -86,7 +87,7 @@ function ThemeDropdown() {
   const [dropdownPos, setDropdownPos] = useState({ top: 0, right: 0 });
   const buttonRef = useRef<HTMLButtonElement>(null);
   const themes: Theme[] = ['midnight', 'sunrise', 'arctic', 'desert'];
-  const current = themeConfig[theme];
+  const current = useMemo(() => THEME_CONFIG[theme], [theme]);
 
   const handleOpen = () => {
     if (buttonRef.current) {
@@ -138,7 +139,7 @@ function ThemeDropdown() {
               }}
             >
               {themes.map((t) => {
-                const cfg = themeConfig[t];
+                const cfg = THEME_CONFIG[t];
                 const isActive = t === theme;
                 return (
                   <button
