@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   AreaChart,
@@ -9,30 +9,10 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
+import { useProgressAnalytics } from '../hooks/useAnalytics';
 
 interface ProgressChartProps {
   userId?: number;
-}
-
-interface ProgressDataPoint {
-  date: string;
-  sentencesCompleted: number;
-  accuracyRate: number;
-  pointsEarned: number;
-  totalAttempts: number;
-}
-
-interface ProgressSummary {
-  totalSentences: number;
-  averageAccuracy: number;
-  totalPoints: number;
-  totalAttempts: number;
-  activeDays: number;
-}
-
-interface ProgressAnalytics {
-  dataPoints: ProgressDataPoint[];
-  summary: ProgressSummary;
 }
 
 type TimeRange = 7 | 30 | 90;
@@ -60,29 +40,9 @@ const METRIC_CONFIG = {
 };
 
 export function ProgressChart({ userId = 1 }: ProgressChartProps) {
-  const [data, setData] = useState<ProgressAnalytics | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [timeRange, setTimeRange] = useState<TimeRange>(30);
   const [selectedMetric, setSelectedMetric] = useState<ChartMetric>('sentences');
-
-  useEffect(() => {
-    fetchProgress();
-  }, [userId, timeRange]);
-
-  const fetchProgress = async () => {
-    try {
-      setIsLoading(true);
-      const res = await fetch(
-        `http://localhost:8080/api/analytics/progress/${userId}?days=${timeRange}`
-      );
-      const result = await res.json();
-      setData(result);
-    } catch (err) {
-      console.error('Failed to fetch progress:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { data, isLoading } = useProgressAnalytics(userId, timeRange);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);

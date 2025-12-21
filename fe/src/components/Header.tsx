@@ -1,7 +1,7 @@
-import { Link } from '@tanstack/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
 import { useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import {
   ChevronDown,
   Volume2,
@@ -11,15 +11,18 @@ import {
   Snowflake,
   Sun,
   RefreshCw,
+  User,
+  LogOut,
+  Settings,
+  LogIn,
 } from 'lucide-react';
 import { Logo } from './Logo';
 import { useSoundEffects } from '../hooks/useSoundEffects';
 import { useTheme, type Theme } from '../hooks/useTheme';
 import { useUserCredits } from '../hooks/useUserCredits';
-import { getDailyProgress, getStreak } from '../api/userApi';
-import { reviewApi } from '../api/reviewApi';
-import type { DailyProgress, StreakData } from '../types/user';
-import { useEffect, useCallback } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { useDailyProgress, useStreak } from '../hooks/useUser';
+import { useDueCount } from '../hooks/useReview';
 
 const themeConfig: Record<Theme, { icon: React.ReactNode; label: string; color: string }> = {
   midnight: { icon: <Moon className="h-4 w-4" />, label: 'Midnight', color: 'text-violet-400' },
@@ -191,23 +194,7 @@ function SoundButton() {
 }
 
 function ReviewButton() {
-  const [dueCount, setDueCount] = useState<number>(0);
-
-  useEffect(() => {
-    const loadDueCount = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) return;
-        const count = await reviewApi.getDueCount(token);
-        setDueCount(count);
-      } catch (err) {
-        console.error('Failed to load due count:', err);
-      }
-    };
-    loadDueCount();
-    const interval = setInterval(loadDueCount, 60000);
-    return () => clearInterval(interval);
-  }, []);
+  const { data: dueCount = 0 } = useDueCount();
 
   if (dueCount === 0) return null;
 
@@ -224,25 +211,164 @@ function ReviewButton() {
   );
 }
 
+function UserMenu() {
+  const { user, logout, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, right: 0 });
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  const handleOpen = () => {
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setDropdownPos({
+        top: rect.bottom + 8,
+        right: window.innerWidth - rect.right,
+      });
+    }
+    setOpen(!open);
+  };
+
+  const handleLogout = () => {
+    logout();
+    setOpen(false);
+    navigate({ to: '/login' });
+  };
+
+  if (!isAuthenticated || !user) {
+    return (
+      <Link
+        to="/login"
+        className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all hover:scale-105"
+        style={{
+          background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))',
+          color: 'white',
+        }}
+      >
+        <LogIn className="h-4 w-4" />
+        Sign In
+      </Link>
+    );
+  }
+
+  const initials = user.username.slice(0, 2).toUpperCase();
+
+  return (
+    <div className="relative">
+      <button
+        ref={buttonRef}
+        onClick={handleOpen}
+        className="flex items-center gap-2 rounded-xl px-2 py-1.5 transition-all hover:opacity-80"
+        style={{ backgroundColor: 'var(--color-surface-light)' }}
+      >
+        <div
+          className="flex h-8 w-8 items-center justify-center rounded-lg text-xs font-bold"
+          style={{
+            background: 'linear-gradient(135deg, var(--color-primary), var(--color-accent))',
+            color: 'white',
+          }}
+        >
+          {initials}
+        </div>
+        <span
+          className="max-w-[100px] truncate text-sm font-medium"
+          style={{ color: 'var(--color-text-primary)' }}
+        >
+          {user.username}
+        </span>
+        <ChevronDown
+          className="h-3.5 w-3.5 transition-transform"
+          style={{
+            color: 'var(--color-text-muted)',
+            transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
+          }}
+        />
+      </button>
+
+      <AnimatePresence>
+        {open &&
+          createPortal(
+            <>
+              <div className="fixed inset-0 z-[9998]" onClick={() => setOpen(false)} />
+              <motion.div
+                initial={{ opacity: 0, y: -8, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -8, scale: 0.95 }}
+                transition={{ duration: 0.15 }}
+                className="fixed z-[9999] w-56 overflow-hidden rounded-xl p-2 shadow-xl"
+                style={{
+                  top: dropdownPos.top,
+                  right: dropdownPos.right,
+                  backgroundColor: 'var(--color-surface)',
+                  border: '1px solid var(--color-border)',
+                }}
+              >
+                {/* User info */}
+                <div
+                  className="mb-2 rounded-lg px-3 py-3"
+                  style={{ backgroundColor: 'var(--color-surface-light)' }}
+                >
+                  <p
+                    className="text-sm font-semibold"
+                    style={{ color: 'var(--color-text-primary)' }}
+                  >
+                    {user.username}
+                  </p>
+                  <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                    {user.email}
+                  </p>
+                  <div className="mt-2 flex items-center gap-3 text-xs">
+                    <span style={{ color: 'var(--color-text-secondary)' }}>
+                      ⭐ {user.totalPoints} pts
+                    </span>
+                    <span style={{ color: 'var(--color-text-secondary)' }}>
+                      🔥 {user.currentStreak} days
+                    </span>
+                  </div>
+                </div>
+
+                {/* Menu items */}
+                <div className="space-y-1">
+                  <button
+                    onClick={() => setOpen(false)}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-all hover:opacity-80"
+                    style={{ color: 'var(--color-text-secondary)' }}
+                  >
+                    <User className="h-4 w-4" />
+                    Profile
+                  </button>
+                  <button
+                    onClick={() => setOpen(false)}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-all hover:opacity-80"
+                    style={{ color: 'var(--color-text-secondary)' }}
+                  >
+                    <Settings className="h-4 w-4" />
+                    Settings
+                  </button>
+                  <div className="my-2 h-px" style={{ backgroundColor: 'var(--color-border)' }} />
+                  <button
+                    onClick={handleLogout}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-red-400 transition-all hover:bg-red-500/10"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Sign Out
+                  </button>
+                </div>
+              </motion.div>
+            </>,
+            document.body
+          )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 export function Header() {
   const { credits, isLoading: creditsLoading } = useUserCredits();
-  const [dailyProgress, setDailyProgress] = useState<DailyProgress | null>(null);
-  const [streakData, setStreakData] = useState<StreakData | null>(null);
-  const userId = 1;
-
-  const loadData = useCallback(async () => {
-    try {
-      const [progress, streak] = await Promise.all([getDailyProgress(userId), getStreak(userId)]);
-      setDailyProgress(progress);
-      setStreakData(streak);
-    } catch (error) {
-      console.error('Failed to load header data:', error);
-    }
-  }, [userId]);
-
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+  const { user, isAuthenticated } = useAuth();
+  const userId = user?.id ?? 0;
+  const { data: dailyProgress } = useDailyProgress(userId);
+  const { data: streakData } = useStreak(userId);
 
   return (
     <header
@@ -268,85 +394,90 @@ export function Header() {
             </span>
           </Link>
 
-          <nav className="flex items-center gap-6">
-            <NavLink to="/" exact>
-              Practice
-            </NavLink>
-            <NavLink to="/paragraphs">Paragraphs</NavLink>
-            <NavLink to="/analytics">Analytics</NavLink>
-            <NavLink to="/leaderboard">Leaderboard</NavLink>
-          </nav>
+          {isAuthenticated && (
+            <nav className="flex items-center gap-6">
+              <NavLink to="/" exact>
+                Practice
+              </NavLink>
+              <NavLink to="/paragraphs">Paragraphs</NavLink>
+              <NavLink to="/analytics">Analytics</NavLink>
+              <NavLink to="/leaderboard">Leaderboard</NavLink>
+            </nav>
+          )}
         </div>
 
         {/* Right: Stats & Controls */}
-        <div className="flex items-center gap-6">
-          {/* Stats group */}
-          <div
-            className="flex items-center gap-4 rounded-xl px-4 py-2"
-            style={{ backgroundColor: 'var(--color-surface-light)' }}
-          >
-            {/* Daily progress */}
-            {dailyProgress && (
-              <div className="flex items-center gap-2">
-                <motion.span
-                  className="text-base"
-                  animate={dailyProgress.goalAchieved ? { scale: [1, 1.2, 1] } : {}}
-                  transition={{
-                    duration: 0.5,
-                    repeat: dailyProgress.goalAchieved ? Infinity : 0,
-                    repeatDelay: 2,
-                  }}
-                >
-                  🔥
-                </motion.span>
-                <div className="flex items-baseline gap-0.5">
-                  <span
-                    className="text-sm font-bold tabular-nums"
-                    style={{
-                      color: dailyProgress.goalAchieved ? '#22c55e' : 'var(--color-text-primary)',
+        <div className="flex items-center gap-4">
+          {/* Stats group - only show when authenticated */}
+          {isAuthenticated && (
+            <div
+              className="flex items-center gap-4 rounded-xl px-4 py-2"
+              style={{ backgroundColor: 'var(--color-surface-light)' }}
+            >
+              {/* Daily progress */}
+              {dailyProgress && (
+                <div className="flex items-center gap-2">
+                  <motion.span
+                    className="text-base"
+                    animate={dailyProgress.goalAchieved ? { scale: [1, 1.2, 1] } : {}}
+                    transition={{
+                      duration: 0.5,
+                      repeat: dailyProgress.goalAchieved ? Infinity : 0,
+                      repeatDelay: 2,
                     }}
                   >
-                    {dailyProgress.progressCount}
-                  </span>
-                  <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
-                    /{dailyProgress.dailyGoal}
-                  </span>
+                    🔥
+                  </motion.span>
+                  <div className="flex items-baseline gap-0.5">
+                    <span
+                      className="text-sm font-bold tabular-nums"
+                      style={{
+                        color: dailyProgress.goalAchieved ? '#22c55e' : 'var(--color-text-primary)',
+                      }}
+                    >
+                      {dailyProgress.progressCount}
+                    </span>
+                    <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                      /{dailyProgress.dailyGoal}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Streak */}
-            {streakData && streakData.currentStreak > 0 && (
-              <>
-                <div className="h-4 w-px" style={{ backgroundColor: 'var(--color-border)' }} />
-                <div className="flex items-center gap-1.5">
-                  <span className="text-sm font-bold text-amber-500 tabular-nums">
-                    {streakData.currentStreak}
-                  </span>
-                  <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
-                    days
-                  </span>
-                </div>
-              </>
-            )}
+              {/* Streak */}
+              {streakData && streakData.currentStreak > 0 && (
+                <>
+                  <div className="h-4 w-px" style={{ backgroundColor: 'var(--color-border)' }} />
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm font-bold text-amber-500 tabular-nums">
+                      {streakData.currentStreak}
+                    </span>
+                    <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                      days
+                    </span>
+                  </div>
+                </>
+              )}
 
-            {/* Credits & Points */}
-            {!creditsLoading && credits && (
-              <>
-                <div className="h-4 w-px" style={{ backgroundColor: 'var(--color-border)' }} />
-                <StatPill icon="💰" value={credits.credits} label="" accent />
-                <StatPill icon="⭐" value={credits.totalPoints} label="" accent />
-              </>
-            )}
-          </div>
+              {/* Credits & Points */}
+              {!creditsLoading && credits && (
+                <>
+                  <div className="h-4 w-px" style={{ backgroundColor: 'var(--color-border)' }} />
+                  <StatPill icon="💰" value={credits.credits} label="" accent />
+                  <StatPill icon="⭐" value={credits.totalPoints} label="" accent />
+                </>
+              )}
+            </div>
+          )}
 
           {/* Review badge */}
-          <ReviewButton />
+          {isAuthenticated && <ReviewButton />}
 
           {/* Controls */}
           <div className="flex items-center gap-2">
             <SoundButton />
             <ThemeDropdown />
+            <UserMenu />
           </div>
         </div>
       </div>

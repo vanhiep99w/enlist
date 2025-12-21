@@ -1,6 +1,4 @@
-import { useState, useEffect } from 'react';
-import { getDetailedErrorAnalytics } from '../api/analyticsApi';
-import type { ErrorAnalytics } from '../types/analytics';
+import { useErrorAnalytics } from '../hooks/useAnalytics';
 import { motion } from 'motion/react';
 import { AlertCircle, TrendingDown, Award, Brain } from 'lucide-react';
 import {
@@ -17,24 +15,8 @@ import {
 } from 'recharts';
 
 export function ErrorAnalyticsPanel() {
-  const [analytics, setAnalytics] = useState<ErrorAnalytics | null>(null);
-  const [loading, setLoading] = useState(true);
   const userId = 1;
-
-  useEffect(() => {
-    loadAnalytics();
-  }, []);
-
-  const loadAnalytics = async () => {
-    try {
-      const data = await getDetailedErrorAnalytics(userId);
-      setAnalytics(data);
-    } catch (error) {
-      console.error('Failed to load analytics:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { data: analytics, isLoading: loading } = useErrorAnalytics(userId);
 
   if (loading) {
     return (

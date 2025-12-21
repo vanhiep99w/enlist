@@ -1,24 +1,10 @@
-import { useState, useEffect } from 'react';
-import { getDailyProgress } from '../api/userApi';
-import type { DailyProgress } from '../types/user';
 import { motion } from 'motion/react';
 import { Flame } from 'lucide-react';
+import { useDailyProgress } from '../hooks/useUser';
 
 export function DailyProgressIndicator() {
-  const [progress, setProgress] = useState<DailyProgress | null>(null);
   const userId = 1;
-
-  const loadProgress = async () => {
-    try {
-      const data = await getDailyProgress(userId);
-      setProgress(data);
-    } catch (error) {
-      console.error('Failed to load daily progress:', error);
-    }
-  };
-  useEffect(() => {
-    loadProgress();
-  }, []);
+  const { data: progress } = useDailyProgress(userId);
 
   if (!progress) return null;
 

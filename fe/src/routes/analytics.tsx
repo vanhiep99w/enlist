@@ -4,10 +4,19 @@ import { ProgressChart } from '../components/ProgressChart';
 import { ErrorAnalyticsPanel } from '../components/ErrorAnalyticsPanel';
 import { ErrorTrendChart } from '../components/ErrorTrendChart';
 import { TrendingUp, Brain, Target, Sparkles } from 'lucide-react';
+import { ProtectedRoute } from '../components/ProtectedRoute';
 
 export const Route = createFileRoute('/analytics')({
-  component: AnalyticsPage,
+  component: AnalyticsPageWrapper,
 });
+
+function AnalyticsPageWrapper() {
+  return (
+    <ProtectedRoute>
+      <AnalyticsPage />
+    </ProtectedRoute>
+  );
+}
 
 function AnalyticsPage() {
   const userId = 1;

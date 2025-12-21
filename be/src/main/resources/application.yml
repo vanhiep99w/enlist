@@ -29,3 +29,7 @@ groq:
 
 server:
   port: 8081
+
+jwt:
+  secret: ${JWT_SECRET:mySecretKeyForJWTTokenGenerationAndValidation2024VerySecure!@#$%^&*()}
+  expiration: 86400000

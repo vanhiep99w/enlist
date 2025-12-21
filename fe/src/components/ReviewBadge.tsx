@@ -1,34 +1,9 @@
-import { useEffect, useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { RefreshCw } from 'lucide-react';
-import { reviewApi } from '../api/reviewApi';
+import { useDueCount } from '../hooks/useReview';
 
 export function ReviewBadge() {
-  const [dueCount, setDueCount] = useState<number>(0);
-  const [loading, setLoading] = useState(true);
-
-  const loadDueCount = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-
-      const count = await reviewApi.getDueCount(token);
-      setDueCount(count);
-      setLoading(false);
-    } catch (err) {
-      console.error('Failed to load due count:', err);
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadDueCount();
-    const interval = setInterval(loadDueCount, 60000);
-    return () => clearInterval(interval);
-  }, []);
+  const { data: dueCount = 0, isLoading: loading } = useDueCount();
 
   if (loading || dueCount === 0) {
     return null;

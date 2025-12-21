@@ -8,6 +8,7 @@ import { Toaster } from 'sonner';
 // Import the generated route tree
 import { routeTree } from './routeTree.gen';
 import { queryClient } from './lib/queryClient';
+import { AuthProvider } from './contexts/AuthContext';
 
 import './styles.css';
 import reportWebVitals from './reportWebVitals.ts';
@@ -36,8 +37,10 @@ if (rootElement && !rootElement.innerHTML) {
   root.render(
     <StrictMode>
       <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
-        <Toaster position="bottom-right" visibleToasts={1} />
+        <AuthProvider>
+          <RouterProvider router={router} />
+          <Toaster position="bottom-right" visibleToasts={1} />
+        </AuthProvider>
         <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>
     </StrictMode>

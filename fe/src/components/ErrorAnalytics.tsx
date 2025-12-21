@@ -1,36 +1,8 @@
-import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useErrorAnalytics } from '../hooks/useAnalytics';
 
 interface ErrorAnalyticsProps {
   userId?: number;
-}
-
-interface ErrorData {
-  distribution: {
-    byType: Record<string, number>;
-    byCategory: Record<string, number>;
-    totalErrors: number;
-  };
-  topErrors: Array<{
-    errorType: string;
-    errorCategory: string;
-    count: number;
-    lastOccurrence: string;
-  }>;
-  recentTrend: {
-    period: string;
-    byType: Record<string, number>;
-    totalErrors: number;
-    startDate: string;
-  };
-  weakAreas: Array<{
-    errorType: string;
-    errorCategory: string;
-    count: number;
-    percentage: number;
-    severity: 'high' | 'medium' | 'low';
-    lastOccurrence: string;
-  }>;
 }
 
 const ERROR_TYPE_COLORS: Record<string, string> = {
@@ -46,25 +18,7 @@ const ERROR_TYPE_LABELS: Record<string, string> = {
 };
 
 export function ErrorAnalytics({ userId = 1 }: ErrorAnalyticsProps) {
-  const [data, setData] = useState<ErrorData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    fetchAnalytics();
-  }, [userId]);
-
-  const fetchAnalytics = async () => {
-    try {
-      setIsLoading(true);
-      const response = await fetch(`http://localhost:8080/api/analytics/errors/${userId}`);
-      const analyticsData = await response.json();
-      setData(analyticsData);
-    } catch (err) {
-      console.error('Failed to fetch error analytics:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { data, isLoading } = useErrorAnalytics(userId);
 
   if (isLoading) {
     return (

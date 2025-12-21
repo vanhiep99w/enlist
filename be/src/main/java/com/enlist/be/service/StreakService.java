@@ -1,6 +1,7 @@
 package com.enlist.be.service;
 
 import com.enlist.be.entity.User;
+import com.enlist.be.exception.ResourceNotFoundException;
 import com.enlist.be.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +21,7 @@ public class StreakService {
     @Transactional
     public void updateStreak(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
 
         LocalDate today = LocalDate.now();
         LocalDate lastActivity = user.getLastActivityDate();
@@ -53,14 +54,14 @@ public class StreakService {
     @Transactional(readOnly = true)
     public Integer getCurrentStreak(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
         return user.getCurrentStreak();
     }
 
     @Transactional(readOnly = true)
     public Integer getLongestStreak(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
         return user.getLongestStreak();
     }
 }

@@ -10,6 +10,11 @@ export interface TTSConfig {
   defaultLanguageCode: string;
 }
 
+export interface TTSOptions {
+  rate?: number;
+  lang?: string;
+}
+
 const DEFAULT_CONFIG: TTSConfig = {
   apiKey: import.meta.env.VITE_SPEECHMATICS_API_KEY || '',
   apiUrl: 'https://preview.tts.speechmatics.com/generate/sarah',
@@ -170,8 +175,8 @@ class TTSService {
       }
 
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'en-US';
-      utterance.rate = 0.85;
+      utterance.lang = options.lang || 'en-US';
+      utterance.rate = options.rate || 0.85;
 
       utterance.onend = () => resolve();
       utterance.onerror = (error) => reject(error);
@@ -182,7 +187,7 @@ class TTSService {
 
   async speakWithFallback(text: string, options: TTSOptions = {}): Promise<void> {
     try {
-      await this.speak(text, options);
+      await this.speak(text);
     } catch (error) {
       console.warn('Speechmatics TTS failed, falling back to browser speech synthesis:', error);
       await this.speakFallback(text, options);

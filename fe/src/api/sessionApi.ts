@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { authAxios } from './authApi';
 import type {
   Paragraph,
   PaginatedResponse,
@@ -7,8 +7,6 @@ import type {
   SessionProgress,
   SentenceSubmissionResponse,
 } from '../types/session';
-
-const API_BASE = 'http://localhost:8081/api';
 
 export async function getParagraphs(
   filters: ParagraphFilters = {}
@@ -22,31 +20,31 @@ export async function getParagraphs(
   if (filters.sortBy) params.append('sortBy', filters.sortBy);
   if (filters.sortOrder) params.append('sortOrder', filters.sortOrder);
 
-  const response = await axios.get<PaginatedResponse<Paragraph>>(`${API_BASE}/paragraphs`, {
+  const response = await authAxios.get<PaginatedResponse<Paragraph>>(`/paragraphs`, {
     params,
   });
   return response.data;
 }
 
 export async function getTopics(): Promise<string[]> {
-  const response = await axios.get<string[]>(`${API_BASE}/paragraphs/topics`);
+  const response = await authAxios.get<string[]>(`/paragraphs/topics`);
   return response.data;
 }
 
 export async function getParagraphById(id: number): Promise<Paragraph> {
-  const response = await axios.get<Paragraph>(`${API_BASE}/paragraphs/${id}`);
+  const response = await authAxios.get<Paragraph>(`/paragraphs/${id}`);
   return response.data;
 }
 
 export async function searchParagraphs(query: string): Promise<Paragraph[]> {
-  const response = await axios.get<Paragraph[]>(`${API_BASE}/paragraphs/search`, {
+  const response = await authAxios.get<Paragraph[]>(`/paragraphs/search`, {
     params: { query },
   });
   return response.data;
 }
 
 export async function createSession(paragraphId: number, userId?: number): Promise<Session> {
-  const response = await axios.post<Session>(`${API_BASE}/sessions`, {
+  const response = await authAxios.post<Session>(`/sessions`, {
     paragraphId,
     userId: userId || 1,
   });
@@ -54,7 +52,7 @@ export async function createSession(paragraphId: number, userId?: number): Promi
 }
 
 export async function getSession(sessionId: number): Promise<Session> {
-  const response = await axios.get<Session>(`${API_BASE}/sessions/${sessionId}`);
+  const response = await authAxios.get<Session>(`/sessions/${sessionId}`);
   return response.data;
 }
 
@@ -63,8 +61,8 @@ export async function submitSentenceTranslation(
   userTranslation: string,
   options?: { isRetry?: boolean; parentSubmissionId?: number }
 ): Promise<SentenceSubmissionResponse> {
-  const response = await axios.post<SentenceSubmissionResponse>(
-    `${API_BASE}/sessions/${sessionId}/submit`,
+  const response = await authAxios.post<SentenceSubmissionResponse>(
+    `/sessions/${sessionId}/submit`,
     {
       userTranslation,
       isRetry: options?.isRetry,
@@ -75,18 +73,16 @@ export async function submitSentenceTranslation(
 }
 
 export async function skipSentence(sessionId: number): Promise<SentenceSubmissionResponse> {
-  const response = await axios.post<SentenceSubmissionResponse>(
-    `${API_BASE}/sessions/${sessionId}/skip`
-  );
+  const response = await authAxios.post<SentenceSubmissionResponse>(`/sessions/${sessionId}/skip`);
   return response.data;
 }
 
 export async function getSessionProgress(sessionId: number): Promise<SessionProgress> {
-  const response = await axios.get<SessionProgress>(`${API_BASE}/sessions/${sessionId}/progress`);
+  const response = await authAxios.get<SessionProgress>(`/sessions/${sessionId}/progress`);
   return response.data;
 }
 
 export async function getUserSessions(userId: number): Promise<Session[]> {
-  const response = await axios.get<Session[]>(`${API_BASE}/sessions/user/${userId}`);
+  const response = await authAxios.get<Session[]>(`/sessions/user/${userId}`);
   return response.data;
 }

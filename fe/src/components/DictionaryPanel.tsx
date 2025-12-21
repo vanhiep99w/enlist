@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { X, Search, Trash2, BookOpen, Calendar, Sparkles } from 'lucide-react';
-import { getUserDictionary, deleteWord, type DictionaryWord } from '../api/dictionaryApi';
+import { useUserDictionary, useDeleteWord } from '../hooks/useDictionary';
 import { Card, CardContent } from './ui/card';
 import { cn } from '@/lib/utils';
+import type { DictionaryWord } from '../api/dictionaryApi';
 
 interface DictionaryPanelProps {
   isOpen: boolean;
@@ -11,17 +12,18 @@ interface DictionaryPanelProps {
 }
 
 export const DictionaryPanel = ({ isOpen, onClose, userId }: DictionaryPanelProps) => {
-  const [words, setWords] = useState<DictionaryWord[]>([]);
+  const { data: words = [], isLoading, refetch } = useUserDictionary(userId);
+  const deleteWordMutation = useDeleteWord();
+
   const [filteredWords, setFilteredWords] = useState<DictionaryWord[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [selectedWord, setSelectedWord] = useState<DictionaryWord | null>(null);
 
   useEffect(() => {
     if (isOpen) {
-      loadDictionary();
+      refetch();
     }
-  }, [isOpen, userId]);
+  }, [isOpen, refetch]);
 
   useEffect(() => {
     if (searchQuery.trim()) {
@@ -36,29 +38,11 @@ export const DictionaryPanel = ({ isOpen, onClose, userId }: DictionaryPanelProp
     }
   }, [searchQuery, words]);
 
-  const loadDictionary = async () => {
-    setIsLoading(true);
-    try {
-      const data = await getUserDictionary(userId);
-      setWords(data);
-      setFilteredWords(data);
-    } catch (error) {
-      console.error('Failed to load dictionary:', error);
-    } finally {
-      setIsLoading(false);
+  const handleDelete = (wordId: number) => {
+    if (selectedWord?.id === wordId) {
+      setSelectedWord(null);
     }
-  };
-
-  const handleDelete = async (wordId: number) => {
-    try {
-      await deleteWord(userId, wordId);
-      setWords(words.filter((w) => w.id !== wordId));
-      if (selectedWord?.id === wordId) {
-        setSelectedWord(null);
-      }
-    } catch (error) {
-      console.error('Failed to delete word:', error);
-    }
+    deleteWordMutation.mutate({ userId, wordId });
   };
 
   const formatDate = (dateString: string) => {

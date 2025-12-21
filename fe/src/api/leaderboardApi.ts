@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-const API_BASE = 'http://localhost:8081/api';
+import { authAxios } from './authApi';
 
 export interface LeaderboardUser {
   id: number;
@@ -14,13 +12,13 @@ export interface LeaderboardUser {
 }
 
 export async function getGlobalLeaderboard(limit: number = 10): Promise<LeaderboardUser[]> {
-  const response = await axios.get<LeaderboardUser[]>(`${API_BASE}/leaderboard`, {
+  const response = await authAxios.get<LeaderboardUser[]>('/leaderboard', {
     params: { limit },
   });
   return response.data;
 }
 
 export async function getUserRank(userId: number): Promise<number> {
-  const response = await axios.get<number>(`${API_BASE}/leaderboard/rank/${userId}`);
+  const response = await authAxios.get<number>(`/leaderboard/rank/${userId}`);
   return response.data;
 }
