@@ -10,7 +10,7 @@ interface Props {
 
 export function ParagraphSummaryModal({ sessionId, isOpen, onClose }: Props) {
   const [isVisible, setIsVisible] = useState(false);
-  const { data: summary, isLoading } = useSessionSummary(sessionId);
+  const { data: summary, isLoading, error } = useSessionSummary(sessionId);
 
   useEffect(() => {
     if (isOpen) {
@@ -23,7 +23,56 @@ export function ParagraphSummaryModal({ sessionId, isOpen, onClose }: Props) {
     setTimeout(onClose, 200);
   };
 
-  if (!isOpen || !summary) return null;
+  if (!isOpen) return null;
+
+  if (isLoading) {
+    return (
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center"
+        style={{ backgroundColor: 'rgba(0, 0, 0, 0.9)' }}
+      >
+        <div className="animate-pulse text-2xl font-bold" style={{ color: 'var(--color-primary)' }}>
+          Loading summary...
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !summary) {
+    return (
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        onClick={handleClose}
+      >
+        <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
+        <div
+          className="relative rounded-2xl p-8 text-center"
+          style={{
+            backgroundColor: 'var(--color-surface)',
+            border: '1px solid var(--color-border)',
+          }}
+        >
+          <div className="mb-4 text-4xl">⚠️</div>
+          <h3 className="mb-2 text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
+            Summary Not Available
+          </h3>
+          <p className="mb-4" style={{ color: 'var(--color-text-muted)' }}>
+            {error ? 'Session not completed yet or summary not found.' : 'Loading...'}
+          </p>
+          <button
+            onClick={handleClose}
+            className="rounded-lg px-6 py-2 font-medium transition-all hover:opacity-80"
+            style={{
+              backgroundColor: 'var(--color-primary)',
+              color: 'var(--color-surface)',
+            }}
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const getGradeInfo = (accuracy: number) => {
     if (accuracy >= 95) return { grade: 'S', label: 'EXCEPTIONAL', color: 'var(--color-primary)' };

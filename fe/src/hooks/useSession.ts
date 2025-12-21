@@ -129,6 +129,7 @@ export function useSessionSummary(sessionId: number) {
     queryKey: sessionKeys.summary(sessionId),
     queryFn: () => getSessionSummary(sessionId),
     enabled: !!sessionId,
+    retry: false,
   });
 }
 
