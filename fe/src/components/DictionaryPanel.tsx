@@ -1,5 +1,14 @@
 import { useState, useEffect } from 'react';
-import { X, Search, Trash2, BookOpen, Calendar, Sparkles, Volume2 } from 'lucide-react';
+import {
+  X,
+  Search,
+  Trash2,
+  BookOpen,
+  Calendar,
+  Sparkles,
+  Volume2,
+  MessageSquareQuote,
+} from 'lucide-react';
 import { useUserDictionary, useDeleteWord } from '../hooks/useDictionary';
 import { Card, CardContent } from './ui/card';
 import { cn } from '@/lib/utils';
@@ -20,6 +29,7 @@ export const DictionaryPanel = ({ isOpen, onClose, userId }: DictionaryPanelProp
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedWord, setSelectedWord] = useState<DictionaryWord | null>(null);
   const [playingWordId, setPlayingWordId] = useState<number | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ wordId: number; word: string } | null>(null);
 
   const handleSpeak = async (e: React.MouseEvent, word: DictionaryWord) => {
     e.stopPropagation();
@@ -60,6 +70,7 @@ export const DictionaryPanel = ({ isOpen, onClose, userId }: DictionaryPanelProp
       setSelectedWord(null);
     }
     deleteWordMutation.mutate({ userId, wordId });
+    setDeleteConfirm(null);
   };
 
   const formatDate = (dateString: string) => {
@@ -245,7 +256,7 @@ export const DictionaryPanel = ({ isOpen, onClose, userId }: DictionaryPanelProp
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleDelete(word.id);
+                        setDeleteConfirm({ wordId: word.id, word: word.word });
                       }}
                       className="rounded-lg p-1.5 opacity-0 transition-all group-hover:opacity-100 hover:bg-red-500/20"
                       style={{ color: 'var(--color-error)' }}
@@ -268,6 +279,41 @@ export const DictionaryPanel = ({ isOpen, onClose, userId }: DictionaryPanelProp
                       >
                         → {word.translation}
                       </p>
+                    </div>
+                  )}
+
+                  {/* Examples Section */}
+                  {word.examples && word.examples.length > 0 && (
+                    <div
+                      className="mb-2 rounded-lg p-2"
+                      style={{ backgroundColor: 'var(--color-surface-dark)' }}
+                    >
+                      <div
+                        className="mb-1.5 flex items-center gap-1 text-[10px] font-semibold tracking-wider uppercase"
+                        style={{ color: 'var(--color-text-muted)' }}
+                      >
+                        <MessageSquareQuote className="h-3 w-3" />
+                        Examples
+                      </div>
+                      <div className="space-y-1.5">
+                        {word.examples.slice(0, 2).map((example, idx) => (
+                          <div
+                            key={idx}
+                            className="border-l-2 pl-2"
+                            style={{ borderColor: 'var(--color-primary)' }}
+                          >
+                            <p
+                              className="text-xs italic"
+                              style={{ color: 'var(--color-text-secondary)' }}
+                            >
+                              {example.en}
+                            </p>
+                            <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                              {example.vi}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
 
@@ -307,6 +353,51 @@ export const DictionaryPanel = ({ isOpen, onClose, userId }: DictionaryPanelProp
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      {deleteConfirm && (
+        <>
+          <div
+            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+            onClick={() => setDeleteConfirm(null)}
+          />
+          <div
+            className="fixed top-1/2 left-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-xl p-6 shadow-2xl"
+            style={{ backgroundColor: 'var(--color-surface)' }}
+          >
+            <h3 className="mb-2 text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>
+              Delete Word?
+            </h3>
+            <p className="mb-6 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+              Are you sure you want to delete "
+              <span className="font-semibold">{deleteConfirm.word}</span>" from your dictionary?
+              This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setDeleteConfirm(null)}
+                className="rounded-lg px-4 py-2 text-sm font-medium transition-colors"
+                style={{
+                  backgroundColor: 'var(--color-surface-dark)',
+                  color: 'var(--color-text-secondary)',
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDelete(deleteConfirm.wordId)}
+                className="rounded-lg px-4 py-2 text-sm font-medium transition-colors hover:opacity-90"
+                style={{
+                  backgroundColor: 'var(--color-error)',
+                  color: 'white',
+                }}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
 };

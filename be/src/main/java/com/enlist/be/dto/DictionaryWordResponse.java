@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -18,6 +19,7 @@ public class DictionaryWordResponse {
     private String word;
     private String translation;
     private String context;
+    private List<ExampleSentence> examples;
     private LocalDateTime createdAt;
 
     public static DictionaryWordResponse fromEntity(DictionaryWord entity) {
@@ -27,6 +29,7 @@ public class DictionaryWordResponse {
                 .word(entity.getWord())
                 .translation(entity.getTranslation())
                 .context(entity.getContext())
+                .examples(entity.getExamples())
                 .createdAt(entity.getCreatedAt())
                 .build();
     }

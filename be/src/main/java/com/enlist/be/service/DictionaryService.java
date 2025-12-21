@@ -29,6 +29,7 @@ public class DictionaryService {
                 .word(request.getWord())
                 .translation(request.getTranslation())
                 .context(request.getContext())
+                .examples(request.getExamples())
                 .build();
 
         DictionaryWord saved = dictionaryWordRepository.save(word);

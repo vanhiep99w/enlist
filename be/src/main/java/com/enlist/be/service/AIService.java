@@ -450,10 +450,6 @@ public class AIService {
                 .build();
     }
 
-    public Map<String, String> translateWord(String word) {
-        return translateWord(word, null);
-    }
-
     public Map<String, String> translateWord(String word, String context) {
         String contextSection = "";
         if (context != null && !context.isEmpty()) {
@@ -474,14 +470,17 @@ public class AIService {
                 Word/Phrase: %s
                 
                 IMPORTANT: Keep example sentences SHORT (maximum 10-15 words). Use simple, clear examples.
+                Provide EXACTLY 2 different example sentences.
                 
                 Respond with ONLY valid JSON (no markdown, no explanation):
                 {
                   "word": "%s",
                   "translation": "<translation in target language based on context>",
                   "partOfSpeech": "<noun|verb|adjective|adverb|phrase|preposition|conjunction|etc>",
-                  "example": "<SHORT example sentence using this word - max 10-15 words>",
-                  "exampleTranslation": "<translation of the example to target language>"
+                  "example1": "<SHORT example sentence 1 using this word - max 10-15 words>",
+                  "example1Translation": "<translation of example 1 to target language>",
+                  "example2": "<SHORT example sentence 2 using this word - max 10-15 words>",
+                  "example2Translation": "<translation of example 2 to target language>"
                 }
                 """, contextSection, word, word);
 
@@ -515,14 +514,24 @@ public class AIService {
                     "word", translationNode.path("word").asText(word),
                     "translation", translationNode.path("translation").asText(""),
                     "partOfSpeech", translationNode.path("partOfSpeech").asText(""),
-                    "example", translationNode.path("example").asText(""),
-                    "exampleTranslation", translationNode.path("exampleTranslation").asText("")
+                    "example1", translationNode.path("example1").asText(""),
+                    "example1Translation", translationNode.path("example1Translation").asText(""),
+                    "example2", translationNode.path("example2").asText(""),
+                    "example2Translation", translationNode.path("example2Translation").asText("")
             );
             log.info("Translation result: {}", result);
             return result;
         } catch (Exception e) {
             log.error("Error translating word '{}': {}", word, e.getMessage(), e);
-            return Map.of("word", word, "translation", "", "partOfSpeech", "", "example", "", "exampleTranslation", "");
+            return Map.of(
+                    "word", word, 
+                    "translation", "", 
+                    "partOfSpeech", "", 
+                    "example1", "", 
+                    "example1Translation", "",
+                    "example2", "", 
+                    "example2Translation", ""
+            );
         }
     }
 }

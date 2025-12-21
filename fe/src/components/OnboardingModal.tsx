@@ -115,7 +115,7 @@ const steps: Step[] = [
             className="flex items-center justify-between rounded-lg p-3"
             style={{ backgroundColor: 'var(--color-surface-light)', opacity: 0.5 }}
           >
-            <span style={{ color: 'var(--color-text-secondary)' }}>Open dictionary</span>
+            <span style={{ color: 'var(--color-text-secondary)' }}>Open My Dictionary</span>
             <kbd
               className="rounded px-2 py-1 font-mono text-sm"
               style={{

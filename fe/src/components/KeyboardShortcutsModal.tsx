@@ -22,7 +22,7 @@ const shortcutGroups: ShortcutGroup[] = [
   {
     title: 'Tools',
     shortcuts: [
-      { keys: ['Ctrl', 'D'], description: 'Toggle dictionary' },
+      { keys: ['Ctrl', 'D'], description: 'Toggle My Dictionary' },
       { keys: ['?'], description: 'Show this help' },
     ],
   },

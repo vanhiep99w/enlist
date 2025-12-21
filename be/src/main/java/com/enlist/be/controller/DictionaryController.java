@@ -3,6 +3,7 @@ package com.enlist.be.controller;
 import com.enlist.be.dto.DictionaryWordRequest;
 import com.enlist.be.dto.DictionaryWordResponse;
 import com.enlist.be.service.DictionaryService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +21,7 @@ public class DictionaryController {
     @PostMapping("/save")
     public ResponseEntity<DictionaryWordResponse> saveWord(
             @RequestParam Long userId,
-            @RequestBody DictionaryWordRequest request) {
+            @Valid @RequestBody DictionaryWordRequest request) {
         return ResponseEntity.ok(dictionaryService.saveWord(userId, request));
     }
 

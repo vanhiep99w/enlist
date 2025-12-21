@@ -4,8 +4,15 @@ export interface WordTranslation {
   word: string;
   translation: string;
   partOfSpeech: string;
-  example: string;
-  exampleTranslation: string;
+  example1: string;
+  example1Translation: string;
+  example2: string;
+  example2Translation: string;
+}
+
+export interface ExampleSentence {
+  vi: string;
+  en: string;
 }
 
 export interface DictionaryWord {
@@ -13,6 +20,7 @@ export interface DictionaryWord {
   word: string;
   translation: string;
   context?: string;
+  examples?: ExampleSentence[];
   sessionId?: number;
   createdAt: string;
 }
@@ -22,6 +30,7 @@ export interface DictionaryEntry {
   word: string;
   translation: string;
   context?: string;
+  examples?: ExampleSentence[];
   sessionId?: number;
   createdAt: string;
 }
@@ -31,6 +40,7 @@ export interface SaveWordRequest {
   word: string;
   translation: string;
   context?: string;
+  examples: ExampleSentence[];
 }
 
 export const translateWord = async (word: string, context?: string): Promise<WordTranslation> => {
