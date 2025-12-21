@@ -14,7 +14,7 @@
 
 ## Architecture
 
-- **be/**: Spring Boot 3.2.x backend (Java 17+) with Spring Security 6.x, JPA, PostgreSQL 15.x, Redis 7.x. REST API at `/api/*`
+- **be/**: Spring Boot 3.2.x backend (Java 21+) with Spring Security 6.x, JPA, PostgreSQL 15.x, Redis 7.x. REST API at `/api/*`
 - **fe/**: React 18.x + TanStack Router + Vite + Vitest + TypeScript + Tailwind CSS + Axios frontend (port 5173)
 - **AI Integration**: Groq API (llama-3.1-8b-instant) or Ollama (llama3.2:3b) for translation evaluation via AIService
 - **TTS Integration**: ttsforfree.com API for high-quality word pronunciation with browser fallback
@@ -226,16 +226,6 @@ bd close bd-42 --reason "Completed" --json
    - `bd create "Found bug" -p 1 --deps discovered-from:<parent-id>`
 5. **Complete**: `bd close <id> --reason "Done"`
 6. **Commit together**: Always commit the `.beads/issues.jsonl` file together with the code changes so issue state stays in sync with code state
-
-### Managing AI-Generated Planning Documents
-
-**Benefits:**
-
-- ✅ Clean repository root
-- ✅ Clear separation between ephemeral and permanent documentation
-- ✅ Easy to exclude from version control if desired
-- ✅ Preserves planning history for archeological research
-- ✅ Reduces noise when browsing the project
 
 ### CLI Help
 

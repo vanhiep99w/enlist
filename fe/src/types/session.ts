@@ -6,6 +6,7 @@ export interface Paragraph {
   topic: string;
   sentenceCount: number;
   sentences: string[];
+  completionStatus?: 'completed' | 'in_progress' | 'not_started';
 }
 
 export interface PaginatedResponse<T> {
@@ -26,6 +27,7 @@ export interface ParagraphFilters {
   pageSize?: number;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
+  userId?: number;
 }
 
 export interface CompletedSentenceData {

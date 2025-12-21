@@ -4,6 +4,7 @@ import { useParagraphs, useTopics } from '../hooks/useSession';
 import type { Paragraph } from '../types/session';
 import { Pagination } from './Pagination';
 import { TopicDropdown } from './TopicDropdown';
+import { useAuth } from '../contexts/AuthContext';
 
 const DIFFICULTIES = ['Beginner', 'Intermediate', 'Advanced'];
 const DIFFICULTY_TO_API: Record<string, string> = {
@@ -11,14 +12,23 @@ const DIFFICULTY_TO_API: Record<string, string> = {
   Intermediate: 'MEDIUM',
   Advanced: 'HARD',
 };
+const COMPLETION_STATUSES = ['All', 'Not Started', 'In Progress', 'Completed'];
+const STATUS_TO_API: Record<string, string | undefined> = {
+  All: undefined,
+  'Not Started': 'not_started',
+  'In Progress': 'in_progress',
+  Completed: 'completed',
+};
 const DEFAULT_PAGE_SIZE = 12;
 
 export function ParagraphList() {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   // Filter states
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('');
   const [selectedTopic, setSelectedTopic] = useState<string>('');
+  const [selectedCompletionStatus, setSelectedCompletionStatus] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
@@ -42,6 +52,7 @@ export function ParagraphList() {
     search: debouncedSearch || undefined,
     page: currentPage,
     pageSize: pageSize,
+    userId: user?.id,
   };
 
   // React Query hooks
@@ -66,11 +77,20 @@ export function ParagraphList() {
   const clearFilters = () => {
     setSelectedDifficulty('');
     setSelectedTopic('');
+    setSelectedCompletionStatus('All');
     setSearchQuery('');
     setCurrentPage(0);
   };
 
-  const hasActiveFilters = selectedDifficulty || selectedTopic || searchQuery;
+  const hasActiveFilters =
+    selectedDifficulty || selectedTopic || selectedCompletionStatus !== 'All' || searchQuery;
+
+  // Filter paragraphs by completion status
+  const filteredParagraphs = (paragraphData?.content || []).filter((p) => {
+    const statusFilter = STATUS_TO_API[selectedCompletionStatus];
+    if (!statusFilter) return true;
+    return p.completionStatus === statusFilter;
+  });
 
   const getDifficultyStyles = (
     difficulty: string
@@ -114,6 +134,7 @@ export function ParagraphList() {
   const renderCard = (paragraph: Paragraph, index: number, isFeatured: boolean = false) => {
     const styles = getDifficultyStyles(paragraph.difficulty);
     const showAccentGlow = isAdvanced(paragraph.difficulty);
+    const completionStatus = paragraph.completionStatus || 'not_started';
 
     return (
       <div
@@ -131,7 +152,7 @@ export function ParagraphList() {
 
         {/* Main card */}
         <div
-          className={`hover-lift relative h-full cursor-pointer overflow-hidden rounded-xl border-[var(--color-border)] bg-[var(--color-surface)] ${styles.accent} ${showAccentGlow ? 'ring-1 ring-cyan-500/20' : ''} `}
+          className={`hover-lift relative h-full cursor-pointer overflow-hidden rounded-xl border-[var(--color-border)] bg-[var(--color-surface)] ${styles.accent} ${showAccentGlow ? 'ring-1 ring-cyan-500/20' : ''} ${completionStatus === 'completed' ? 'ring-2 ring-emerald-500/40' : ''} ${completionStatus === 'in_progress' ? 'ring-2 ring-amber-500/40' : ''}`}
         >
           {/* Geometric decorative element */}
           {isFeatured && (
@@ -151,6 +172,29 @@ export function ParagraphList() {
           )}
 
           <div className={`relative p-6 ${isFeatured ? 'md:p-8' : ''}`}>
+            {/* Completion Status Badge */}
+            {completionStatus !== 'not_started' && (
+              <div className="absolute -top-2 -right-2 z-10">
+                {completionStatus === 'completed' ? (
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/20 ring-2 ring-emerald-500/60 backdrop-blur-sm">
+                    <svg
+                      className="h-5 w-5 text-emerald-400"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                    >
+                      <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
+                ) : (
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-500/20 ring-2 ring-amber-500/60 backdrop-blur-sm">
+                    <div className="h-3 w-3 animate-spin rounded-full border-2 border-amber-400 border-t-transparent" />
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Topic badge */}
             {paragraph.topic && (
               <span className="mb-4 inline-block rounded-full bg-[var(--color-surface-elevated)] px-3 py-1 text-xs font-medium text-[var(--color-text-muted)]">
@@ -221,8 +265,6 @@ export function ParagraphList() {
       </div>
     );
   };
-
-  const paragraphs = paragraphData?.content || [];
 
   return (
     <div className="min-h-screen bg-[var(--color-surface-dark)] px-4 py-8">
@@ -331,6 +373,41 @@ export function ParagraphList() {
               </button>
             )}
           </div>
+
+          {/* Completion Status Filter Row */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="mr-2 text-sm text-[var(--color-text-muted)]">Status:</span>
+            {COMPLETION_STATUSES.map((status) => (
+              <button
+                key={status}
+                onClick={() => {
+                  setSelectedCompletionStatus(status);
+                  setCurrentPage(0);
+                }}
+                className={`hover-button flex items-center gap-2 rounded-xl px-4 py-2.5 font-medium transition-all ${
+                  selectedCompletionStatus === status
+                    ? 'bg-[var(--color-primary)] text-black'
+                    : 'bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-light)]'
+                }`}
+              >
+                {status === 'Completed' && (
+                  <svg
+                    className="h-4 w-4"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                )}
+                {status === 'In Progress' && (
+                  <div className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                )}
+                {status}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Loading */}
@@ -367,7 +444,7 @@ export function ParagraphList() {
         {!isLoading && !error && (
           <>
             <div className="grid auto-rows-min grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {paragraphs.length === 0 ? (
+              {filteredParagraphs.length === 0 ? (
                 <div className="col-span-full py-16 text-center">
                   <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-surface)]">
                     <svg
@@ -394,7 +471,7 @@ export function ParagraphList() {
                   )}
                 </div>
               ) : (
-                paragraphs.map((paragraph, index) =>
+                filteredParagraphs.map((paragraph, index) =>
                   renderCard(paragraph, index, index === 0 && currentPage === 0)
                 )
               )}
