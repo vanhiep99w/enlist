@@ -91,7 +91,7 @@ export function ParagraphSession({ paragraphId }: Props) {
   useEffect(() => {
     const initSession = async () => {
       try {
-        const newSession = await createSessionMutation.mutateAsync({ paragraphId });
+        const newSession = await createSessionMutation.mutateAsync(paragraphId);
         setSessionId(newSession.id);
 
         // Load completedData from backend
