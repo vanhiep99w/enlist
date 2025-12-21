@@ -1,12 +1,17 @@
 package com.enlist.be.util;
 
+import com.enlist.be.security.CustomUserDetailsService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 
-public final class SecurityUtils {
+@Component
+public class SecurityUtils {
 
-    private SecurityUtils() {
-        throw new UnsupportedOperationException("Utility class");
+    private static CustomUserDetailsService userDetailsService;
+
+    public SecurityUtils(CustomUserDetailsService userDetailsService) {
+        SecurityUtils.userDetailsService = userDetailsService;
     }
 
     public static Long getCurrentUserId() {
@@ -15,10 +20,6 @@ public final class SecurityUtils {
             throw new IllegalStateException("User is not authenticated");
         }
         String username = authentication.getName();
-        try {
-            return Long.parseLong(username);
-        } catch (NumberFormatException e) {
-            throw new IllegalStateException("Invalid user ID in authentication context: " + username);
-        }
+        return userDetailsService.loadUserEntityByUsername(username).getId();
     }
 }
