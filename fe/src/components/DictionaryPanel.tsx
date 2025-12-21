@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { X, Search, Trash2, BookOpen, Calendar, Sparkles } from 'lucide-react';
+import { X, Search, Trash2, BookOpen, Calendar, Sparkles, Volume2 } from 'lucide-react';
 import { useUserDictionary, useDeleteWord } from '../hooks/useDictionary';
 import { Card, CardContent } from './ui/card';
 import { cn } from '@/lib/utils';
+import { ttsService } from '../services/ttsService';
 import type { DictionaryWord } from '../api/dictionaryApi';
 
 interface DictionaryPanelProps {
@@ -18,6 +19,22 @@ export const DictionaryPanel = ({ isOpen, onClose, userId }: DictionaryPanelProp
   const [filteredWords, setFilteredWords] = useState<DictionaryWord[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedWord, setSelectedWord] = useState<DictionaryWord | null>(null);
+  const [playingWordId, setPlayingWordId] = useState<number | null>(null);
+
+  const handleSpeak = async (e: React.MouseEvent, word: DictionaryWord) => {
+    e.stopPropagation();
+    if (playingWordId === word.id) {
+      ttsService.stop();
+      setPlayingWordId(null);
+      return;
+    }
+    setPlayingWordId(word.id);
+    try {
+      await ttsService.speakWithFallback(word.translation);
+    } finally {
+      setPlayingWordId(null);
+    }
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -199,12 +216,28 @@ export const DictionaryPanel = ({ isOpen, onClose, userId }: DictionaryPanelProp
                 <CardContent className="p-4">
                   <div className="mb-2 flex items-start justify-between">
                     <div className="flex-1">
-                      <h3
-                        className="font-display mb-1 text-lg font-bold"
-                        style={{ color: 'var(--color-text-primary)' }}
-                      >
-                        {word.word}
-                      </h3>
+                      <div className="flex items-center gap-2">
+                        <h3
+                          className="font-display text-lg font-bold"
+                          style={{ color: 'var(--color-text-primary)' }}
+                        >
+                          {word.word}
+                        </h3>
+                        <button
+                          onClick={(e) => handleSpeak(e, word)}
+                          className={cn(
+                            'flex h-6 w-6 items-center justify-center rounded-full transition-all hover:scale-110',
+                            playingWordId === word.id && 'animate-pulse'
+                          )}
+                          style={{
+                            backgroundColor: 'var(--color-primary)',
+                            color: 'white',
+                          }}
+                          title="Listen to pronunciation"
+                        >
+                          <Volume2 className="h-3 w-3" />
+                        </button>
+                      </div>
                       <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                         {word.translation}
                       </p>
@@ -222,12 +255,20 @@ export const DictionaryPanel = ({ isOpen, onClose, userId }: DictionaryPanelProp
                   </div>
 
                   {word.context && (
-                    <p
-                      className="mb-2 line-clamp-2 text-xs italic"
-                      style={{ color: 'var(--color-text-muted)' }}
-                    >
-                      "{word.context}"
-                    </p>
+                    <div className="mb-2 space-y-1">
+                      <p
+                        className="line-clamp-2 text-xs italic"
+                        style={{ color: 'var(--color-text-muted)' }}
+                      >
+                        "{word.context}"
+                      </p>
+                      <p
+                        className="line-clamp-2 text-xs"
+                        style={{ color: 'var(--color-text-secondary)' }}
+                      >
+                        → {word.translation}
+                      </p>
+                    </div>
                   )}
 
                   <div
