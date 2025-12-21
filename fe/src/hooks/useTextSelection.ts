@@ -80,9 +80,23 @@ export const useTextSelection = ({
         return;
       }
 
+      // Count words in selection - strict word limit (max 50 words)
+      const wordCount = selectedText.split(/\s+/).filter((w) => w.length > 0).length;
+      if (wordCount > 50) {
+        setSelection(null);
+        return;
+      }
+
       // Expand selection to word boundaries
       const expandedRange = expandToWordBoundaries(originalRange);
       const expandedText = expandedRange.toString().trim();
+
+      // Validate expanded text word count as well
+      const expandedWordCount = expandedText.split(/\s+/).filter((w) => w.length > 0).length;
+      if (expandedWordCount > 50) {
+        setSelection(null);
+        return;
+      }
 
       // Only update selection if there's a valid expanded text
       if (expandedText && expandedText.length >= minLength) {
