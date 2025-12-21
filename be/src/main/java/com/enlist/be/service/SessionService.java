@@ -41,19 +41,19 @@ public class SessionService {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Transactional
-    public SessionResponse createSession(SessionCreateRequest request) {
+    public SessionResponse createSession(Long userId, SessionCreateRequest request) {
         Paragraph paragraph = paragraphRepository.findById(request.getParagraphId())
                 .orElseThrow(() -> new RuntimeException("Paragraph not found: " + request.getParagraphId()));
 
         var existingSession = sessionRepository.findFirstByUserIdAndParagraphIdAndStatusOrderByIdDesc(
-                request.getUserId(), request.getParagraphId(), ParagraphSession.Status.IN_PROGRESS);
+                userId, request.getParagraphId(), ParagraphSession.Status.IN_PROGRESS);
         
         if (existingSession.isPresent()) {
             return SessionResponse.fromEntity(existingSession.get());
         }
 
         ParagraphSession session = ParagraphSession.builder()
-                .userId(request.getUserId())
+                .userId(userId)
                 .paragraph(paragraph)
                 .currentSentenceIndex(0)
                 .status(ParagraphSession.Status.IN_PROGRESS)

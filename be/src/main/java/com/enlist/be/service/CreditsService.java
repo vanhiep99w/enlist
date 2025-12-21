@@ -29,8 +29,8 @@ public class CreditsService {
     }
 
     @Transactional
-    public SpendCreditsResponse spendCredits(SpendCreditsRequest request) {
-        User user = getOrCreateUser(request.getUserId());
+    public SpendCreditsResponse spendCredits(Long userId, SpendCreditsRequest request) {
+        User user = getOrCreateUser(userId);
 
         int amount = request.getAmount() != null ? request.getAmount() : HINT_COST;
 

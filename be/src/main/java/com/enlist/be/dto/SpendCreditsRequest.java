@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SpendCreditsRequest {
 
-    private Long userId;
     private Integer amount;
     private String reason;
 }

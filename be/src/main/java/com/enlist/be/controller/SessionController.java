@@ -2,6 +2,7 @@ package com.enlist.be.controller;
 
 import com.enlist.be.dto.*;
 import com.enlist.be.service.SessionService;
+import com.enlist.be.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +19,8 @@ public class SessionController {
 
     @PostMapping
     public ResponseEntity<SessionResponse> createSession(@RequestBody SessionCreateRequest request) {
-        return ResponseEntity.ok(sessionService.createSession(request));
+        Long userId = SecurityUtils.getCurrentUserId();
+        return ResponseEntity.ok(sessionService.createSession(userId, request));
     }
 
     @GetMapping("/{id}")
@@ -43,8 +45,9 @@ public class SessionController {
         return ResponseEntity.ok(sessionService.getProgress(id));
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<SessionResponse>> getUserSessions(@PathVariable Long userId) {
+    @GetMapping("/user")
+    public ResponseEntity<List<SessionResponse>> getUserSessions() {
+        Long userId = SecurityUtils.getCurrentUserId();
         return ResponseEntity.ok(sessionService.getUserSessions(userId));
     }
 

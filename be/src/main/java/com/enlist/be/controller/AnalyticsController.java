@@ -3,6 +3,7 @@ package com.enlist.be.controller;
 import com.enlist.be.dto.ProgressAnalyticsResponse;
 import com.enlist.be.service.ErrorAnalyticsService;
 import com.enlist.be.service.ProgressAnalyticsService;
+import com.enlist.be.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,46 +20,45 @@ public class AnalyticsController {
     private final ErrorAnalyticsService errorAnalyticsService;
     private final ProgressAnalyticsService progressAnalyticsService;
 
-    @GetMapping("/errors/{userId}")
-    public ResponseEntity<Map<String, Object>> getDetailedErrorAnalytics(@PathVariable Long userId) {
+    @GetMapping("/errors")
+    public ResponseEntity<Map<String, Object>> getDetailedErrorAnalytics() {
+        Long userId = SecurityUtils.getCurrentUserId();
         return ResponseEntity.ok(errorAnalyticsService.getDetailedAnalytics(userId));
     }
 
-    @GetMapping("/errors/{userId}/distribution")
-    public ResponseEntity<Map<String, Object>> getErrorDistribution(@PathVariable Long userId) {
+    @GetMapping("/errors/distribution")
+    public ResponseEntity<Map<String, Object>> getErrorDistribution() {
+        Long userId = SecurityUtils.getCurrentUserId();
         return ResponseEntity.ok(errorAnalyticsService.getErrorDistribution(userId));
     }
 
-    @GetMapping("/errors/{userId}/trends")
-    public ResponseEntity<Map<String, Object>> getErrorTrends(
-            @PathVariable Long userId,
-            @RequestParam(defaultValue = "7") int days) {
+    @GetMapping("/errors/trends")
+    public ResponseEntity<Map<String, Object>> getErrorTrends(@RequestParam(defaultValue = "7") int days) {
+        Long userId = SecurityUtils.getCurrentUserId();
         return ResponseEntity.ok(errorAnalyticsService.getErrorTrend(userId, days));
     }
 
-    @GetMapping("/errors/{userId}/weak-areas")
-    public ResponseEntity<List<Map<String, Object>>> getWeakAreas(@PathVariable Long userId) {
+    @GetMapping("/errors/weak-areas")
+    public ResponseEntity<List<Map<String, Object>>> getWeakAreas() {
+        Long userId = SecurityUtils.getCurrentUserId();
         return ResponseEntity.ok(errorAnalyticsService.getWeakAreas(userId));
     }
 
-    @GetMapping("/errors/{userId}/top")
-    public ResponseEntity<List<Map<String, Object>>> getTopErrors(
-            @PathVariable Long userId,
-            @RequestParam(defaultValue = "5") int limit) {
+    @GetMapping("/errors/top")
+    public ResponseEntity<List<Map<String, Object>>> getTopErrors(@RequestParam(defaultValue = "5") int limit) {
+        Long userId = SecurityUtils.getCurrentUserId();
         return ResponseEntity.ok(errorAnalyticsService.getMostCommonErrors(userId, limit));
     }
 
-    @GetMapping("/common-mistakes/{userId}")
-    public ResponseEntity<List<Map<String, Object>>> getCommonMistakes(
-            @PathVariable Long userId,
-            @RequestParam(defaultValue = "10") int limit) {
+    @GetMapping("/common-mistakes")
+    public ResponseEntity<List<Map<String, Object>>> getCommonMistakes(@RequestParam(defaultValue = "10") int limit) {
+        Long userId = SecurityUtils.getCurrentUserId();
         return ResponseEntity.ok(errorAnalyticsService.getMostCommonErrors(userId, limit));
     }
 
-    @GetMapping("/progress/{userId}")
-    public ResponseEntity<ProgressAnalyticsResponse> getProgressAnalytics(
-            @PathVariable Long userId,
-            @RequestParam(defaultValue = "30") int days) {
+    @GetMapping("/progress")
+    public ResponseEntity<ProgressAnalyticsResponse> getProgressAnalytics(@RequestParam(defaultValue = "30") int days) {
+        Long userId = SecurityUtils.getCurrentUserId();
         return ResponseEntity.ok(progressAnalyticsService.getProgressAnalytics(userId, days));
     }
 }
