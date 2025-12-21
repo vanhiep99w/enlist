@@ -469,6 +469,11 @@ public class SessionService {
         ParagraphSession session = sessionRepository.findById(sessionId)
             .orElseThrow(() -> new RuntimeException("Session not found: " + sessionId));
 
+        // Check if session is completed
+        if (session.getStatus() != ParagraphSession.Status.COMPLETED) {
+            throw new RuntimeException("Session not completed yet: " + sessionId);
+        }
+
         SessionSummary summary = sessionSummaryRepository.findBySessionId(sessionId)
             .orElseThrow(() -> new RuntimeException("Session summary not found: " + sessionId));
 
