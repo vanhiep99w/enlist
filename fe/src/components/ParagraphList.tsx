@@ -279,14 +279,14 @@ export function ParagraphList() {
           </p>
         </div>
 
-        {/* Filters */}
-        <div className="animate-fade-up stagger-2 relative z-20 mb-8 space-y-4">
-          {/* Search and Topic Filter Row */}
-          <div className="relative z-20 flex gap-3">
+        {/* Filters - Compact Design */}
+        <div className="animate-fade-up stagger-2 relative z-20 mb-8 overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
+          {/* Search and Topic Row */}
+          <div className="mb-5 flex gap-3">
             {/* Search Input */}
             <div className="relative flex-1">
               <svg
-                className="absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-[var(--color-text-muted)]"
+                className="absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-[var(--color-text-muted)]"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -299,15 +299,16 @@ export function ParagraphList() {
                 placeholder="Search paragraphs..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-10 w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] pr-4 pl-12 text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] transition-all focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/50"
+                className="h-11 w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-dark)] pr-4 pl-11 text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] transition-all focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/50"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute top-1/2 right-4 -translate-y-1/2 p-1 text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text-primary)]"
+                  className="absolute top-1/2 right-3 -translate-y-1/2 p-1 text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text-primary)]"
+                  aria-label="Clear search"
                 >
                   <svg
-                    className="h-4 w-4"
+                    className="h-3.5 w-3.5"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
@@ -327,86 +328,104 @@ export function ParagraphList() {
             />
           </div>
 
-          {/* Difficulty Buttons Row */}
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="mr-2 text-sm text-[var(--color-text-muted)]">Difficulty:</span>
-            <button
-              onClick={() => handleDifficultyChange('')}
-              className={`hover-button rounded-xl px-4 py-2.5 font-medium transition-all ${
-                selectedDifficulty === ''
-                  ? 'bg-[var(--color-primary)] text-black'
-                  : 'bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-light)]'
-              }`}
-            >
-              All
-            </button>
-            {DIFFICULTIES.map((diff) => (
-              <button
-                key={diff}
-                onClick={() => handleDifficultyChange(diff)}
-                className={`hover-button rounded-xl px-4 py-2.5 font-medium transition-all ${
-                  selectedDifficulty === diff
-                    ? 'bg-[var(--color-primary)] text-black'
-                    : 'bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-light)]'
-                }`}
-              >
-                {diff}
-              </button>
-            ))}
-
-            {/* Clear Filters Button */}
-            {hasActiveFilters && (
-              <button
-                onClick={clearFilters}
-                className="ml-auto flex items-center gap-2 px-3 py-2 text-sm text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text-primary)]"
-              >
-                <svg
-                  className="h-4 w-4"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
+          {/* Difficulty Filter */}
+          <div className="mb-4">
+            <div className="mb-2.5 flex items-center">
+              <span className="text-sm text-[var(--color-text-muted)]">Difficulty:</span>
+              {hasActiveFilters && (
+                <button
+                  onClick={clearFilters}
+                  className="ml-auto flex items-center gap-1 text-xs text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text-primary)]"
                 >
-                  <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" />
-                </svg>
-                Clear filters
-              </button>
-            )}
-          </div>
-
-          {/* Completion Status Filter Row */}
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="mr-2 text-sm text-[var(--color-text-muted)]">Status:</span>
-            {COMPLETION_STATUSES.map((status) => (
-              <button
-                key={status}
-                onClick={() => {
-                  setSelectedCompletionStatus(status);
-                  setCurrentPage(0);
-                }}
-                className={`hover-button flex items-center gap-2 rounded-xl px-4 py-2.5 font-medium transition-all ${
-                  selectedCompletionStatus === status
-                    ? 'bg-[var(--color-primary)] text-black'
-                    : 'bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-light)]'
-                }`}
-              >
-                {status === 'Completed' && (
                   <svg
-                    className="h-4 w-4"
+                    className="h-3 w-3"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2"
                   >
-                    <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" />
                   </svg>
-                )}
-                {status === 'In Progress' && (
-                  <div className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                )}
-                {status}
+                  Clear
+                </button>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => handleDifficultyChange('')}
+                className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
+                  selectedDifficulty === ''
+                    ? 'bg-[var(--color-primary)] text-black'
+                    : 'bg-[var(--color-surface-dark)] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-elevated)] hover:text-[var(--color-text-primary)]'
+                }`}
+              >
+                All
               </button>
-            ))}
+              {DIFFICULTIES.map((diff) => (
+                <button
+                  key={diff}
+                  onClick={() => handleDifficultyChange(diff)}
+                  className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
+                    selectedDifficulty === diff
+                      ? 'bg-[var(--color-primary)] text-black'
+                      : 'bg-[var(--color-surface-dark)] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-elevated)] hover:text-[var(--color-text-primary)]'
+                  }`}
+                >
+                  {diff}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className="my-4 h-px bg-[var(--color-border)]" />
+
+          {/* Status Filter */}
+          <div>
+            <span className="mb-2.5 block text-sm text-[var(--color-text-muted)]">Status:</span>
+            <div className="flex flex-wrap gap-2">
+              {COMPLETION_STATUSES.map((status) => (
+                <button
+                  key={status}
+                  onClick={() => {
+                    setSelectedCompletionStatus(status);
+                    setCurrentPage(0);
+                  }}
+                  className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition-all ${
+                    selectedCompletionStatus === status
+                      ? 'bg-[var(--color-primary)] text-black'
+                      : 'bg-[var(--color-surface-dark)] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-elevated)] hover:text-[var(--color-text-primary)]'
+                  }`}
+                >
+                  {status === 'Completed' && (
+                    <svg
+                      className="h-3.5 w-3.5"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                    >
+                      <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  )}
+                  {status === 'In Progress' && (
+                    <svg
+                      className="h-3.5 w-3.5"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path
+                        d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  )}
+                  {status}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
