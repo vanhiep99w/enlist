@@ -94,6 +94,9 @@ public class ParagraphService {
             if (session.getStatus() == ParagraphSession.Status.IN_PROGRESS) {
                 return "in_progress";
             }
+            if (session.getStatus() == ParagraphSession.Status.NOT_STARTED) {
+                return "in_progress"; // Show as in_progress if clicked but not submitted
+            }
         }
         
         return "not_started";

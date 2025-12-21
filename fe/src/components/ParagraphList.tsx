@@ -186,7 +186,7 @@ export function ParagraphList() {
                   </div>
                 ) : (
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-500/20 ring-2 ring-amber-500/60 backdrop-blur-sm">
-                    <div className="h-3 w-3 animate-spin rounded-full border-2 border-amber-400 border-t-transparent" />
+                    <div className="h-2 w-2 rounded-full bg-amber-400" />
                   </div>
                 )}
               </div>

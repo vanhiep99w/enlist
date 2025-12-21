@@ -42,7 +42,7 @@ export interface Session {
   id: number;
   paragraphId: number;
   paragraphTitle: string;
-  status: 'IN_PROGRESS' | 'COMPLETED' | 'ABANDONED';
+  status: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED' | 'ABANDONED';
   currentSentenceIndex: number;
   totalSentences: number;
   completedSentences: number;

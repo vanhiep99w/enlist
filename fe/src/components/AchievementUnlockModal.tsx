@@ -21,6 +21,7 @@ export function AchievementUnlockModal({ achievement, onClose }: Props) {
   const [isVisible, setIsVisible] = useState(false);
   const { playAchievementSound } = useSoundEffects();
   const soundPlayedRef = useRef(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Generate confetti particles once - outside of render
   const confettiParticles = useMemo(
@@ -40,6 +41,12 @@ export function AchievementUnlockModal({ achievement, onClose }: Props) {
   );
 
   const handleClose = useCallback(() => {
+    // Clear timer if user closes manually
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+
     setIsVisible(false);
     setTimeout(() => {
       onClose();
@@ -53,12 +60,16 @@ export function AchievementUnlockModal({ achievement, onClose }: Props) {
       playAchievementSound();
       soundPlayedRef.current = true;
 
-      // Auto-close after 5 seconds
-      const timer = setTimeout(() => {
+      // Auto-close after 3 seconds
+      timerRef.current = setTimeout(() => {
         handleClose();
-      }, 5000);
+      }, 3000);
 
-      return () => clearTimeout(timer);
+      return () => {
+        if (timerRef.current) {
+          clearTimeout(timerRef.current);
+        }
+      };
     }
   }, [achievement, playAchievementSound, handleClose]);
 

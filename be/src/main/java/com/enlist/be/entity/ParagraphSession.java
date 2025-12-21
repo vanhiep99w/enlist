@@ -19,6 +19,7 @@ import java.util.List;
 public class ParagraphSession {
 
     public enum Status {
+        NOT_STARTED,
         IN_PROGRESS,
         COMPLETED,
         ABANDONED
@@ -41,7 +42,7 @@ public class ParagraphSession {
 
     @Enumerated(EnumType.STRING)
     @Builder.Default
-    private Status status = Status.IN_PROGRESS;
+    private Status status = Status.NOT_STARTED;
 
     @Column(name = "total_points")
     @Builder.Default
@@ -92,7 +93,9 @@ public class ParagraphSession {
     }
 
     public int getCompletedSentenceCount() {
-        if (submissions == null) return 0;
+        if (submissions == null) {
+            return 0;
+        }
         return (int) submissions.stream()
                 .map(SentenceSubmission::getSentenceIndex)
                 .distinct()

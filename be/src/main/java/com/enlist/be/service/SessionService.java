@@ -45,18 +45,25 @@ public class SessionService {
         Paragraph paragraph = paragraphRepository.findById(request.getParagraphId())
                 .orElseThrow(() -> new RuntimeException("Paragraph not found: " + request.getParagraphId()));
 
-        var existingSession = sessionRepository.findFirstByUserIdAndParagraphIdAndStatusOrderByIdDesc(
+        var existingInProgress = sessionRepository.findFirstByUserIdAndParagraphIdAndStatusOrderByIdDesc(
                 userId, request.getParagraphId(), ParagraphSession.Status.IN_PROGRESS);
         
-        if (existingSession.isPresent()) {
-            return SessionResponse.fromEntity(existingSession.get());
+        if (existingInProgress.isPresent()) {
+            return SessionResponse.fromEntity(existingInProgress.get());
+        }
+
+        var existingNotStarted = sessionRepository.findFirstByUserIdAndParagraphIdAndStatusOrderByIdDesc(
+                userId, request.getParagraphId(), ParagraphSession.Status.NOT_STARTED);
+        
+        if (existingNotStarted.isPresent()) {
+            return SessionResponse.fromEntity(existingNotStarted.get());
         }
 
         ParagraphSession session = ParagraphSession.builder()
                 .userId(userId)
                 .paragraph(paragraph)
                 .currentSentenceIndex(0)
-                .status(ParagraphSession.Status.IN_PROGRESS)
+                .status(ParagraphSession.Status.NOT_STARTED)
                 .totalPoints(0)
                 .totalCredits(6)
                 .build();
@@ -75,6 +82,11 @@ public class SessionService {
     public SentenceSubmissionResponse submitTranslation(Long sessionId, SentenceSubmitRequest request) {
         ParagraphSession session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new RuntimeException("Session not found: " + sessionId));
+
+        // Mark session as IN_PROGRESS on first submission
+        if (session.getStatus() == ParagraphSession.Status.NOT_STARTED) {
+            session.setStatus(ParagraphSession.Status.IN_PROGRESS);
+        }
 
         if (session.getStatus() != ParagraphSession.Status.IN_PROGRESS) {
             throw new RuntimeException("Session is not in progress");
@@ -194,6 +206,11 @@ public class SessionService {
     public SentenceSubmissionResponse skipSentence(Long sessionId) {
         ParagraphSession session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new RuntimeException("Session not found: " + sessionId));
+
+        // Mark session as IN_PROGRESS on first skip
+        if (session.getStatus() == ParagraphSession.Status.NOT_STARTED) {
+            session.setStatus(ParagraphSession.Status.IN_PROGRESS);
+        }
 
         if (session.getStatus() != ParagraphSession.Status.IN_PROGRESS) {
             throw new RuntimeException("Session is not in progress");
