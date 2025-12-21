@@ -22,6 +22,7 @@ export async function getParagraphs(
   if (filters.sortBy) params.append('sortBy', filters.sortBy);
   if (filters.sortOrder) params.append('sortOrder', filters.sortOrder);
   if (filters.userId !== undefined) params.append('userId', String(filters.userId));
+  if (filters.completionStatus) params.append('completionStatus', filters.completionStatus);
 
   const response = await authAxios.get<PaginatedResponse<Paragraph>>(`/paragraphs`, {
     params,

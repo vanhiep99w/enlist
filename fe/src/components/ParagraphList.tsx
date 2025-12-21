@@ -53,6 +53,7 @@ export function ParagraphList() {
     page: currentPage,
     pageSize: pageSize,
     userId: user?.id,
+    completionStatus: STATUS_TO_API[selectedCompletionStatus],
   };
 
   // React Query hooks
@@ -85,12 +86,8 @@ export function ParagraphList() {
   const hasActiveFilters =
     selectedDifficulty || selectedTopic || selectedCompletionStatus !== 'All' || searchQuery;
 
-  // Filter paragraphs by completion status
-  const filteredParagraphs = (paragraphData?.content || []).filter((p) => {
-    const statusFilter = STATUS_TO_API[selectedCompletionStatus];
-    if (!statusFilter) return true;
-    return p.completionStatus === statusFilter;
-  });
+  // No need for client-side filtering - backend handles completionStatus
+  const filteredParagraphs = paragraphData?.content || [];
 
   const getDifficultyStyles = (
     difficulty: string

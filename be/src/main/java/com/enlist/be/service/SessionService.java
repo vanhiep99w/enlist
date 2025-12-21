@@ -178,6 +178,11 @@ public class SessionService {
                 createSessionSummary(session);
                 creditsService.awardPointsForSession(session.getUserId(), session.getTotalPoints(), true);
             }
+        } else if (isLastSentence && !passedThreshold) {
+            // If failed the last sentence, still mark as complete (user finished all attempts)
+            session.complete();
+            createSessionSummary(session);
+            creditsService.awardPointsForSession(session.getUserId(), session.getTotalPoints(), true);
         }
 
         sessionRepository.save(session);

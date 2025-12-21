@@ -28,6 +28,7 @@ export interface ParagraphFilters {
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
   userId?: number;
+  completionStatus?: 'completed' | 'in_progress' | 'not_started';
 }
 
 export interface CompletedSentenceData {

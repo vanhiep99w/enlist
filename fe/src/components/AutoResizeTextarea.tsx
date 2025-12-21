@@ -83,7 +83,7 @@ export const AutoResizeTextarea = forwardRef<AutoResizeTextareaRef, AutoResizeTe
       if (charCount === 0) return 'bg-muted';
       if (isOverOptimal) return 'bg-amber-500';
       if (isInOptimalRange) return 'bg-emerald-500';
-      if (isNearOptimal) return 'bg-primary';
+      if (isNearOptimal) return 'bg-cyan-500';
       return 'bg-muted';
     };
 
@@ -96,7 +96,7 @@ export const AutoResizeTextarea = forwardRef<AutoResizeTextareaRef, AutoResizeTe
       if (charCount === 0) return 'text-muted-foreground';
       if (isOverOptimal) return 'text-amber-400';
       if (isInOptimalRange) return 'text-emerald-400';
-      if (isNearOptimal) return 'text-primary';
+      if (isNearOptimal) return 'text-cyan-400';
       return 'text-muted-foreground';
     };
 

@@ -1,11 +1,12 @@
 import { Trophy, Medal, Award, TrendingUp, Zap, Target } from 'lucide-react';
 import { useGlobalLeaderboard, useUserRank } from '../hooks/useLeaderboard';
-
-const CURRENT_USER_ID = 1; // TODO: Get from auth context
+import { useAuth } from '../contexts/AuthContext';
 
 export function Leaderboard() {
+  const { user } = useAuth();
+  const userId = user?.id ?? 0;
   const { data: leaderboard, isLoading, error } = useGlobalLeaderboard(20);
-  const { data: userRank } = useUserRank(CURRENT_USER_ID);
+  const { data: userRank } = useUserRank(userId);
 
   if (isLoading) {
     return (
@@ -107,7 +108,7 @@ export function Leaderboard() {
         <div className="animate-fade-up space-y-3" style={{ animationDelay: '0.1s' }}>
           {leaderboard?.map((user, index) => {
             const rank = index + 1;
-            const isCurrentUser = user.id === CURRENT_USER_ID;
+            const isCurrentUser = user.id === userId;
             const isTopThree = rank <= 3;
 
             return (

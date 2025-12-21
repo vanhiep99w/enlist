@@ -1,14 +1,5 @@
 import { useState, useEffect } from 'react';
-import {
-  X,
-  Search,
-  Trash2,
-  BookOpen,
-  Calendar,
-  Sparkles,
-  Volume2,
-  MessageSquareQuote,
-} from 'lucide-react';
+import { X, Search, Trash2, BookOpen, Sparkles, Volume2, MessageSquareQuote } from 'lucide-react';
 import { useUserDictionary, useDeleteWord } from '../hooks/useDictionary';
 import { Card, CardContent } from './ui/card';
 import { cn } from '@/lib/utils';
@@ -71,21 +62,6 @@ export const DictionaryPanel = ({ isOpen, onClose, userId }: DictionaryPanelProp
     }
     deleteWordMutation.mutate({ userId, wordId });
     setDeleteConfirm(null);
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays < 7) return `${diffDays}d ago`;
-    return date.toLocaleDateString();
   };
 
   return (
