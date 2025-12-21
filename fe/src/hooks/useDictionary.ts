@@ -10,9 +10,8 @@ import type { SaveWordRequest } from '../api/dictionaryApi';
 
 export const dictionaryKeys = {
   all: ['dictionary'] as const,
-  user: (userId: number) => [...dictionaryKeys.all, 'user', userId] as const,
-  session: (userId: number, sessionId: number) =>
-    [...dictionaryKeys.all, 'session', userId, sessionId] as const,
+  user: () => [...dictionaryKeys.all, 'user'] as const,
+  session: (sessionId: number) => [...dictionaryKeys.all, 'session', sessionId] as const,
 };
 
 export function useTranslateWord() {
@@ -25,42 +24,37 @@ export function useTranslateWord() {
 export function useSaveWord() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ userId, request }: { userId: number; request: SaveWordRequest }) =>
-      saveWordToDictionary(userId, request),
+    mutationFn: (request: SaveWordRequest) => saveWordToDictionary(request),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: dictionaryKeys.user(variables.userId) });
-      if (variables.request.sessionId) {
-        queryClient.invalidateQueries({
-          queryKey: dictionaryKeys.session(variables.userId, variables.request.sessionId),
-        });
+      queryClient.invalidateQueries({ queryKey: dictionaryKeys.user() });
+      if (variables.sessionId) {
+        queryClient.invalidateQueries({ queryKey: dictionaryKeys.session(variables.sessionId) });
       }
     },
   });
 }
 
-export function useUserDictionary(userId: number) {
+export function useUserDictionary() {
   return useQuery({
-    queryKey: dictionaryKeys.user(userId),
-    queryFn: () => getUserDictionary(userId),
-    enabled: !!userId,
+    queryKey: dictionaryKeys.user(),
+    queryFn: () => getUserDictionary(),
   });
 }
 
-export function useSessionDictionary(userId: number, sessionId: number) {
+export function useSessionDictionary(sessionId: number) {
   return useQuery({
-    queryKey: dictionaryKeys.session(userId, sessionId),
-    queryFn: () => getSessionDictionary(userId, sessionId),
-    enabled: !!userId && !!sessionId,
+    queryKey: dictionaryKeys.session(sessionId),
+    queryFn: () => getSessionDictionary(sessionId),
+    enabled: !!sessionId,
   });
 }
 
 export function useDeleteWord() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ userId, wordId }: { userId: number; wordId: number }) =>
-      deleteWord(userId, wordId),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: dictionaryKeys.user(variables.userId) });
+    mutationFn: (wordId: number) => deleteWord(wordId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: dictionaryKeys.user() });
     },
   });
 }

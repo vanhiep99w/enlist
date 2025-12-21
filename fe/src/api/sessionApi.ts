@@ -47,10 +47,9 @@ export async function searchParagraphs(query: string): Promise<Paragraph[]> {
   return response.data;
 }
 
-export async function createSession(paragraphId: number, userId?: number): Promise<Session> {
+export async function createSession(paragraphId: number): Promise<Session> {
   const response = await authAxios.post<Session>(`/sessions`, {
     paragraphId,
-    userId: userId || 1,
   });
   return response.data;
 }
@@ -86,8 +85,8 @@ export async function getSessionProgress(sessionId: number): Promise<SessionProg
   return response.data;
 }
 
-export async function getUserSessions(userId: number): Promise<Session[]> {
-  const response = await authAxios.get<Session[]>(`/sessions/user/${userId}`);
+export async function getUserSessions(): Promise<Session[]> {
+  const response = await authAxios.get<Session[]>(`/sessions/user`);
   return response.data;
 }
 

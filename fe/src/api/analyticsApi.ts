@@ -22,36 +22,27 @@ export interface ProgressAnalytics {
   summary: ProgressSummary;
 }
 
-export async function getProgressAnalytics(
-  userId: number,
-  days: number = 30
-): Promise<ProgressAnalytics> {
-  const response = await authAxios.get<ProgressAnalytics>(
-    `/analytics/progress/${userId}?days=${days}`
-  );
+export async function getProgressAnalytics(days: number = 30): Promise<ProgressAnalytics> {
+  const response = await authAxios.get<ProgressAnalytics>(`/analytics/progress?days=${days}`);
   return response.data;
 }
 
-export async function getDetailedErrorAnalytics(userId: number): Promise<ErrorAnalytics> {
-  const response = await authAxios.get<ErrorAnalytics>(`/analytics/errors/${userId}`);
+export async function getDetailedErrorAnalytics(): Promise<ErrorAnalytics> {
+  const response = await authAxios.get<ErrorAnalytics>(`/analytics/errors`);
   return response.data;
 }
 
-export async function getErrorDistribution(userId: number): Promise<ErrorDistribution> {
-  const response = await authAxios.get<ErrorDistribution>(
-    `/analytics/errors/${userId}/distribution`
-  );
+export async function getErrorDistribution(): Promise<ErrorDistribution> {
+  const response = await authAxios.get<ErrorDistribution>(`/analytics/errors/distribution`);
   return response.data;
 }
 
-export async function getErrorTrends(userId: number, days: number = 7): Promise<ErrorTrend> {
-  const response = await authAxios.get<ErrorTrend>(
-    `/analytics/errors/${userId}/trends?days=${days}`
-  );
+export async function getErrorTrends(days: number = 7): Promise<ErrorTrend> {
+  const response = await authAxios.get<ErrorTrend>(`/analytics/errors/trends?days=${days}`);
   return response.data;
 }
 
-export async function getWeakAreas(userId: number): Promise<WeakArea[]> {
-  const response = await authAxios.get<WeakArea[]>(`/analytics/errors/${userId}/weak-areas`);
+export async function getWeakAreas(): Promise<WeakArea[]> {
+  const response = await authAxios.get<WeakArea[]>(`/analytics/errors/weak-areas`);
   return response.data;
 }

@@ -22,7 +22,7 @@ export const sessionKeys = {
   details: () => [...sessionKeys.all, 'detail'] as const,
   detail: (id: number) => [...sessionKeys.details(), id] as const,
   progress: (id: number) => [...sessionKeys.all, 'progress', id] as const,
-  userSessions: (userId: number) => [...sessionKeys.all, 'user', userId] as const,
+  userSessions: () => [...sessionKeys.all, 'user'] as const,
   summary: (id: number) => [...sessionKeys.all, 'summary', id] as const,
   previousAttempts: (paragraphId: number, userId: number) =>
     [...sessionKeys.all, 'previous-attempts', paragraphId, userId] as const,
@@ -64,8 +64,7 @@ export function useSearchParagraphs(query: string) {
 export function useCreateSession() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ paragraphId, userId }: { paragraphId: number; userId?: number }) =>
-      createSession(paragraphId, userId),
+    mutationFn: (paragraphId: number) => createSession(paragraphId),
     onSuccess: (data) => {
       queryClient.setQueryData(sessionKeys.detail(data.id), data);
     },
@@ -118,11 +117,10 @@ export function useSessionProgress(sessionId: number) {
   });
 }
 
-export function useUserSessions(userId: number) {
+export function useUserSessions() {
   return useQuery({
-    queryKey: sessionKeys.userSessions(userId),
-    queryFn: () => getUserSessions(userId),
-    enabled: !!userId,
+    queryKey: sessionKeys.userSessions(),
+    queryFn: () => getUserSessions(),
   });
 }
 

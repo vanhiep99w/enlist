@@ -11,61 +11,56 @@ import type { SpendCreditsRequest } from '../types/user';
 
 export const userKeys = {
   all: ['users'] as const,
-  credits: (userId: number) => [...userKeys.all, 'credits', userId] as const,
-  dailyProgress: (userId: number) => [...userKeys.all, 'dailyProgress', userId] as const,
-  streak: (userId: number) => [...userKeys.all, 'streak', userId] as const,
-  achievements: (userId: number) => [...userKeys.all, 'achievements', userId] as const,
+  credits: () => [...userKeys.all, 'credits'] as const,
+  dailyProgress: () => [...userKeys.all, 'dailyProgress'] as const,
+  streak: () => [...userKeys.all, 'streak'] as const,
+  achievements: () => [...userKeys.all, 'achievements'] as const,
 };
 
-export function useUserCredits(userId: number) {
+export function useUserCredits() {
   return useQuery({
-    queryKey: userKeys.credits(userId),
-    queryFn: () => getUserCredits(userId),
-    enabled: !!userId,
+    queryKey: userKeys.credits(),
+    queryFn: () => getUserCredits(),
   });
 }
 
 export function useSpendCredits() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (request: SpendCreditsRequest) => spendCredits(request),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: userKeys.credits(variables.userId) });
+    mutationFn: (request: Omit<SpendCreditsRequest, 'userId'>) => spendCredits(request),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: userKeys.credits() });
     },
   });
 }
 
-export function useDailyProgress(userId: number) {
+export function useDailyProgress() {
   return useQuery({
-    queryKey: userKeys.dailyProgress(userId),
-    queryFn: () => getDailyProgress(userId),
-    enabled: !!userId,
+    queryKey: userKeys.dailyProgress(),
+    queryFn: () => getDailyProgress(),
   });
 }
 
 export function useSetDailyGoal() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ userId, dailyGoal }: { userId: number; dailyGoal: number }) =>
-      setDailyGoal(userId, dailyGoal),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: userKeys.dailyProgress(variables.userId) });
+    mutationFn: (dailyGoal: number) => setDailyGoal(dailyGoal),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: userKeys.dailyProgress() });
     },
   });
 }
 
-export function useStreak(userId: number) {
+export function useStreak() {
   return useQuery({
-    queryKey: userKeys.streak(userId),
-    queryFn: () => getStreak(userId),
-    enabled: !!userId,
+    queryKey: userKeys.streak(),
+    queryFn: () => getStreak(),
   });
 }
 
-export function useUserAchievements(userId: number) {
+export function useUserAchievements() {
   return useQuery({
-    queryKey: userKeys.achievements(userId),
-    queryFn: () => getUserAchievements(userId),
-    enabled: !!userId,
+    queryKey: userKeys.achievements(),
+    queryFn: () => getUserAchievements(),
   });
 }

@@ -8,34 +8,36 @@ import type {
   UserAchievement,
 } from '../types/user';
 
-export async function getUserCredits(userId: number): Promise<UserCredits> {
-  const response = await authAxios.get<UserCredits>(`/users/${userId}/credits`);
+export async function getUserCredits(): Promise<UserCredits> {
+  const response = await authAxios.get<UserCredits>(`/users/credits`);
   return response.data;
 }
 
-export async function spendCredits(request: SpendCreditsRequest): Promise<SpendCreditsResponse> {
+export async function spendCredits(
+  request: Omit<SpendCreditsRequest, 'userId'>
+): Promise<SpendCreditsResponse> {
   const response = await authAxios.post<SpendCreditsResponse>('/users/credits/spend', request);
   return response.data;
 }
 
-export async function getDailyProgress(userId: number): Promise<DailyProgress> {
-  const response = await authAxios.get<DailyProgress>(`/users/${userId}/daily-progress`);
+export async function getDailyProgress(): Promise<DailyProgress> {
+  const response = await authAxios.get<DailyProgress>(`/users/daily-progress`);
   return response.data;
 }
 
-export async function setDailyGoal(userId: number, dailyGoal: number): Promise<DailyProgress> {
-  const response = await authAxios.put<DailyProgress>(`/users/${userId}/daily-goal`, {
+export async function setDailyGoal(dailyGoal: number): Promise<DailyProgress> {
+  const response = await authAxios.put<DailyProgress>(`/users/daily-goal`, {
     dailyGoal,
   });
   return response.data;
 }
 
-export async function getStreak(userId: number): Promise<StreakData> {
-  const response = await authAxios.get<StreakData>(`/users/${userId}/streak`);
+export async function getStreak(): Promise<StreakData> {
+  const response = await authAxios.get<StreakData>(`/users/streak`);
   return response.data;
 }
 
-export async function getUserAchievements(userId: number): Promise<UserAchievement[]> {
-  const response = await authAxios.get<UserAchievement[]>(`/users/${userId}/achievements`);
+export async function getUserAchievements(): Promise<UserAchievement[]> {
+  const response = await authAxios.get<UserAchievement[]>(`/users/achievements`);
   return response.data;
 }

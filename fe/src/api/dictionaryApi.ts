@@ -52,34 +52,23 @@ export const lookupWord = async (word: string): Promise<WordTranslation> => {
   return translateWord(word);
 };
 
-export const saveWordToDictionary = async (
-  userId: number,
-  request: SaveWordRequest
-): Promise<DictionaryWord> => {
-  const response = await authAxios.post<DictionaryWord>(
-    `/dictionary/save?userId=${userId}`,
-    request
-  );
+export const saveWordToDictionary = async (request: SaveWordRequest): Promise<DictionaryWord> => {
+  const response = await authAxios.post<DictionaryWord>(`/dictionary/save`, request);
   return response.data;
 };
 
-export const getUserDictionary = async (userId: number): Promise<DictionaryWord[]> => {
-  const response = await authAxios.get<DictionaryWord[]>(`/dictionary/user/${userId}`);
+export const getUserDictionary = async (): Promise<DictionaryWord[]> => {
+  const response = await authAxios.get<DictionaryWord[]>(`/dictionary/user`);
   return response.data;
 };
 
-export const getSessionDictionary = async (
-  userId: number,
-  sessionId: number
-): Promise<DictionaryWord[]> => {
-  const response = await authAxios.get<DictionaryWord[]>(
-    `/dictionary/session/${userId}/${sessionId}`
-  );
+export const getSessionDictionary = async (sessionId: number): Promise<DictionaryWord[]> => {
+  const response = await authAxios.get<DictionaryWord[]>(`/dictionary/session/${sessionId}`);
   return response.data;
 };
 
-export const deleteWord = async (userId: number, wordId: number): Promise<void> => {
-  await authAxios.delete(`/dictionary/${userId}/${wordId}`);
+export const deleteWord = async (wordId: number): Promise<void> => {
+  await authAxios.delete(`/dictionary/${wordId}`);
 };
 
 export interface WordExample {
