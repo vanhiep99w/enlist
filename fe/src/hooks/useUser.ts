@@ -27,7 +27,7 @@ export function useUserCredits() {
 export function useSpendCredits() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (request: Omit<SpendCreditsRequest, 'userId'>) => spendCredits(request),
+    mutationFn: (request: SpendCreditsRequest) => spendCredits(request),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: userKeys.credits() });
     },

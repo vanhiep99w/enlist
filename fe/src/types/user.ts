@@ -6,7 +6,6 @@ export interface UserCredits {
 }
 
 export interface SpendCreditsRequest {
-  userId: number;
   amount?: number;
   reason?: string;
 }

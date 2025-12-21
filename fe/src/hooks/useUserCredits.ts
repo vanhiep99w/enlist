@@ -7,7 +7,7 @@ export function useUserCredits() {
   const { user, isAuthenticated } = useAuth();
   const userId = user?.id ?? 0;
 
-  const { data: credits, isLoading, error } = useUserCreditsQuery(userId);
+  const { data: credits, isLoading, error } = useUserCreditsQuery();
   const spendCreditsMutation = useSpendCredits();
   const queryClient = useQueryClient();
 
@@ -18,7 +18,7 @@ export function useUserCredits() {
       }
 
       try {
-        const result = await spendCreditsMutation.mutateAsync({ userId, amount, reason });
+        const result = await spendCreditsMutation.mutateAsync({ amount, reason });
         return result;
       } catch {
         return { success: false, remainingCredits: credits?.credits || 0, message: 'Error' };
@@ -28,10 +28,8 @@ export function useUserCredits() {
   );
 
   const refresh = useCallback(() => {
-    if (userId) {
-      queryClient.invalidateQueries({ queryKey: userKeys.credits(userId) });
-    }
-  }, [userId, queryClient]);
+    queryClient.invalidateQueries({ queryKey: userKeys.credits() });
+  }, [queryClient]);
 
   return {
     credits: credits ?? null,

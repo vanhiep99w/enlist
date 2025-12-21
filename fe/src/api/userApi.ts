@@ -13,9 +13,7 @@ export async function getUserCredits(): Promise<UserCredits> {
   return response.data;
 }
 
-export async function spendCredits(
-  request: Omit<SpendCreditsRequest, 'userId'>
-): Promise<SpendCreditsResponse> {
+export async function spendCredits(request: SpendCreditsRequest): Promise<SpendCreditsResponse> {
   const response = await authAxios.post<SpendCreditsResponse>('/users/credits/spend', request);
   return response.data;
 }
