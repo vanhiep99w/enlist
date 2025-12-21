@@ -24,8 +24,8 @@ export const sessionKeys = {
   progress: (id: number) => [...sessionKeys.all, 'progress', id] as const,
   userSessions: () => [...sessionKeys.all, 'user'] as const,
   summary: (id: number) => [...sessionKeys.all, 'summary', id] as const,
-  previousAttempts: (paragraphId: number, userId: number) =>
-    [...sessionKeys.all, 'previous-attempts', paragraphId, userId] as const,
+  previousAttempts: (paragraphId: number) =>
+    [...sessionKeys.all, 'previous-attempts', paragraphId] as const,
   paragraphs: ['paragraphs'] as const,
   topics: () => [...sessionKeys.paragraphs, 'topics'] as const,
   search: (query: string) => [...sessionKeys.paragraphs, 'search', query] as const,
@@ -132,10 +132,10 @@ export function useSessionSummary(sessionId: number) {
   });
 }
 
-export function usePreviousAttempts(paragraphId: number, userId: number) {
+export function usePreviousAttempts(paragraphId: number) {
   return useQuery({
-    queryKey: sessionKeys.previousAttempts(paragraphId, userId),
-    queryFn: () => getPreviousAttempts(paragraphId, userId),
-    enabled: !!paragraphId && !!userId,
+    queryKey: sessionKeys.previousAttempts(paragraphId),
+    queryFn: () => getPreviousAttempts(paragraphId),
+    enabled: !!paragraphId,
   });
 }

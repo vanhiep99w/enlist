@@ -27,7 +27,6 @@ export interface ParagraphFilters {
   pageSize?: number;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
-  userId?: number;
   completionStatus?: 'completed' | 'in_progress' | 'not_started';
 }
 

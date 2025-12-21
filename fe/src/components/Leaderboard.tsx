@@ -6,7 +6,7 @@ export function Leaderboard() {
   const { user } = useAuth();
   const userId = user?.id ?? 0;
   const { data: leaderboard, isLoading, error } = useGlobalLeaderboard(20);
-  const { data: userRank } = useUserRank(userId);
+  const { data: userRank } = useUserRank();
 
   if (isLoading) {
     return (

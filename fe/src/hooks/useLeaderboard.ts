@@ -8,10 +8,9 @@ export function useGlobalLeaderboard(limit: number = 10) {
   });
 }
 
-export function useUserRank(userId: number) {
+export function useUserRank() {
   return useQuery({
-    queryKey: ['leaderboard-rank', userId],
-    queryFn: () => getUserRank(userId),
-    enabled: !!userId,
+    queryKey: ['leaderboard-rank'],
+    queryFn: () => getUserRank(),
   });
 }

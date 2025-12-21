@@ -1430,7 +1430,6 @@ export function ParagraphSession({ paragraphId }: Props) {
           <PreviousAttemptsModal
             paragraphId={session.paragraphId}
             paragraphTitle={session.paragraphTitle}
-            userId={user?.id ?? 0}
             isOpen={showPreviousAttempts}
             onClose={() => setShowPreviousAttempts(false)}
           />

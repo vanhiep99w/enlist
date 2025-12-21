@@ -18,7 +18,7 @@ export async function getGlobalLeaderboard(limit: number = 10): Promise<Leaderbo
   return response.data;
 }
 
-export async function getUserRank(userId: number): Promise<number> {
-  const response = await authAxios.get<number>(`/leaderboard/rank/${userId}`);
+export async function getUserRank(): Promise<number> {
+  const response = await authAxios.get<number>('/leaderboard/rank');
   return response.data;
 }

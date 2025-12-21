@@ -21,7 +21,6 @@ export async function getParagraphs(
   if (filters.pageSize !== undefined) params.append('pageSize', String(filters.pageSize));
   if (filters.sortBy) params.append('sortBy', filters.sortBy);
   if (filters.sortOrder) params.append('sortOrder', filters.sortOrder);
-  if (filters.userId !== undefined) params.append('userId', String(filters.userId));
   if (filters.completionStatus) params.append('completionStatus', filters.completionStatus);
 
   const response = await authAxios.get<PaginatedResponse<Paragraph>>(`/paragraphs`, {
@@ -95,13 +94,9 @@ export async function getSessionSummary(sessionId: number): Promise<SessionSumma
   return response.data;
 }
 
-export async function getPreviousAttempts(
-  paragraphId: number,
-  userId: number
-): Promise<PreviousAttempt[]> {
+export async function getPreviousAttempts(paragraphId: number): Promise<PreviousAttempt[]> {
   const response = await authAxios.get<PreviousAttempt[]>(
-    `/paragraphs/${paragraphId}/previous-attempts`,
-    { params: { userId } }
+    `/paragraphs/${paragraphId}/previous-attempts`
   );
   return response.data;
 }

@@ -6,19 +6,12 @@ import { ParagraphSummaryModal } from './ParagraphSummaryModal';
 interface Props {
   paragraphId: number;
   paragraphTitle: string;
-  userId: number;
   isOpen: boolean;
   onClose: () => void;
 }
 
-export function PreviousAttemptsModal({
-  paragraphId,
-  paragraphTitle,
-  userId,
-  isOpen,
-  onClose,
-}: Props) {
-  const { data: attempts, isLoading } = usePreviousAttempts(paragraphId, userId);
+export function PreviousAttemptsModal({ paragraphId, paragraphTitle, isOpen, onClose }: Props) {
+  const { data: attempts, isLoading } = usePreviousAttempts(paragraphId);
   const [selectedSessionId, setSelectedSessionId] = useState<number | null>(null);
   const [isVisible, setIsVisible] = useState(false);
 
