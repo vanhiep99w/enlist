@@ -1,13 +1,18 @@
-import axios from 'axios';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+import { authAxios } from './authApi';
 
 export interface WordTranslation {
   word: string;
   translation: string;
   partOfSpeech: string;
-  example: string;
-  exampleTranslation: string;
+  example1: string;
+  example1Translation: string;
+  example2: string;
+  example2Translation: string;
+}
+
+export interface ExampleSentence {
+  vi: string;
+  en: string;
 }
 
 export interface DictionaryWord {
@@ -15,6 +20,7 @@ export interface DictionaryWord {
   word: string;
   translation: string;
   context?: string;
+  examples?: ExampleSentence[];
   sessionId?: number;
   createdAt: string;
 }
@@ -24,6 +30,7 @@ export interface DictionaryEntry {
   word: string;
   translation: string;
   context?: string;
+  examples?: ExampleSentence[];
   sessionId?: number;
   createdAt: string;
 }
@@ -33,18 +40,11 @@ export interface SaveWordRequest {
   word: string;
   translation: string;
   context?: string;
+  examples: ExampleSentence[];
 }
 
 export const translateWord = async (word: string, context?: string): Promise<WordTranslation> => {
-  const response = await axios.post<WordTranslation>(
-    `${API_BASE_URL}/api/translate/word`,
-    { word, context },
-    {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    }
-  );
+  const response = await authAxios.post<WordTranslation>('/translate/word', { word, context });
   return response.data;
 };
 
@@ -56,17 +56,15 @@ export const saveWordToDictionary = async (
   userId: number,
   request: SaveWordRequest
 ): Promise<DictionaryWord> => {
-  const response = await axios.post<DictionaryWord>(
-    `${API_BASE_URL}/api/dictionary/save?userId=${userId}`,
+  const response = await authAxios.post<DictionaryWord>(
+    `/dictionary/save?userId=${userId}`,
     request
   );
   return response.data;
 };
 
 export const getUserDictionary = async (userId: number): Promise<DictionaryWord[]> => {
-  const response = await axios.get<DictionaryWord[]>(
-    `${API_BASE_URL}/api/dictionary/user/${userId}`
-  );
+  const response = await authAxios.get<DictionaryWord[]>(`/dictionary/user/${userId}`);
   return response.data;
 };
 
@@ -74,14 +72,14 @@ export const getSessionDictionary = async (
   userId: number,
   sessionId: number
 ): Promise<DictionaryWord[]> => {
-  const response = await axios.get<DictionaryWord[]>(
-    `${API_BASE_URL}/api/dictionary/session/${userId}/${sessionId}`
+  const response = await authAxios.get<DictionaryWord[]>(
+    `/dictionary/session/${userId}/${sessionId}`
   );
   return response.data;
 };
 
 export const deleteWord = async (userId: number, wordId: number): Promise<void> => {
-  await axios.delete(`${API_BASE_URL}/api/dictionary/${userId}/${wordId}`);
+  await authAxios.delete(`/dictionary/${userId}/${wordId}`);
 };
 
 export interface WordExample {
@@ -93,8 +91,8 @@ export interface WordExample {
 }
 
 export const getWordExamples = async (word: string): Promise<WordExample[]> => {
-  const response = await axios.get<WordExample[]>(
-    `${API_BASE_URL}/api/words/${encodeURIComponent(word)}/examples`
+  const response = await authAxios.get<WordExample[]>(
+    `/words/${encodeURIComponent(word)}/examples`
   );
   return response.data;
 };

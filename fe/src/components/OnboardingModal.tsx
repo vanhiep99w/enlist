@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 
 interface Props {
   isOpen: boolean;
@@ -114,7 +115,7 @@ const steps: Step[] = [
             className="flex items-center justify-between rounded-lg p-3"
             style={{ backgroundColor: 'var(--color-surface-light)', opacity: 0.5 }}
           >
-            <span style={{ color: 'var(--color-text-secondary)' }}>Open dictionary</span>
+            <span style={{ color: 'var(--color-text-secondary)' }}>Open My Dictionary</span>
             <kbd
               className="rounded px-2 py-1 font-mono text-sm"
               style={{
@@ -216,8 +217,8 @@ export function OnboardingModal({ isOpen, onComplete }: Props) {
     onComplete();
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4">
       <div
         className="animate-in fade-in zoom-in-95 w-full max-w-md overflow-hidden rounded-xl shadow-2xl duration-200"
         style={{
@@ -286,6 +287,7 @@ export function OnboardingModal({ isOpen, onComplete }: Props) {
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

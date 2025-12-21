@@ -10,9 +10,12 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ReviewRouteImport } from './routes/review'
+import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ParagraphsRouteImport } from './routes/paragraphs'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
+import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SessionParagraphIdRouteImport } from './routes/session.$paragraphId'
 
@@ -21,9 +24,19 @@ const ReviewRoute = ReviewRouteImport.update({
   path: '/review',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ParagraphsRoute = ParagraphsRouteImport.update({
   id: '/paragraphs',
   path: '/paragraphs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LeaderboardRoute = LeaderboardRouteImport.update({
@@ -34,6 +47,11 @@ const LeaderboardRoute = LeaderboardRouteImport.update({
 const AnalyticsRoute = AnalyticsRouteImport.update({
   id: '/analytics',
   path: '/analytics',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SplatRoute = SplatRouteImport.update({
+  id: '/$',
+  path: '/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -49,26 +67,35 @@ const SessionParagraphIdRoute = SessionParagraphIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/$': typeof SplatRoute
   '/analytics': typeof AnalyticsRoute
   '/leaderboard': typeof LeaderboardRoute
+  '/login': typeof LoginRoute
   '/paragraphs': typeof ParagraphsRoute
+  '/register': typeof RegisterRoute
   '/review': typeof ReviewRoute
   '/session/$paragraphId': typeof SessionParagraphIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/$': typeof SplatRoute
   '/analytics': typeof AnalyticsRoute
   '/leaderboard': typeof LeaderboardRoute
+  '/login': typeof LoginRoute
   '/paragraphs': typeof ParagraphsRoute
+  '/register': typeof RegisterRoute
   '/review': typeof ReviewRoute
   '/session/$paragraphId': typeof SessionParagraphIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/$': typeof SplatRoute
   '/analytics': typeof AnalyticsRoute
   '/leaderboard': typeof LeaderboardRoute
+  '/login': typeof LoginRoute
   '/paragraphs': typeof ParagraphsRoute
+  '/register': typeof RegisterRoute
   '/review': typeof ReviewRoute
   '/session/$paragraphId': typeof SessionParagraphIdRoute
 }
@@ -76,34 +103,46 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/$'
     | '/analytics'
     | '/leaderboard'
+    | '/login'
     | '/paragraphs'
+    | '/register'
     | '/review'
     | '/session/$paragraphId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/$'
     | '/analytics'
     | '/leaderboard'
+    | '/login'
     | '/paragraphs'
+    | '/register'
     | '/review'
     | '/session/$paragraphId'
   id:
     | '__root__'
     | '/'
+    | '/$'
     | '/analytics'
     | '/leaderboard'
+    | '/login'
     | '/paragraphs'
+    | '/register'
     | '/review'
     | '/session/$paragraphId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  SplatRoute: typeof SplatRoute
   AnalyticsRoute: typeof AnalyticsRoute
   LeaderboardRoute: typeof LeaderboardRoute
+  LoginRoute: typeof LoginRoute
   ParagraphsRoute: typeof ParagraphsRoute
+  RegisterRoute: typeof RegisterRoute
   ReviewRoute: typeof ReviewRoute
   SessionParagraphIdRoute: typeof SessionParagraphIdRoute
 }
@@ -117,11 +156,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReviewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/paragraphs': {
       id: '/paragraphs'
       path: '/paragraphs'
       fullPath: '/paragraphs'
       preLoaderRoute: typeof ParagraphsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/leaderboard': {
@@ -136,6 +189,13 @@ declare module '@tanstack/react-router' {
       path: '/analytics'
       fullPath: '/analytics'
       preLoaderRoute: typeof AnalyticsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$': {
+      id: '/$'
+      path: '/$'
+      fullPath: '/$'
+      preLoaderRoute: typeof SplatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -157,9 +217,12 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  SplatRoute: SplatRoute,
   AnalyticsRoute: AnalyticsRoute,
   LeaderboardRoute: LeaderboardRoute,
+  LoginRoute: LoginRoute,
   ParagraphsRoute: ParagraphsRoute,
+  RegisterRoute: RegisterRoute,
   ReviewRoute: ReviewRoute,
   SessionParagraphIdRoute: SessionParagraphIdRoute,
 }

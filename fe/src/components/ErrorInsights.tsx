@@ -1,26 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useErrorAnalytics, useErrorTrends } from '../hooks/useAnalytics';
 
 interface ErrorInsightsProps {
   userId?: number;
-}
-
-interface AnalyticsData {
-  distribution: {
-    byType: Record<string, number>;
-    totalErrors: number;
-  };
-  trends: {
-    period7: { byType: Record<string, number>; totalErrors: number };
-    period30: { byType: Record<string, number>; totalErrors: number };
-  };
-  weakAreas: Array<{
-    errorType: string;
-    errorCategory: string;
-    count: number;
-    percentage: number;
-    severity: 'high' | 'medium' | 'low';
-  }>;
 }
 
 const ERROR_CONFIG = {
@@ -30,38 +13,22 @@ const ERROR_CONFIG = {
 };
 
 export function ErrorInsights({ userId = 1 }: ErrorInsightsProps) {
-  const [data, setData] = useState<AnalyticsData | null>(null);
   const [selectedPeriod, setSelectedPeriod] = useState<7 | 30>(7);
-  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    fetchData();
-  }, [userId]);
+  const { data: analytics, isLoading: isAnalyticsLoading } = useErrorAnalytics(userId);
+  const { data: trends7, isLoading: isTrends7Loading } = useErrorTrends(userId, 7);
+  const { data: trends30, isLoading: isTrends30Loading } = useErrorTrends(userId, 30);
 
-  const fetchData = async () => {
-    try {
-      setIsLoading(true);
-      const [analytics, trends7, trends30] = await Promise.all([
-        fetch(`http://localhost:8080/api/analytics/errors/${userId}`).then((r) => r.json()),
-        fetch(`http://localhost:8080/api/analytics/errors/${userId}/trends?days=7`).then((r) =>
-          r.json()
-        ),
-        fetch(`http://localhost:8080/api/analytics/errors/${userId}/trends?days=30`).then((r) =>
-          r.json()
-        ),
-      ]);
+  const isLoading = isAnalyticsLoading || isTrends7Loading || isTrends30Loading;
 
-      setData({
-        distribution: analytics.distribution,
-        trends: { period7: trends7, period30: trends30 },
-        weakAreas: analytics.weakAreas || [],
-      });
-    } catch (err) {
-      console.error('Failed to fetch error insights:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const data =
+    analytics && trends7 && trends30
+      ? {
+          distribution: analytics.distribution,
+          trends: { period7: trends7, period30: trends30 },
+          weakAreas: analytics.weakAreas || [],
+        }
+      : null;
 
   if (isLoading) {
     return (

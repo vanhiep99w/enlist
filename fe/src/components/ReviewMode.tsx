@@ -1,49 +1,29 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { ArrowLeft, RefreshCw, Calendar, Target, Brain } from 'lucide-react';
 import { toast } from 'sonner';
-import { reviewApi, type ReviewCard } from '../api/reviewApi';
+import { useDueReviews, useSubmitReview } from '../hooks/useReview';
 
 export function ReviewMode() {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [dueCards, setDueCards] = useState<ReviewCard[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showingAnswer, setShowingAnswer] = useState(false);
 
-  const loadDueCards = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        navigate({ to: '/' });
-        return;
-      }
+  const { data: dueCards = [], isLoading: loading } = useDueReviews();
+  const submitReviewMutation = useSubmitReview();
 
-      const cards = await reviewApi.getDueReviews(token);
-      setDueCards(cards);
-      setLoading(false);
-
-      if (cards.length === 0) {
-        toast.success('All reviews completed! 🎉');
-      }
-    } catch (err) {
-      console.error('Failed to load reviews:', err);
-      toast.error('Failed to load reviews');
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadDueCards();
-  }, []);
+  const token = localStorage.getItem('token');
+  if (!token) {
+    navigate({ to: '/' });
+    return null;
+  }
 
   const handleQualitySubmit = async (quality: number) => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token || dueCards.length === 0) return;
+    if (dueCards.length === 0) return;
 
-      const currentCard = dueCards[currentIndex];
-      await reviewApi.submitReview(token, {
+    const currentCard = dueCards[currentIndex];
+    try {
+      await submitReviewMutation.mutateAsync({
         sentenceId: currentCard.sentenceId,
         quality,
       });
@@ -202,7 +182,8 @@ export function ReviewMode() {
                   <button
                     key={quality}
                     onClick={() => handleQualitySubmit(quality)}
-                    className={`bg-gradient-to-br px-6 py-4 ${color} transform rounded-xl font-bold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl`}
+                    disabled={submitReviewMutation.isPending}
+                    className={`bg-gradient-to-br px-6 py-4 ${color} transform rounded-xl font-bold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50`}
                   >
                     <div className="mb-1 text-2xl">{quality}</div>
                     <div className="text-xs opacity-90">{label}</div>

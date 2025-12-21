@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import { getParagraphs, getTopics } from '../api/sessionApi';
-import type { Paragraph, PaginatedResponse } from '../types/session';
+import { useParagraphs, useTopics } from '../hooks/useSession';
+import type { Paragraph } from '../types/session';
 import { Pagination } from './Pagination';
 import { TopicDropdown } from './TopicDropdown';
 
@@ -15,10 +15,6 @@ const DEFAULT_PAGE_SIZE = 12;
 
 export function ParagraphList() {
   const navigate = useNavigate();
-  const [paragraphData, setParagraphData] = useState<PaginatedResponse<Paragraph> | null>(null);
-  const [topics, setTopics] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   // Filter states
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('');
@@ -39,43 +35,18 @@ export function ParagraphList() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Load topics on mount
-  useEffect(() => {
-    loadTopics();
-  }, []);
-
-  // Load paragraphs when filters change
-  useEffect(() => {
-    loadParagraphs();
-  }, [selectedDifficulty, selectedTopic, debouncedSearch, currentPage, pageSize]);
-
-  const loadTopics = async () => {
-    try {
-      const data = await getTopics();
-      setTopics(data);
-    } catch (err) {
-      console.error('Failed to load topics:', err);
-    }
+  // Build filters object for React Query
+  const filters = {
+    difficulty: selectedDifficulty ? DIFFICULTY_TO_API[selectedDifficulty] : undefined,
+    topic: selectedTopic || undefined,
+    search: debouncedSearch || undefined,
+    page: currentPage,
+    pageSize: pageSize,
   };
 
-  const loadParagraphs = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const data = await getParagraphs({
-        difficulty: selectedDifficulty ? DIFFICULTY_TO_API[selectedDifficulty] : undefined,
-        topic: selectedTopic || undefined,
-        search: debouncedSearch || undefined,
-        page: currentPage,
-        pageSize: pageSize,
-      });
-      setParagraphData(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load paragraphs');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [selectedDifficulty, selectedTopic, debouncedSearch, currentPage, pageSize]);
+  // React Query hooks
+  const { data: paragraphData, isLoading, error } = useParagraphs(filters);
+  const { data: topics = [] } = useTopics();
 
   const handleDifficultyChange = (difficulty: string) => {
     setSelectedDifficulty(difficulty);
@@ -387,7 +358,7 @@ export function ParagraphList() {
                 <circle cx="12" cy="12" r="10" />
                 <path d="M12 8v4M12 16h.01" strokeLinecap="round" />
               </svg>
-              {error}
+              {error.message || 'Failed to load paragraphs'}
             </div>
           </div>
         )}

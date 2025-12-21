@@ -1,8 +1,19 @@
 import { useState, useEffect } from 'react';
-import { X, Search, Trash2, BookOpen, Calendar, Sparkles } from 'lucide-react';
-import { getUserDictionary, deleteWord, type DictionaryWord } from '../api/dictionaryApi';
+import {
+  X,
+  Search,
+  Trash2,
+  BookOpen,
+  Calendar,
+  Sparkles,
+  Volume2,
+  MessageSquareQuote,
+} from 'lucide-react';
+import { useUserDictionary, useDeleteWord } from '../hooks/useDictionary';
 import { Card, CardContent } from './ui/card';
 import { cn } from '@/lib/utils';
+import { ttsService } from '../services/ttsService';
+import type { DictionaryWord } from '../api/dictionaryApi';
 
 interface DictionaryPanelProps {
   isOpen: boolean;
@@ -11,17 +22,35 @@ interface DictionaryPanelProps {
 }
 
 export const DictionaryPanel = ({ isOpen, onClose, userId }: DictionaryPanelProps) => {
-  const [words, setWords] = useState<DictionaryWord[]>([]);
+  const { data: words = [], isLoading, refetch } = useUserDictionary(userId);
+  const deleteWordMutation = useDeleteWord();
+
   const [filteredWords, setFilteredWords] = useState<DictionaryWord[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [selectedWord, setSelectedWord] = useState<DictionaryWord | null>(null);
+  const [playingWordId, setPlayingWordId] = useState<number | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ wordId: number; word: string } | null>(null);
+
+  const handleSpeak = async (e: React.MouseEvent, word: DictionaryWord) => {
+    e.stopPropagation();
+    if (playingWordId === word.id) {
+      ttsService.stop();
+      setPlayingWordId(null);
+      return;
+    }
+    setPlayingWordId(word.id);
+    try {
+      await ttsService.speakWithFallback(word.translation);
+    } finally {
+      setPlayingWordId(null);
+    }
+  };
 
   useEffect(() => {
     if (isOpen) {
-      loadDictionary();
+      refetch();
     }
-  }, [isOpen, userId]);
+  }, [isOpen, refetch]);
 
   useEffect(() => {
     if (searchQuery.trim()) {
@@ -36,29 +65,12 @@ export const DictionaryPanel = ({ isOpen, onClose, userId }: DictionaryPanelProp
     }
   }, [searchQuery, words]);
 
-  const loadDictionary = async () => {
-    setIsLoading(true);
-    try {
-      const data = await getUserDictionary(userId);
-      setWords(data);
-      setFilteredWords(data);
-    } catch (error) {
-      console.error('Failed to load dictionary:', error);
-    } finally {
-      setIsLoading(false);
+  const handleDelete = (wordId: number) => {
+    if (selectedWord?.id === wordId) {
+      setSelectedWord(null);
     }
-  };
-
-  const handleDelete = async (wordId: number) => {
-    try {
-      await deleteWord(userId, wordId);
-      setWords(words.filter((w) => w.id !== wordId));
-      if (selectedWord?.id === wordId) {
-        setSelectedWord(null);
-      }
-    } catch (error) {
-      console.error('Failed to delete word:', error);
-    }
+    deleteWordMutation.mutate({ userId, wordId });
+    setDeleteConfirm(null);
   };
 
   const formatDate = (dateString: string) => {
@@ -215,12 +227,28 @@ export const DictionaryPanel = ({ isOpen, onClose, userId }: DictionaryPanelProp
                 <CardContent className="p-4">
                   <div className="mb-2 flex items-start justify-between">
                     <div className="flex-1">
-                      <h3
-                        className="font-display mb-1 text-lg font-bold"
-                        style={{ color: 'var(--color-text-primary)' }}
-                      >
-                        {word.word}
-                      </h3>
+                      <div className="flex items-center gap-2">
+                        <h3
+                          className="font-display text-lg font-bold"
+                          style={{ color: 'var(--color-text-primary)' }}
+                        >
+                          {word.word}
+                        </h3>
+                        <button
+                          onClick={(e) => handleSpeak(e, word)}
+                          className={cn(
+                            'flex h-6 w-6 items-center justify-center rounded-full transition-all hover:scale-110',
+                            playingWordId === word.id && 'animate-pulse'
+                          )}
+                          style={{
+                            backgroundColor: 'var(--color-primary)',
+                            color: 'white',
+                          }}
+                          title="Listen to pronunciation"
+                        >
+                          <Volume2 className="h-3 w-3" />
+                        </button>
+                      </div>
                       <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                         {word.translation}
                       </p>
@@ -228,7 +256,7 @@ export const DictionaryPanel = ({ isOpen, onClose, userId }: DictionaryPanelProp
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleDelete(word.id);
+                        setDeleteConfirm({ wordId: word.id, word: word.word });
                       }}
                       className="rounded-lg p-1.5 opacity-0 transition-all group-hover:opacity-100 hover:bg-red-500/20"
                       style={{ color: 'var(--color-error)' }}
@@ -238,12 +266,55 @@ export const DictionaryPanel = ({ isOpen, onClose, userId }: DictionaryPanelProp
                   </div>
 
                   {word.context && (
-                    <p
-                      className="mb-2 line-clamp-2 text-xs italic"
-                      style={{ color: 'var(--color-text-muted)' }}
+                    <div className="mb-2 space-y-1">
+                      <p
+                        className="line-clamp-2 text-xs italic"
+                        style={{ color: 'var(--color-text-muted)' }}
+                      >
+                        "{word.context}"
+                      </p>
+                      <p
+                        className="line-clamp-2 text-xs"
+                        style={{ color: 'var(--color-text-secondary)' }}
+                      >
+                        → {word.translation}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Examples Section */}
+                  {word.examples && word.examples.length > 0 && (
+                    <div
+                      className="mb-2 rounded-lg p-2"
+                      style={{ backgroundColor: 'var(--color-surface-dark)' }}
                     >
-                      "{word.context}"
-                    </p>
+                      <div
+                        className="mb-1.5 flex items-center gap-1 text-[10px] font-semibold tracking-wider uppercase"
+                        style={{ color: 'var(--color-text-muted)' }}
+                      >
+                        <MessageSquareQuote className="h-3 w-3" />
+                        Examples
+                      </div>
+                      <div className="space-y-1.5">
+                        {word.examples.slice(0, 2).map((example, idx) => (
+                          <div
+                            key={idx}
+                            className="border-l-2 pl-2"
+                            style={{ borderColor: 'var(--color-primary)' }}
+                          >
+                            <p
+                              className="text-xs italic"
+                              style={{ color: 'var(--color-text-secondary)' }}
+                            >
+                              {example.en}
+                            </p>
+                            <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                              {example.vi}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   )}
 
                   <div
@@ -282,6 +353,51 @@ export const DictionaryPanel = ({ isOpen, onClose, userId }: DictionaryPanelProp
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      {deleteConfirm && (
+        <>
+          <div
+            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+            onClick={() => setDeleteConfirm(null)}
+          />
+          <div
+            className="fixed top-1/2 left-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-xl p-6 shadow-2xl"
+            style={{ backgroundColor: 'var(--color-surface)' }}
+          >
+            <h3 className="mb-2 text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>
+              Delete Word?
+            </h3>
+            <p className="mb-6 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+              Are you sure you want to delete "
+              <span className="font-semibold">{deleteConfirm.word}</span>" from your dictionary?
+              This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setDeleteConfirm(null)}
+                className="rounded-lg px-4 py-2 text-sm font-medium transition-colors"
+                style={{
+                  backgroundColor: 'var(--color-surface-dark)',
+                  color: 'var(--color-text-secondary)',
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDelete(deleteConfirm.wordId)}
+                className="rounded-lg px-4 py-2 text-sm font-medium transition-colors hover:opacity-90"
+                style={{
+                  backgroundColor: 'var(--color-error)',
+                  color: 'white',
+                }}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
 };

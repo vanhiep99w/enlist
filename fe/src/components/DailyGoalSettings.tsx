@@ -1,49 +1,41 @@
 import { useState, useEffect } from 'react';
-import { getDailyProgress, setDailyGoal } from '../api/userApi';
-import type { DailyProgress } from '../types/user';
+import { useDailyProgress, useSetDailyGoal } from '../hooks/useUser';
 import { motion } from 'motion/react';
 import { Target, Minus, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function DailyGoalSettings() {
-  const [progress, setProgress] = useState<DailyProgress | null>(null);
+  const userId = 1;
+  const { data: progress } = useDailyProgress(userId);
+  const setDailyGoalMutation = useSetDailyGoal();
+
   const [tempGoal, setTempGoal] = useState<number>(10);
   const [isEditing, setIsEditing] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const userId = 1;
 
   useEffect(() => {
-    loadProgress();
-  }, []);
-
-  const loadProgress = async () => {
-    try {
-      const data = await getDailyProgress(userId);
-      setProgress(data);
-      setTempGoal(data.dailyGoal);
-    } catch (error) {
-      console.error('Failed to load daily progress:', error);
+    if (progress?.dailyGoal) {
+      setTempGoal(progress.dailyGoal);
     }
-  };
+  }, [progress?.dailyGoal]);
 
-  const handleSaveGoal = async () => {
+  const handleSaveGoal = () => {
     if (tempGoal < 1 || tempGoal > 100) {
       toast.error('Goal must be between 1 and 100');
       return;
     }
 
-    setIsSaving(true);
-    try {
-      const updated = await setDailyGoal(userId, tempGoal);
-      setProgress(updated);
-      setIsEditing(false);
-      toast.success(`Daily goal updated to ${tempGoal} sentences!`);
-    } catch (error) {
-      toast.error('Failed to update goal');
-      console.error('Failed to save goal:', error);
-    } finally {
-      setIsSaving(false);
-    }
+    setDailyGoalMutation.mutate(
+      { userId, dailyGoal: tempGoal },
+      {
+        onSuccess: () => {
+          setIsEditing(false);
+          toast.success(`Daily goal updated to ${tempGoal} sentences!`);
+        },
+        onError: () => {
+          toast.error('Failed to update goal');
+        },
+      }
+    );
   };
 
   const handleCancel = () => {
@@ -196,7 +188,7 @@ export function DailyGoalSettings() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleSaveGoal}
-                disabled={isSaving}
+                disabled={setDailyGoalMutation.isPending}
                 className="flex-1 rounded-lg py-3 font-bold tracking-wide transition-all disabled:opacity-50"
                 style={{
                   background: 'linear-gradient(135deg, var(--color-primary), var(--color-accent))',
@@ -204,13 +196,13 @@ export function DailyGoalSettings() {
                   boxShadow: '0 4px 16px var(--glow-primary)',
                 }}
               >
-                {isSaving ? 'Saving...' : 'Save Goal'}
+                {setDailyGoalMutation.isPending ? 'Saving...' : 'Save Goal'}
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleCancel}
-                disabled={isSaving}
+                disabled={setDailyGoalMutation.isPending}
                 className="flex-1 rounded-lg py-3 font-semibold transition-all disabled:opacity-50"
                 style={{
                   background: 'rgba(var(--color-surface-dark-rgb), 0.6)',

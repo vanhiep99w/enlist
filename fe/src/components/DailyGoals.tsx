@@ -1,28 +1,41 @@
 /* eslint-disable react-hooks/purity */
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSoundEffects } from '../hooks/useSoundEffects';
+import { useDailyProgress, useSetDailyGoal } from '../hooks/useUser';
 
 interface DailyGoalsProps {
   userId?: number;
 }
 
-interface GoalData {
-  dailyGoal: number;
-  dailyProgressCount: number;
-  isGoalAchieved: boolean;
-}
-
 export function DailyGoals({ userId = 1 }: DailyGoalsProps) {
-  const [goalData, setGoalData] = useState<GoalData>({
-    dailyGoal: 10,
-    dailyProgressCount: 0,
-    isGoalAchieved: false,
-  });
   const [isEditing, setIsEditing] = useState(false);
   const [newGoal, setNewGoal] = useState(10);
   const [showCelebration, setShowCelebration] = useState(false);
   const { playAchievementSound } = useSoundEffects();
+
+  const { data: dailyProgress } = useDailyProgress(userId);
+  const setDailyGoalMutation = useSetDailyGoal();
+
+  const goalData = {
+    dailyGoal: dailyProgress?.dailyGoal || 10,
+    dailyProgressCount: dailyProgress?.progressCount || 0,
+    isGoalAchieved: dailyProgress?.goalAchieved || false,
+  };
+
+  useEffect(() => {
+    if (dailyProgress?.dailyGoal) {
+      setNewGoal(dailyProgress.dailyGoal);
+    }
+  }, [dailyProgress?.dailyGoal]);
+
+  useEffect(() => {
+    if (goalData.isGoalAchieved && !showCelebration) {
+      setShowCelebration(true);
+      playAchievementSound();
+      setTimeout(() => setShowCelebration(false), 3000);
+    }
+  }, [goalData.isGoalAchieved, showCelebration, playAchievementSound]);
 
   // Pre-generate random values for confetti (outside of render)
   const confettiData = useMemo(() => {
@@ -41,44 +54,9 @@ export function DailyGoals({ userId = 1 }: DailyGoalsProps) {
     return data;
   }, []);
 
-  // Fetch daily progress
-  useEffect(() => {
-    fetch(`http://localhost:8080/api/users/${userId}/daily-progress`)
-      .then((res) => res.json())
-      .then((data) => {
-        // Ensure all numeric fields have valid values
-        const validData = {
-          dailyGoal: data.dailyGoal || 10,
-          dailyProgressCount: data.dailyProgressCount || 0,
-          isGoalAchieved: data.isGoalAchieved || false,
-        };
-        setGoalData(validData);
-        setNewGoal(validData.dailyGoal);
-
-        // Trigger celebration if goal just achieved
-        if (validData.isGoalAchieved && !showCelebration) {
-          setShowCelebration(true);
-          playAchievementSound();
-          setTimeout(() => setShowCelebration(false), 3000);
-        }
-      })
-      .catch((err) => console.error('Failed to fetch daily progress:', err));
-  }, [userId, playAchievementSound, showCelebration]);
-
   const handleSetGoal = async () => {
     try {
-      const response = await fetch(`http://localhost:8080/api/users/${userId}/daily-goal`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ dailyGoal: newGoal }),
-      });
-      const data = await response.json();
-      const validData = {
-        dailyGoal: data.dailyGoal || 10,
-        dailyProgressCount: data.dailyProgressCount || 0,
-        isGoalAchieved: data.isGoalAchieved || false,
-      };
-      setGoalData(validData);
+      await setDailyGoalMutation.mutateAsync({ userId, dailyGoal: newGoal });
       setIsEditing(false);
     } catch (err) {
       console.error('Failed to set daily goal:', err);
@@ -120,7 +98,12 @@ export function DailyGoals({ userId = 1 }: DailyGoalsProps) {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setIsEditing(true)}
-              className="rounded-xl border-2 border-black bg-white px-4 py-2 font-bold shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+              className="rounded-lg px-4 py-2 font-bold transition-all"
+              style={{
+                backgroundColor: 'var(--color-surface)',
+                color: 'var(--color-text-primary)',
+                border: '1px solid var(--color-border)',
+              }}
             >
               ✏️ Edit
             </motion.button>
@@ -201,10 +184,17 @@ export function DailyGoals({ userId = 1 }: DailyGoalsProps) {
                 duration: 0.25,
                 ease: [0.25, 0.1, 0.25, 1],
               }}
-              style={{ originY: 0 }}
-              className="relative z-10 overflow-hidden rounded-xl border-4 border-black bg-white p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+              style={{
+                originY: 0,
+                backgroundColor: 'var(--color-surface)',
+                borderColor: 'var(--color-border)',
+              }}
+              className="relative z-10 overflow-hidden rounded-xl border p-4 shadow-lg"
             >
-              <label className="mb-2 block text-sm font-bold text-black uppercase">
+              <label
+                className="mb-2 block text-sm font-bold uppercase"
+                style={{ color: 'var(--color-text-primary)' }}
+              >
                 Set New Goal
               </label>
               <div className="flex gap-2">
@@ -214,15 +204,22 @@ export function DailyGoals({ userId = 1 }: DailyGoalsProps) {
                   max="100"
                   value={newGoal}
                   onChange={(e) => setNewGoal(parseInt(e.target.value) || 10)}
-                  className="flex-1 rounded-lg border-4 border-black px-4 py-2 font-bold focus:ring-4 focus:ring-black/20 focus:outline-none"
+                  className="flex-1 rounded-lg border px-4 py-2 font-bold focus:ring-2 focus:outline-none"
+                  style={{
+                    backgroundColor: 'var(--color-surface-light)',
+                    borderColor: 'var(--color-border)',
+                    color: 'var(--color-text-primary)',
+                  }}
                 />
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={handleSetGoal}
-                  className="rounded-lg border-4 border-black bg-amber-400 px-6 py-2 font-bold shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+                  disabled={setDailyGoalMutation.isPending}
+                  className="rounded-lg px-6 py-2 font-bold text-white transition-all disabled:opacity-50"
+                  style={{ backgroundColor: 'var(--color-primary)' }}
                 >
-                  Save
+                  {setDailyGoalMutation.isPending ? 'Saving...' : 'Save'}
                 </motion.button>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
@@ -231,7 +228,11 @@ export function DailyGoals({ userId = 1 }: DailyGoalsProps) {
                     setIsEditing(false);
                     setNewGoal(goalData.dailyGoal);
                   }}
-                  className="rounded-lg border-4 border-black bg-gray-200 px-4 py-2 font-bold shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+                  className="rounded-lg px-4 py-2 font-bold transition-all"
+                  style={{
+                    backgroundColor: 'var(--color-surface-light)',
+                    color: 'var(--color-text-secondary)',
+                  }}
                 >
                   Cancel
                 </motion.button>

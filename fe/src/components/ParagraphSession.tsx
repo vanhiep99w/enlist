@@ -5,7 +5,6 @@ import { toast } from 'sonner';
 import { ScoreBreakdown } from './ScoreBreakdown';
 import { FeedbackPanel } from './FeedbackPanel';
 import { TypingIndicator } from './TypingIndicator';
-import { DictionaryModal } from './DictionaryModal';
 import { DictionaryPanel } from './DictionaryPanel';
 import { WordPopup } from './WordPopup';
 import { KeyboardShortcutsModal } from './KeyboardShortcutsModal';
@@ -56,7 +55,6 @@ export function ParagraphSession({ paragraphId }: Props) {
   const [previousAttempt, setPreviousAttempt] = useState<SentenceSubmissionResponse | null>(null);
   const [completedData, setCompletedData] = useState<Record<number, CompletedSentenceData>>({});
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
-  const [showDictionary, setShowDictionary] = useState(false);
   const [showDictionaryPanel, setShowDictionaryPanel] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [wordPopup, setWordPopup] = useState<{
@@ -139,10 +137,10 @@ export function ParagraphSession({ paragraphId }: Props) {
           setTimeout(() => textareaRef.current?.focus(), 0);
         }
       }
-      // Ctrl+D to toggle Dictionary
+      // Ctrl+D to toggle Dictionary Panel (My Dictionary)
       if (e.ctrlKey && e.key === 'd') {
         e.preventDefault();
-        setShowDictionary((prev) => !prev);
+        setShowDictionaryPanel((prev) => !prev);
       }
       // ? key to toggle Keyboard Shortcuts help
       if (e.key === '?' && !e.ctrlKey && !e.altKey && !e.metaKey) {
@@ -157,7 +155,6 @@ export function ParagraphSession({ paragraphId }: Props) {
       // Escape to close modals
       if (e.key === 'Escape') {
         if (showShortcuts) setShowShortcuts(false);
-        if (showDictionary) setShowDictionary(false);
         if (showDictionaryPanel) setShowDictionaryPanel(false);
         if (wordPopup) {
           setWordPopup(null);
@@ -168,7 +165,7 @@ export function ParagraphSession({ paragraphId }: Props) {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [lastSubmission, showShortcuts, showDictionary, showDictionaryPanel, wordPopup]);
+  }, [lastSubmission, showShortcuts, showDictionaryPanel, wordPopup]);
 
   // Text selection for word popup
   useTextSelection({
@@ -321,10 +318,6 @@ export function ParagraphSession({ paragraphId }: Props) {
     setPreviousAttempt(null);
     setUserTranslation('');
     setTimeout(() => textareaRef.current?.focus(), 0);
-  };
-
-  const handleQuit = () => {
-    navigate({ to: '/paragraphs' });
   };
 
   const renderHighlightedParagraph = () => {
@@ -795,19 +788,7 @@ export function ParagraphSession({ paragraphId }: Props) {
                     </div>
                   )}
 
-                  <div className="mt-3 flex items-center justify-between">
-                    <button
-                      onClick={handleQuit}
-                      className="flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-all hover:opacity-80"
-                      style={{
-                        backgroundColor: 'var(--color-surface)',
-                        color: 'var(--color-text-secondary)',
-                        borderColor: 'var(--color-border)',
-                      }}
-                    >
-                      ← Quit
-                    </button>
-
+                  <div className="mt-3 flex items-center justify-end">
                     <div className="flex items-center gap-2">
                       <button
                         onClick={handleSkip}
@@ -1175,7 +1156,6 @@ export function ParagraphSession({ paragraphId }: Props) {
             </div>
           )}
         </div>
-        <DictionaryModal isOpen={showDictionary} onClose={() => setShowDictionary(false)} />
         <KeyboardShortcutsModal isOpen={showShortcuts} onClose={() => setShowShortcuts(false)} />
 
         {/* Keyboard shortcuts hint */}
@@ -1240,7 +1220,7 @@ export function ParagraphSession({ paragraphId }: Props) {
                 border: '1px solid var(--color-border)',
                 color: 'var(--color-text-secondary)',
               }}
-              title="Dictionary (Ctrl+D)"
+              title="My Dictionary (Ctrl+D)"
             >
               {/* Hover gradient overlay */}
               <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-violet-600/0 via-violet-600/0 to-purple-600/0 transition-all duration-300 group-hover:from-violet-600/10 group-hover:via-violet-600/5 group-hover:to-purple-600/10" />
@@ -1342,14 +1322,14 @@ export function ParagraphSession({ paragraphId }: Props) {
         {session && (
           <div className="fixed bottom-4 left-1/2 z-40 flex -translate-x-1/2 gap-3 md:hidden">
             <button
-              onClick={() => setShowDictionary(true)}
+              onClick={() => setShowDictionaryPanel(true)}
               className="flex items-center gap-2.5 rounded-2xl px-5 py-2.5 shadow-xl ring-1 shadow-black/30 ring-white/5 backdrop-blur-xl transition-all active:scale-95"
               style={{
                 backgroundColor: 'var(--color-surface)',
                 border: '1px solid var(--color-border)',
                 color: 'var(--color-text-secondary)',
               }}
-              title="Dictionary (Ctrl+D)"
+              title="My Dictionary (Ctrl+D)"
             >
               <span className="text-lg">📖</span>
               <span
@@ -1380,9 +1360,6 @@ export function ParagraphSession({ paragraphId }: Props) {
             </div>
           </div>
         )}
-
-        {/* Dictionary Modal (old) */}
-        <DictionaryModal isOpen={showDictionary} onClose={() => setShowDictionary(false)} />
 
         {/* Word Popup */}
         {wordPopup && (

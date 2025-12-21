@@ -1,6 +1,7 @@
 package com.enlist.be.service;
 
 import com.enlist.be.entity.User;
+import com.enlist.be.exception.ResourceNotFoundException;
 import com.enlist.be.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +22,7 @@ public class DailyGoalService {
     @Transactional
     public void incrementDailyProgress(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
 
         resetProgressIfNeeded(user);
         user.setDailyProgressCount(user.getDailyProgressCount() + 1);
@@ -38,7 +39,7 @@ public class DailyGoalService {
         }
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
 
         user.setDailyGoal(goal);
         userRepository.save(user);
@@ -49,7 +50,7 @@ public class DailyGoalService {
     @Transactional
     public Map<String, Object> getDailyProgress(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
 
         if (user.getDailyGoal() == null) {
             user.setDailyGoal(10);
@@ -74,7 +75,7 @@ public class DailyGoalService {
     @Transactional
     public boolean isGoalAchieved(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
 
         resetProgressIfNeeded(user);
         userRepository.save(user);

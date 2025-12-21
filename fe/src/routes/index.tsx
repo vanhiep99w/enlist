@@ -4,11 +4,20 @@ import { getParagraphs } from '../api/sessionApi';
 import { ParagraphCardSkeleton } from '../components/Skeleton';
 import { DailyGoals } from '../components/DailyGoals';
 import { ErrorInsights } from '../components/ErrorInsights';
+import { ProtectedRoute } from '../components/ProtectedRoute';
 import type { Paragraph } from '../types/session';
 
 export const Route = createFileRoute('/')({
-  component: HomePage,
+  component: HomePageWrapper,
 });
+
+function HomePageWrapper() {
+  return (
+    <ProtectedRoute>
+      <HomePage />
+    </ProtectedRoute>
+  );
+}
 
 const DIFFICULTIES = [
   { key: 'Beginner', label: 'Beginner', color: 'bg-emerald-500 hover:bg-emerald-600', icon: '🌱' },

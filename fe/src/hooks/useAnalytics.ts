@@ -3,6 +3,7 @@ import {
   getDetailedErrorAnalytics,
   getErrorDistribution,
   getErrorTrends,
+  getProgressAnalytics,
   getWeakAreas,
 } from '../api/analyticsApi';
 
@@ -12,6 +13,8 @@ export const analyticsKeys = {
   distribution: (userId: number) => [...analyticsKeys.all, 'distribution', userId] as const,
   trends: (userId: number, days: number) => [...analyticsKeys.all, 'trends', userId, days] as const,
   weakAreas: (userId: number) => [...analyticsKeys.all, 'weakAreas', userId] as const,
+  progress: (userId: number, days: number) =>
+    [...analyticsKeys.all, 'progress', userId, days] as const,
 };
 
 export function useErrorAnalytics(userId: number) {
@@ -42,6 +45,14 @@ export function useWeakAreas(userId: number) {
   return useQuery({
     queryKey: analyticsKeys.weakAreas(userId),
     queryFn: () => getWeakAreas(userId),
+    enabled: !!userId,
+  });
+}
+
+export function useProgressAnalytics(userId: number, days: number = 30) {
+  return useQuery({
+    queryKey: analyticsKeys.progress(userId, days),
+    queryFn: () => getProgressAnalytics(userId, days),
     enabled: !!userId,
   });
 }

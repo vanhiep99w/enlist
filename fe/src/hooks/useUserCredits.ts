@@ -1,55 +1,42 @@
-import { useState, useEffect, useCallback } from 'react';
-import { getUserCredits, spendCredits } from '../api/userApi';
-import type { UserCredits } from '../types/user';
+import { useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { useUserCredits as useUserCreditsQuery, useSpendCredits, userKeys } from './useUser';
+import { useAuth } from '../contexts/AuthContext';
 
-const DEFAULT_USER_ID = 1;
+export function useUserCredits() {
+  const { user, isAuthenticated } = useAuth();
+  const userId = user?.id ?? 0;
 
-export function useUserCredits(userId: number = DEFAULT_USER_ID) {
-  const [credits, setCredits] = useState<UserCredits | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchCredits = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const data = await getUserCredits(userId);
-      setCredits(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch credits');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [userId]);
-
-  useEffect(() => {
-    fetchCredits();
-  }, [fetchCredits]);
+  const { data: credits, isLoading, error } = useUserCreditsQuery(userId);
+  const spendCreditsMutation = useSpendCredits();
+  const queryClient = useQueryClient();
 
   const spend = useCallback(
     async (amount: number = 1, reason: string = 'hint') => {
+      if (!userId || !isAuthenticated) {
+        return { success: false, remainingCredits: 0, message: 'Not authenticated' };
+      }
+
       try {
-        const result = await spendCredits({ userId, amount, reason });
-        if (result.success) {
-          setCredits((prev) => (prev ? { ...prev, credits: result.remainingCredits } : null));
-        }
+        const result = await spendCreditsMutation.mutateAsync({ userId, amount, reason });
         return result;
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to spend credits');
+      } catch {
         return { success: false, remainingCredits: credits?.credits || 0, message: 'Error' };
       }
     },
-    [userId, credits?.credits]
+    [userId, isAuthenticated, spendCreditsMutation, credits?.credits]
   );
 
   const refresh = useCallback(() => {
-    fetchCredits();
-  }, [fetchCredits]);
+    if (userId) {
+      queryClient.invalidateQueries({ queryKey: userKeys.credits(userId) });
+    }
+  }, [userId, queryClient]);
 
   return {
-    credits,
+    credits: credits ?? null,
     isLoading,
-    error,
+    error: error?.message ?? null,
     spend,
     refresh,
   };

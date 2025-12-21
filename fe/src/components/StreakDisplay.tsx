@@ -1,7 +1,7 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'motion/react';
-import { getDailyProgress, getStreak } from '../api/userApi';
+import { useDailyProgress, useStreak } from '../hooks/useUser';
 import type { DailyProgress, StreakData } from '../types/user';
 
 function getMilestoneMessage(streak: number): string | null {
@@ -20,7 +20,7 @@ function StreakTooltip({
   position: { top: number; left: number };
   data: StreakData;
   milestone: string | null;
-  dailyProgress: DailyProgress | null;
+  dailyProgress?: DailyProgress;
 }) {
   return createPortal(
     <div
@@ -130,33 +130,11 @@ function StreakTooltip({
 export function StreakDisplay() {
   const [showTooltip, setShowTooltip] = useState(false);
   const [tooltipPos, setTooltipPos] = useState({ top: 0, left: 0 });
-  const [dailyProgress, setDailyProgress] = useState<DailyProgress | null>(null);
-  const [streakData, setStreakData] = useState<StreakData | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const userId = 1;
 
-  const loadDailyProgress = useCallback(async () => {
-    try {
-      const progress = await getDailyProgress(userId);
-      setDailyProgress(progress);
-    } catch (error) {
-      console.error('Failed to load daily progress:', error);
-    }
-  }, [userId]);
-
-  const loadStreak = useCallback(async () => {
-    try {
-      const streak = await getStreak(userId);
-      setStreakData(streak);
-    } catch (error) {
-      console.error('Failed to load streak:', error);
-    }
-  }, [userId]);
-
-  useEffect(() => {
-    loadDailyProgress();
-    loadStreak();
-  }, [loadDailyProgress, loadStreak]);
+  const { data: dailyProgress } = useDailyProgress(userId);
+  const { data: streakData } = useStreak(userId);
 
   if (!streakData) {
     return null;

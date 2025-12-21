@@ -1,15 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useErrorTrends } from '../hooks/useAnalytics';
 
 interface ErrorTrendChartProps {
   userId?: number;
-}
-
-interface TrendData {
-  period: string;
-  byType: Record<string, number>;
-  totalErrors: number;
-  startDate: string;
 }
 
 const ERROR_TYPE_COLORS: Record<string, string> = {
@@ -25,32 +19,12 @@ const ERROR_TYPE_LABELS: Record<string, string> = {
 };
 
 export function ErrorTrendChart({ userId = 1 }: ErrorTrendChartProps) {
-  const [trend7, setTrend7] = useState<TrendData | null>(null);
-  const [trend30, setTrend30] = useState<TrendData | null>(null);
   const [selectedPeriod, setSelectedPeriod] = useState<7 | 30>(7);
-  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    fetchTrends();
-  }, [userId]);
+  const { data: trend7, isLoading: isTrend7Loading } = useErrorTrends(userId, 7);
+  const { data: trend30, isLoading: isTrend30Loading } = useErrorTrends(userId, 30);
 
-  const fetchTrends = async () => {
-    try {
-      setIsLoading(true);
-      const [res7, res30] = await Promise.all([
-        fetch(`http://localhost:8080/api/analytics/errors/${userId}/trends?days=7`),
-        fetch(`http://localhost:8080/api/analytics/errors/${userId}/trends?days=30`),
-      ]);
-      const [data7, data30] = await Promise.all([res7.json(), res30.json()]);
-      setTrend7(data7);
-      setTrend30(data30);
-    } catch (err) {
-      console.error('Failed to fetch error trends:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
+  const isLoading = isTrend7Loading || isTrend30Loading;
   const currentTrend = selectedPeriod === 7 ? trend7 : trend30;
 
   if (isLoading) {

@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-const API_BASE_URL = 'http://localhost:8080/api';
+import { authAxios } from './authApi';
 
 export interface ReviewCard {
   id: number;
@@ -20,30 +18,22 @@ export interface ReviewSubmitRequest {
 }
 
 export const reviewApi = {
-  getDueReviews: async (token: string): Promise<ReviewCard[]> => {
-    const response = await axios.get(`${API_BASE_URL}/reviews/due`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+  getDueReviews: async (): Promise<ReviewCard[]> => {
+    const response = await authAxios.get('/reviews/due');
     return response.data;
   },
 
-  getDueCount: async (token: string): Promise<number> => {
-    const response = await axios.get<{ count: number }>(`${API_BASE_URL}/reviews/due/count`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+  getDueCount: async (): Promise<number> => {
+    const response = await authAxios.get<{ count: number }>('/reviews/due/count');
     return response.data.count;
   },
 
-  submitReview: async (token: string, request: ReviewSubmitRequest): Promise<void> => {
-    await axios.post(`${API_BASE_URL}/reviews/submit`, request, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+  submitReview: async (request: ReviewSubmitRequest): Promise<void> => {
+    await authAxios.post('/reviews/submit', request);
   },
 
-  getAllUserCards: async (token: string): Promise<ReviewCard[]> => {
-    const response = await axios.get(`${API_BASE_URL}/reviews/all`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+  getAllUserCards: async (): Promise<ReviewCard[]> => {
+    const response = await authAxios.get('/reviews/all');
     return response.data;
   },
 };

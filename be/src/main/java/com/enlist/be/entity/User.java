@@ -27,6 +27,9 @@ public class User {
     @Column(unique = true)
     private String email;
 
+    @Column(name = "password")
+    private String password;
+
     @Column(name = "total_points")
     @Builder.Default
     private Integer totalPoints = 0;
