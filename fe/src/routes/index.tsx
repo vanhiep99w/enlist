@@ -5,6 +5,7 @@ import { ParagraphCardSkeleton } from '../components/Skeleton';
 import { DailyGoals } from '../components/DailyGoals';
 import { ErrorInsights } from '../components/ErrorInsights';
 import { ProtectedRoute } from '../components/ProtectedRoute';
+import { useAuth } from '../contexts/AuthContext';
 import type { Paragraph } from '../types/session';
 
 export const Route = createFileRoute('/')({
@@ -32,6 +33,8 @@ const DIFFICULTIES = [
 
 function HomePage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const userId = user?.id ?? 0;
   const [paragraphs, setParagraphs] = useState<Paragraph[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -254,14 +257,14 @@ function HomePage() {
           <div className="space-y-6">
             {/* Daily Goals */}
             <div className="animate-fade-up stagger-2">
-              <DailyGoals userId={1} />
+              <DailyGoals userId={userId} />
             </div>
           </div>
         </div>
 
         {/* Error Insights - Full Width */}
         <div className="animate-fade-up stagger-4">
-          <ErrorInsights userId={1} />
+          <ErrorInsights userId={userId} />
         </div>
       </div>
     </div>

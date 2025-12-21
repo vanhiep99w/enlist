@@ -17,4 +17,6 @@ public interface ParagraphSessionRepository extends JpaRepository<ParagraphSessi
     Optional<ParagraphSession> findFirstByUserIdAndParagraphIdAndStatusOrderByIdDesc(Long userId, Long paragraphId, ParagraphSession.Status status);
 
     List<ParagraphSession> findByParagraphId(Long paragraphId);
+
+    List<ParagraphSession> findByUserIdAndParagraphIdOrderByIdDesc(Long userId, Long paragraphId);
 }

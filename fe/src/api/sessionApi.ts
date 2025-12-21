@@ -6,6 +6,8 @@ import type {
   Session,
   SessionProgress,
   SentenceSubmissionResponse,
+  SessionSummary,
+  PreviousAttempt,
 } from '../types/session';
 
 export async function getParagraphs(
@@ -84,5 +86,21 @@ export async function getSessionProgress(sessionId: number): Promise<SessionProg
 
 export async function getUserSessions(userId: number): Promise<Session[]> {
   const response = await authAxios.get<Session[]>(`/sessions/user/${userId}`);
+  return response.data;
+}
+
+export async function getSessionSummary(sessionId: number): Promise<SessionSummary> {
+  const response = await authAxios.get<SessionSummary>(`/sessions/${sessionId}/summary`);
+  return response.data;
+}
+
+export async function getPreviousAttempts(
+  paragraphId: number,
+  userId: number
+): Promise<PreviousAttempt[]> {
+  const response = await authAxios.get<PreviousAttempt[]>(
+    `/paragraphs/${paragraphId}/previous-attempts`,
+    { params: { userId } }
+  );
   return response.data;
 }

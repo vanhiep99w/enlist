@@ -5,6 +5,7 @@ import { ErrorAnalyticsPanel } from '../components/ErrorAnalyticsPanel';
 import { ErrorTrendChart } from '../components/ErrorTrendChart';
 import { TrendingUp, Brain, Target, Sparkles } from 'lucide-react';
 import { ProtectedRoute } from '../components/ProtectedRoute';
+import { useAuth } from '../contexts/AuthContext';
 
 export const Route = createFileRoute('/analytics')({
   component: AnalyticsPageWrapper,
@@ -19,7 +20,8 @@ function AnalyticsPageWrapper() {
 }
 
 function AnalyticsPage() {
-  const userId = 1;
+  const { user } = useAuth();
+  const userId = user?.id ?? 0;
 
   return (
     <div className="min-h-screen px-4 py-8 sm:px-6 lg:px-8">

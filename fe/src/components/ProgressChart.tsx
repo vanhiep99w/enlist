@@ -12,7 +12,7 @@ import {
 import { useProgressAnalytics } from '../hooks/useAnalytics';
 
 interface ProgressChartProps {
-  userId?: number;
+  userId: number;
 }
 
 type TimeRange = 7 | 30 | 90;
@@ -39,7 +39,7 @@ const METRIC_CONFIG = {
   },
 };
 
-export function ProgressChart({ userId = 1 }: ProgressChartProps) {
+export function ProgressChart({ userId }: ProgressChartProps) {
   const [timeRange, setTimeRange] = useState<TimeRange>(30);
   const [selectedMetric, setSelectedMetric] = useState<ChartMetric>('sentences');
   const { data, isLoading } = useProgressAnalytics(userId, timeRange);

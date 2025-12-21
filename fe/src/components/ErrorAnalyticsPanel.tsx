@@ -1,6 +1,7 @@
 import { useErrorAnalytics } from '../hooks/useAnalytics';
 import { motion } from 'motion/react';
 import { AlertCircle, TrendingDown, Award, Brain } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 import {
   PieChart,
   Pie,
@@ -15,7 +16,8 @@ import {
 } from 'recharts';
 
 export function ErrorAnalyticsPanel() {
-  const userId = 1;
+  const { user } = useAuth();
+  const userId = user?.id ?? 0;
   const { data: analytics, isLoading: loading } = useErrorAnalytics(userId);
 
   if (loading) {

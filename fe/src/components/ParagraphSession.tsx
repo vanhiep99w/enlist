@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, History } from 'lucide-react';
 import { toast } from 'sonner';
 import { ScoreBreakdown } from './ScoreBreakdown';
 import { FeedbackPanel } from './FeedbackPanel';
@@ -11,10 +11,13 @@ import { KeyboardShortcutsModal } from './KeyboardShortcutsModal';
 import { SentenceTooltip } from './SentenceTooltip';
 import { SuccessAnimation } from './SuccessAnimation';
 import { AchievementUnlockModal } from './AchievementUnlockModal';
+import { ParagraphSummaryModal } from './ParagraphSummaryModal';
+import { PreviousAttemptsModal } from './PreviousAttemptsModal';
 import { Tooltip } from './Tooltip';
 import { TooltipProvider } from './ui/tooltip';
 import { AutoResizeTextarea, type AutoResizeTextareaRef } from './AutoResizeTextarea';
 import { useTextSelection } from '../hooks/useTextSelection';
+import { useAuth } from '../contexts/AuthContext';
 import {
   useCreateSession,
   useSession,
@@ -32,6 +35,7 @@ interface Props {
 
 export function ParagraphSession({ paragraphId }: Props) {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const textareaRef = useRef<AutoResizeTextareaRef>(null);
 
   // React Query hooks
@@ -62,6 +66,8 @@ export function ParagraphSession({ paragraphId }: Props) {
     position: { x: number; y: number };
   } | null>(null);
   const [unlockedAchievement, setUnlockedAchievement] = useState<Achievement | null>(null);
+  const [showSummary, setShowSummary] = useState(false);
+  const [showPreviousAttempts, setShowPreviousAttempts] = useState(false);
   const paragraphRef = useRef<HTMLDivElement>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -235,6 +241,11 @@ export function ParagraphSession({ paragraphId }: Props) {
             description: sessionCompletedAchievement.title,
           });
         }, 1500);
+
+        // Show summary modal after achievement
+        setTimeout(() => {
+          setShowSummary(true);
+        }, 3000);
       }
     } catch (err) {
       toast.error('Failed to submit translation', {
@@ -382,7 +393,8 @@ export function ParagraphSession({ paragraphId }: Props) {
 
     const isRetryingSentence =
       retryingSentenceIndex !== undefined && index === retryingSentenceIndex;
-    const isCurrentSentence = index === session.currentSentenceIndex && !retryingSubmission;
+    const isCurrentSentence =
+      index === session.currentSentenceIndex && !retryingSubmission && !lastSubmission;
     const isCompleted = index < session.currentSentenceIndex && !isRetryingSentence;
     const data = completedData[index];
 
@@ -612,6 +624,21 @@ export function ParagraphSession({ paragraphId }: Props) {
               >
                 {session.currentSentenceIndex + 1}/{session.totalSentences}
               </span>
+
+              {/* Previous Attempts Button */}
+              <button
+                onClick={() => setShowPreviousAttempts(true)}
+                className="flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all hover:scale-105"
+                style={{
+                  backgroundColor: 'var(--color-surface-light)',
+                  color: 'var(--color-text-secondary)',
+                  border: '1px solid var(--color-border)',
+                }}
+                title="View previous attempts"
+              >
+                <History className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">History</span>
+              </button>
             </div>
 
             {/* Right: Compact progress bar */}
@@ -1372,7 +1399,7 @@ export function ParagraphSession({ paragraphId }: Props) {
             }}
             sessionId={session?.id}
             context={session?.currentSentence}
-            userId={1} // TODO: Get actual userId
+            userId={user?.id ?? 0}
           />
         )}
 
@@ -1380,7 +1407,7 @@ export function ParagraphSession({ paragraphId }: Props) {
         <DictionaryPanel
           isOpen={showDictionaryPanel}
           onClose={() => setShowDictionaryPanel(false)}
-          userId={1} // TODO: Get actual userId
+          userId={user?.id ?? 0}
         />
 
         {/* Achievement Unlock Modal */}
@@ -1388,6 +1415,26 @@ export function ParagraphSession({ paragraphId }: Props) {
           achievement={unlockedAchievement}
           onClose={() => setUnlockedAchievement(null)}
         />
+
+        {/* Paragraph Summary Modal */}
+        {sessionId && (
+          <ParagraphSummaryModal
+            sessionId={sessionId}
+            isOpen={showSummary}
+            onClose={() => setShowSummary(false)}
+          />
+        )}
+
+        {/* Previous Attempts Modal */}
+        {session && (
+          <PreviousAttemptsModal
+            paragraphId={session.paragraphId}
+            paragraphTitle={session.paragraphTitle}
+            userId={user?.id ?? 0}
+            isOpen={showPreviousAttempts}
+            onClose={() => setShowPreviousAttempts(false)}
+          />
+        )}
       </div>
     </TooltipProvider>
   );

@@ -86,3 +86,38 @@ export interface SentenceSubmissionResponse {
   submittedAt: string;
   feedback: import('./translation').TranslationFeedback | null;
 }
+
+export interface SessionSummary {
+  sessionId: number;
+  paragraphId: number;
+  paragraphTitle: string;
+  totalSentences: number;
+  completedSentences: number;
+  averageAccuracy: number;
+  totalErrors: number;
+  totalPoints: number;
+  completedAt: string;
+  errorBreakdown: {
+    grammarErrors: number;
+    wordChoiceErrors: number;
+    naturalnessErrors: number;
+  };
+  allErrors: Array<{
+    sentenceIndex: number;
+    originalSentence: string;
+    userTranslation: string;
+    type: string;
+    quickFix: string;
+    correction: string;
+  }>;
+}
+
+export interface PreviousAttempt {
+  sessionId: number;
+  completedAt: string;
+  averageAccuracy: number;
+  totalErrors: number;
+  completedSentences: number;
+  totalSentences: number;
+  totalPoints: number;
+}

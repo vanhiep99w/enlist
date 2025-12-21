@@ -5,10 +5,10 @@ import { useSoundEffects } from '../hooks/useSoundEffects';
 import { useDailyProgress, useSetDailyGoal } from '../hooks/useUser';
 
 interface DailyGoalsProps {
-  userId?: number;
+  userId: number;
 }
 
-export function DailyGoals({ userId = 1 }: DailyGoalsProps) {
+export function DailyGoals({ userId }: DailyGoalsProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [newGoal, setNewGoal] = useState(10);
   const [showCelebration, setShowCelebration] = useState(false);

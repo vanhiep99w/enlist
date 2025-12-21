@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useErrorTrends } from '../hooks/useAnalytics';
 
 interface ErrorTrendChartProps {
-  userId?: number;
+  userId: number;
 }
 
 const ERROR_TYPE_COLORS: Record<string, string> = {
@@ -18,7 +18,7 @@ const ERROR_TYPE_LABELS: Record<string, string> = {
   NATURALNESS: 'Naturalness',
 };
 
-export function ErrorTrendChart({ userId = 1 }: ErrorTrendChartProps) {
+export function ErrorTrendChart({ userId }: ErrorTrendChartProps) {
   const [selectedPeriod, setSelectedPeriod] = useState<7 | 30>(7);
 
   const { data: trend7, isLoading: isTrend7Loading } = useErrorTrends(userId, 7);

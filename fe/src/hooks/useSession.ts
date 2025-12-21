@@ -10,6 +10,8 @@ import {
   skipSentence,
   getSessionProgress,
   getUserSessions,
+  getSessionSummary,
+  getPreviousAttempts,
 } from '../api/sessionApi';
 import type { ParagraphFilters } from '../types/session';
 
@@ -21,6 +23,9 @@ export const sessionKeys = {
   detail: (id: number) => [...sessionKeys.details(), id] as const,
   progress: (id: number) => [...sessionKeys.all, 'progress', id] as const,
   userSessions: (userId: number) => [...sessionKeys.all, 'user', userId] as const,
+  summary: (id: number) => [...sessionKeys.all, 'summary', id] as const,
+  previousAttempts: (paragraphId: number, userId: number) =>
+    [...sessionKeys.all, 'previous-attempts', paragraphId, userId] as const,
   paragraphs: ['paragraphs'] as const,
   topics: () => [...sessionKeys.paragraphs, 'topics'] as const,
   search: (query: string) => [...sessionKeys.paragraphs, 'search', query] as const,
@@ -118,5 +123,21 @@ export function useUserSessions(userId: number) {
     queryKey: sessionKeys.userSessions(userId),
     queryFn: () => getUserSessions(userId),
     enabled: !!userId,
+  });
+}
+
+export function useSessionSummary(sessionId: number) {
+  return useQuery({
+    queryKey: sessionKeys.summary(sessionId),
+    queryFn: () => getSessionSummary(sessionId),
+    enabled: !!sessionId,
+  });
+}
+
+export function usePreviousAttempts(paragraphId: number, userId: number) {
+  return useQuery({
+    queryKey: sessionKeys.previousAttempts(paragraphId, userId),
+    queryFn: () => getPreviousAttempts(paragraphId, userId),
+    enabled: !!paragraphId && !!userId,
   });
 }

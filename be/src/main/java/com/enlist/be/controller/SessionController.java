@@ -47,4 +47,9 @@ public class SessionController {
     public ResponseEntity<List<SessionResponse>> getUserSessions(@PathVariable Long userId) {
         return ResponseEntity.ok(sessionService.getUserSessions(userId));
     }
+
+    @GetMapping("/{id}/summary")
+    public ResponseEntity<SessionSummaryResponse> getSessionSummary(@PathVariable Long id) {
+        return ResponseEntity.ok(sessionService.getSessionSummary(id));
+    }
 }

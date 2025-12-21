@@ -5,11 +5,14 @@ import com.enlist.be.entity.ErrorAnalytics;
 import com.enlist.be.entity.Paragraph;
 import com.enlist.be.entity.ParagraphSession;
 import com.enlist.be.entity.SentenceSubmission;
+import com.enlist.be.entity.SessionSummary;
 import com.enlist.be.repository.ErrorAnalyticsRepository;
 import com.enlist.be.repository.ParagraphRepository;
 import com.enlist.be.repository.ParagraphSessionRepository;
 import com.enlist.be.repository.SentenceSubmissionRepository;
+import com.enlist.be.repository.SessionSummaryRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +20,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +32,7 @@ public class SessionService {
     private final ParagraphRepository paragraphRepository;
     private final ParagraphSessionRepository sessionRepository;
     private final SentenceSubmissionRepository submissionRepository;
+    private final SessionSummaryRepository sessionSummaryRepository;
     private final ErrorAnalyticsRepository errorAnalyticsRepository;
     private final AIService aiService;
     private final CreditsService creditsService;
@@ -169,6 +175,7 @@ public class SessionService {
                 nextSentence = sentences.get(nextIndex);
             } else {
                 session.complete();
+                createSessionSummary(session);
                 creditsService.awardPointsForSession(session.getUserId(), session.getTotalPoints(), true);
             }
         }
@@ -220,6 +227,7 @@ public class SessionService {
             nextSentence = sentences.get(nextIndex);
         } else {
             session.complete();
+            createSessionSummary(session);
             creditsService.awardPointsForSession(session.getUserId(), session.getTotalPoints(), true);
         }
 
@@ -361,5 +369,148 @@ public class SessionService {
         }
         
         return "general";
+    }
+
+    private void createSessionSummary(ParagraphSession session) {
+        List<SentenceSubmission> submissions = session.getSubmissions();
+        int grammarErrors = 0;
+        int wordChoiceErrors = 0;
+        int naturalnessErrors = 0;
+        int totalErrors = 0;
+
+        List<Map<String, Object>> allErrors = new ArrayList<>();
+
+        for (SentenceSubmission submission : submissions) {
+            if (Boolean.TRUE.equals(submission.getSkipped())) {
+                continue;
+            }
+
+            if (submission.getFeedbackJson() != null) {
+                try {
+                    Map<String, Object> feedback = objectMapper.readValue(
+                        submission.getFeedbackJson(), 
+                        new TypeReference<Map<String, Object>>() {}
+                    );
+                    
+                    Object errorsObj = feedback.get("errors");
+                    if (errorsObj instanceof List<?>) {
+                        List<?> errors = (List<?>) errorsObj;
+                        for (Object errorObj : errors) {
+                            if (errorObj instanceof Map<?, ?>) {
+                                @SuppressWarnings("unchecked")
+                                Map<String, Object> errorMap = (Map<String, Object>) errorObj;
+                                String type = (String) errorMap.get("type");
+                                
+                                if (type != null) {
+                                    String typeLower = type.toLowerCase();
+                                    if (typeLower.contains("grammar")
+                                            || typeLower.contains("tense")
+                                            || typeLower.contains("article")
+                                            || typeLower.contains("preposition")) {
+                                        grammarErrors++;
+                                    } else if (typeLower.contains("word")
+                                            || typeLower.contains("vocabulary")) {
+                                        wordChoiceErrors++;
+                                    } else if (typeLower.contains("natural")
+                                            || typeLower.contains("flow")) {
+                                        naturalnessErrors++;
+                                    }
+                                    totalErrors++;
+
+                                    Map<String, Object> errorDetail = Map.of(
+                                        "sentenceIndex", submission.getSentenceIndex(),
+                                        "originalSentence", submission.getOriginalSentence() != null
+                                                ? submission.getOriginalSentence() : "",
+                                        "userTranslation", submission.getUserTranslation() != null
+                                                ? submission.getUserTranslation() : "",
+                                        "type", type,
+                                        "quickFix", errorMap.get("quickFix") != null
+                                                ? errorMap.get("quickFix") : "",
+                                        "correction", errorMap.get("correction") != null
+                                                ? errorMap.get("correction") : ""
+                                    );
+                                    allErrors.add(errorDetail);
+                                }
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    log.error("Error parsing feedback JSON for summary", e);
+                }
+            }
+        }
+
+        String errorsJson = null;
+        try {
+            errorsJson = objectMapper.writeValueAsString(allErrors);
+        } catch (JsonProcessingException e) {
+            log.error("Error serializing errors JSON", e);
+        }
+
+        SessionSummary summary = SessionSummary.builder()
+            .session(session)
+            .paragraphId(session.getParagraph().getId())
+            .userId(session.getUserId())
+            .totalSentences(session.getParagraph().getSentenceCount())
+            .completedSentences(session.getCompletedSentenceCount())
+            .averageAccuracy(session.getAverageAccuracy())
+            .totalErrors(totalErrors)
+            .grammarErrors(grammarErrors)
+            .wordChoiceErrors(wordChoiceErrors)
+            .naturalnessErrors(naturalnessErrors)
+            .totalPoints(session.getTotalPoints())
+            .errorsJson(errorsJson)
+            .build();
+
+        sessionSummaryRepository.save(summary);
+    }
+
+    public SessionSummaryResponse getSessionSummary(Long sessionId) {
+        ParagraphSession session = sessionRepository.findById(sessionId)
+            .orElseThrow(() -> new RuntimeException("Session not found: " + sessionId));
+
+        SessionSummary summary = sessionSummaryRepository.findBySessionId(sessionId)
+            .orElseThrow(() -> new RuntimeException("Session summary not found: " + sessionId));
+
+        List<SessionSummaryResponse.ErrorDetail> errorDetails = new ArrayList<>();
+        if (summary.getErrorsJson() != null) {
+            try {
+                List<Map<String, Object>> errors = objectMapper.readValue(
+                    summary.getErrorsJson(),
+                    new TypeReference<List<Map<String, Object>>>() {}
+                );
+                
+                for (Map<String, Object> error : errors) {
+                    errorDetails.add(SessionSummaryResponse.ErrorDetail.builder()
+                        .sentenceIndex((Integer) error.get("sentenceIndex"))
+                        .originalSentence((String) error.get("originalSentence"))
+                        .userTranslation((String) error.get("userTranslation"))
+                        .type((String) error.get("type"))
+                        .quickFix((String) error.get("quickFix"))
+                        .correction((String) error.get("correction"))
+                        .build());
+                }
+            } catch (Exception e) {
+                log.error("Error parsing errors JSON", e);
+            }
+        }
+
+        return SessionSummaryResponse.builder()
+            .sessionId(session.getId())
+            .paragraphId(session.getParagraph().getId())
+            .paragraphTitle(session.getParagraph().getTitle())
+            .totalSentences(summary.getTotalSentences())
+            .completedSentences(summary.getCompletedSentences())
+            .averageAccuracy(summary.getAverageAccuracy())
+            .totalErrors(summary.getTotalErrors())
+            .totalPoints(summary.getTotalPoints())
+            .completedAt(session.getCompletedAt())
+            .errorBreakdown(SessionSummaryResponse.ErrorBreakdown.builder()
+                .grammarErrors(summary.getGrammarErrors())
+                .wordChoiceErrors(summary.getWordChoiceErrors())
+                .naturalnessErrors(summary.getNaturalnessErrors())
+                .build())
+            .allErrors(errorDetails)
+            .build();
     }
 }

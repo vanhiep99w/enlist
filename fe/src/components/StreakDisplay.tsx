@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'motion/react';
 import { useDailyProgress, useStreak } from '../hooks/useUser';
+import { useAuth } from '../contexts/AuthContext';
 import type { DailyProgress, StreakData } from '../types/user';
 
 function getMilestoneMessage(streak: number): string | null {
@@ -131,7 +132,8 @@ export function StreakDisplay() {
   const [showTooltip, setShowTooltip] = useState(false);
   const [tooltipPos, setTooltipPos] = useState({ top: 0, left: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
-  const userId = 1;
+  const { user } = useAuth();
+  const userId = user?.id ?? 0;
 
   const { data: dailyProgress } = useDailyProgress(userId);
   const { data: streakData } = useStreak(userId);

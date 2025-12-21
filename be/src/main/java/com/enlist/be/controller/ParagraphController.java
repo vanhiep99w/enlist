@@ -3,6 +3,7 @@ package com.enlist.be.controller;
 import com.enlist.be.dto.PaginatedResponse;
 import com.enlist.be.dto.ParagraphCreateRequest;
 import com.enlist.be.dto.ParagraphResponse;
+import com.enlist.be.dto.PreviousAttemptResponse;
 import com.enlist.be.service.ParagraphService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -26,9 +27,10 @@ public class ParagraphController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "12") int pageSize,
             @RequestParam(required = false) String sortBy,
-            @RequestParam(defaultValue = "asc") String sortOrder) {
+            @RequestParam(defaultValue = "asc") String sortOrder,
+            @RequestParam(required = false) Long userId) {
         return ResponseEntity.ok(paragraphService.getParagraphsPaginated(
-                difficulty, topic, search, page, pageSize, sortBy, sortOrder));
+                difficulty, topic, search, page, pageSize, sortBy, sortOrder, userId));
     }
 
     @GetMapping("/topics")
@@ -55,5 +57,12 @@ public class ParagraphController {
     public ResponseEntity<Void> deleteParagraph(@PathVariable Long id) {
         paragraphService.deleteParagraph(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/previous-attempts")
+    public ResponseEntity<List<PreviousAttemptResponse>> getPreviousAttempts(
+            @PathVariable Long id,
+            @RequestParam Long userId) {
+        return ResponseEntity.ok(paragraphService.getPreviousAttempts(id, userId));
     }
 }

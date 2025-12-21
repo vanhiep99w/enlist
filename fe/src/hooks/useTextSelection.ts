@@ -80,9 +80,9 @@ export const useTextSelection = ({
         return;
       }
 
-      // Count words in selection - strict word limit (max 50 words)
+      // Count words in selection - strict word limit (max 30 words)
       const wordCount = selectedText.split(/\s+/).filter((w) => w.length > 0).length;
-      if (wordCount > 50) {
+      if (wordCount > 30) {
         setSelection(null);
         return;
       }
@@ -93,7 +93,7 @@ export const useTextSelection = ({
 
       // Validate expanded text word count as well
       const expandedWordCount = expandedText.split(/\s+/).filter((w) => w.length > 0).length;
-      if (expandedWordCount > 50) {
+      if (expandedWordCount > 30) {
         setSelection(null);
         return;
       }

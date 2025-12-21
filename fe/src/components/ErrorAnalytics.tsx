@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { useErrorAnalytics } from '../hooks/useAnalytics';
 
 interface ErrorAnalyticsProps {
-  userId?: number;
+  userId: number;
 }
 
 const ERROR_TYPE_COLORS: Record<string, string> = {
@@ -17,7 +17,7 @@ const ERROR_TYPE_LABELS: Record<string, string> = {
   NATURALNESS: 'Naturalness',
 };
 
-export function ErrorAnalytics({ userId = 1 }: ErrorAnalyticsProps) {
+export function ErrorAnalytics({ userId }: ErrorAnalyticsProps) {
   const { data, isLoading } = useErrorAnalytics(userId);
 
   if (isLoading) {

@@ -265,23 +265,6 @@ export const DictionaryPanel = ({ isOpen, onClose, userId }: DictionaryPanelProp
                     </button>
                   </div>
 
-                  {word.context && (
-                    <div className="mb-2 space-y-1">
-                      <p
-                        className="line-clamp-2 text-xs italic"
-                        style={{ color: 'var(--color-text-muted)' }}
-                      >
-                        "{word.context}"
-                      </p>
-                      <p
-                        className="line-clamp-2 text-xs"
-                        style={{ color: 'var(--color-text-secondary)' }}
-                      >
-                        → {word.translation}
-                      </p>
-                    </div>
-                  )}
-
                   {/* Examples Section */}
                   {word.examples && word.examples.length > 0 && (
                     <div
@@ -316,14 +299,6 @@ export const DictionaryPanel = ({ isOpen, onClose, userId }: DictionaryPanelProp
                       </div>
                     </div>
                   )}
-
-                  <div
-                    className="flex items-center gap-2 text-xs"
-                    style={{ color: 'var(--color-text-muted)' }}
-                  >
-                    <Calendar className="h-3 w-3" />
-                    <span>{formatDate(word.createdAt)}</span>
-                  </div>
                 </CardContent>
               </Card>
             ))

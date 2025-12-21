@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useErrorAnalytics, useErrorTrends } from '../hooks/useAnalytics';
 
 interface ErrorInsightsProps {
-  userId?: number;
+  userId: number;
 }
 
 const ERROR_CONFIG = {
@@ -12,7 +12,7 @@ const ERROR_CONFIG = {
   NATURALNESS: { color: '#06b6d4', label: 'Naturalness', icon: '🗣️' },
 };
 
-export function ErrorInsights({ userId = 1 }: ErrorInsightsProps) {
+export function ErrorInsights({ userId }: ErrorInsightsProps) {
   const [selectedPeriod, setSelectedPeriod] = useState<7 | 30>(7);
 
   const { data: analytics, isLoading: isAnalyticsLoading } = useErrorAnalytics(userId);

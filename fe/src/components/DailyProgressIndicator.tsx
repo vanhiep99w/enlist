@@ -1,9 +1,11 @@
 import { motion } from 'motion/react';
 import { Flame } from 'lucide-react';
 import { useDailyProgress } from '../hooks/useUser';
+import { useAuth } from '../contexts/AuthContext';
 
 export function DailyProgressIndicator() {
-  const userId = 1;
+  const { user } = useAuth();
+  const userId = user?.id ?? 0;
   const { data: progress } = useDailyProgress(userId);
 
   if (!progress) return null;

@@ -3,9 +3,11 @@ import { useDailyProgress, useSetDailyGoal } from '../hooks/useUser';
 import { motion } from 'motion/react';
 import { Target, Minus, Plus } from 'lucide-react';
 import { toast } from 'sonner';
+import { useAuth } from '../contexts/AuthContext';
 
 export function DailyGoalSettings() {
-  const userId = 1;
+  const { user } = useAuth();
+  const userId = user?.id ?? 0;
   const { data: progress } = useDailyProgress(userId);
   const setDailyGoalMutation = useSetDailyGoal();
 
