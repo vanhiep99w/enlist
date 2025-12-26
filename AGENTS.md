@@ -50,6 +50,7 @@
   - `ci:` CI/CD configuration
   - `chore:` Maintenance tasks
   - Example: `feat: add React Query integration for API calls`
+- **Git/Commit Rule**: ❌ **NEVER** run `git commit` or `git push` until explicitly instructed by the user
 
 ## Frontend Implementation Rules (CRITICAL)
 
