@@ -50,6 +50,7 @@ AI Feedback: ❌ Missing "to" after "want" (60% accuracy)
 - ✅ **AI Feedback**: Phân tích lỗi sai chi tiết với AI
 - ✅ **Smart Scoring**: Tính điểm dựa trên độ chính xác (0-100)
 - ✅ **Context Learning**: Học trong ngữ cảnh thực tế (email, thư, hội thoại)
+- ✅ **Random Session Mode**: AI tự động sinh đoạn văn với độ khó tăng dần dựa trên hiệu suất
 
 ### 🏆 Gamification
 - 🔥 **Streak System**: Theo dõi chuỗi ngày học liên tiếp
@@ -62,6 +63,8 @@ AI Feedback: ❌ Missing "to" after "want" (60% accuracy)
 - 💡 **Hint System**: Gợi ý khi gặp khó khăn
 - 📝 **Detailed Explanation**: Giải thích lỗi bằng tiếng Việt
 - 🎯 **Personalized Practice**: Luyện tập theo điểm yếu
+- 🤖 **Adaptive AI Generator**: Sinh đoạn văn dựa trên lỗi và từ vựng đã học
+- 📈 **Progressive Difficulty**: Độ khó tăng dần theo từng câu phức tạp hơn, thì khó hơn
 
 ---
 
@@ -147,7 +150,7 @@ UI updates with feedback & achievements
 | **Spring Security** | 6.x | Authentication |
 | **Spring Data JPA** | 3.x | ORM |
 | **PostgreSQL** | 15.x | Primary Database |
-| **Redis** | 7.x | Caching (optional) |
+| **Redis** | 7.x | Caching for AI-generated paragraphs |
 | **Lombok** | 1.18.x | Boilerplate reduction |
 
 ### AI & External Services
@@ -488,6 +491,121 @@ Response:
   }
 }
 ```
+
+### Random Session API
+
+#### Create Random Session
+```http
+POST /api/random-sessions
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "initialDifficulty": 1,
+  "targetLanguage": "en"
+}
+
+Response:
+{
+  "id": 789,
+  "status": "ACTIVE",
+  "currentDifficulty": 1,
+  "currentParagraph": {
+    "id": 101,
+    "paragraphId": 555,
+    "paragraphSessionId": 666,
+    "paragraphTitle": "AI Generated - Level 1",
+    "paragraphContent": "Tôi thích ăn phở mỗi sáng...",
+    "status": "PENDING",
+    "difficultyLevel": 1
+  },
+  "totalParagraphsCompleted": 0,
+  "totalPoints": 0,
+  "averageAccuracy": 0.0
+}
+```
+
+#### Get Next Paragraph
+```http
+POST /api/random-sessions/{sessionId}/next
+Authorization: Bearer {token}
+
+Response:
+{
+  "currentParagraph": {
+    "paragraphContent": "Hôm qua tôi đã đi chợ với mẹ...",
+    "difficultyLevel": 2,
+    "status": "PENDING"
+  }
+}
+```
+
+#### End Random Session
+```http
+POST /api/random-sessions/{sessionId}/end
+Authorization: Bearer {token}
+
+Response:
+{
+  "id": 789,
+  "status": "COMPLETED",
+  "totalParagraphsCompleted": 5,
+  "totalPoints": 450,
+  "averageAccuracy": 85.5,
+  "endedAt": "2024-12-26T21:00:00Z"
+}
+```
+
+---
+
+## 🤖 Random Session - Adaptive Learning
+
+### How It Works
+
+Random Session là chế độ học thích ứng sử dụng AI để tạo đoạn văn động dựa trên:
+
+1. **Previous Paragraph Context** - Ngữ cảnh từ đoạn văn trước
+2. **Error Analysis** - Phân tích lỗi sai của người học
+3. **Saved Vocabulary** - Từ vựng đã lưu
+4. **Performance Tracking** - Theo dõi độ chính xác
+
+### Progressive Difficulty Algorithm
+
+```
+Accuracy ≥ 95%  → Difficulty +1
+Accuracy ≥ 85%  → Difficulty +1 every 2 paragraphs
+Accuracy ≥ 70%  → Maintain current difficulty
+Accuracy ≥ 50%  → Difficulty -1
+Accuracy < 50%  → Difficulty -2
+```
+
+### AI Prompt Structure
+
+```
+CONTEXT - Previous paragraph: "..."
+→ Build upon this context with related but harder topic
+
+LEARNER'S WEAKNESSES:
+- Grammar errors: Missing "to" after "want"
+- Tense confusion: Present vs Past
+→ Create sentences that practice these weak points
+
+VOCABULARY WORDS TO INCLUDE:
+- achievement, struggle, improve
+→ Naturally incorporate these saved words
+
+PROGRESSIVE DIFFICULTY (Level 3 → 4):
+- Use SLIGHTLY MORE COMPLEX grammar
+- Include longer sentences (+1-2 words)
+- Use more advanced verb tenses (past continuous, present perfect)
+- Introduce 2-3 new vocabulary words
+```
+
+### Caching Strategy
+
+- **Generic paragraphs** (no context): Cached in Redis for 24h
+- **Context-specific paragraphs**: Generated fresh every time
+- **Pre-generation**: Next 2 difficulty levels cached asynchronously
 
 ---
 
