@@ -12,6 +12,8 @@ import {
   getUserSessions,
   getSessionSummary,
   getPreviousAttempts,
+  getRandomSession,
+  endRandomSession,
 } from '../api/sessionApi';
 import type { ParagraphFilters } from '../types/session';
 
@@ -29,6 +31,8 @@ export const sessionKeys = {
   paragraphs: ['paragraphs'] as const,
   topics: () => [...sessionKeys.paragraphs, 'topics'] as const,
   search: (query: string) => [...sessionKeys.paragraphs, 'search', query] as const,
+  randomSessions: ['random-sessions'] as const,
+  randomSession: (id: number) => [...sessionKeys.randomSessions, id] as const,
 };
 
 export function useParagraphs(filters: ParagraphFilters = {}) {
@@ -138,5 +142,25 @@ export function usePreviousAttempts(paragraphId: number) {
     queryKey: sessionKeys.previousAttempts(paragraphId),
     queryFn: () => getPreviousAttempts(paragraphId),
     enabled: !!paragraphId,
+  });
+}
+
+export function useRandomSession(id: number) {
+  return useQuery({
+    queryKey: sessionKeys.randomSession(id),
+    queryFn: () => getRandomSession(id),
+    enabled: id > 0,
+  });
+}
+
+export function useEndRandomSession() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: number) => endRandomSession(id),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: sessionKeys.randomSession(data.id) });
+      queryClient.invalidateQueries({ queryKey: sessionKeys.randomSessions });
+    },
   });
 }

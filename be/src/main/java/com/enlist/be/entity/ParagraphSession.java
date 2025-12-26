@@ -56,6 +56,9 @@ public class ParagraphSession {
     @Builder.Default
     private List<SentenceSubmission> submissions = new ArrayList<>();
 
+    @OneToOne(mappedBy = "paragraphSession")
+    private RandomSessionParagraph randomSessionParagraph;
+
     @Column(name = "started_at")
     private LocalDateTime startedAt;
 

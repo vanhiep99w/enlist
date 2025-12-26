@@ -38,6 +38,8 @@ public class SessionService {
     private final CreditsService creditsService;
     private final DailyGoalService dailyGoalService;
     private final ReviewService reviewService;
+    private final RandomSessionService randomSessionService;
+    private final ParagraphCacheService paragraphCacheService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Transactional
@@ -177,6 +179,9 @@ public class SessionService {
         int nextIndex = currentIndex;
         String nextSentence = null;
 
+        // Trigger prefetch during session (at halfway point) for random mode
+        triggerPrefetchIfNeeded(session, accuracy);
+
         // Increment daily progress when user passes a sentence (not retry)
         if (passedThreshold && !isRetry) {
             dailyGoalService.incrementDailyProgress(session.getUserId());
@@ -189,12 +194,14 @@ public class SessionService {
                 session.complete();
                 createSessionSummary(session);
                 creditsService.awardPointsForSession(session.getUserId(), session.getTotalPoints(), true);
+                notifyRandomSessionIfApplicable(session);
             }
         } else if (isLastSentence && !passedThreshold) {
             // If failed the last sentence, still mark as complete (user finished all attempts)
             session.complete();
             createSessionSummary(session);
             creditsService.awardPointsForSession(session.getUserId(), session.getTotalPoints(), true);
+            notifyRandomSessionIfApplicable(session);
         }
 
         sessionRepository.save(session);
@@ -539,5 +546,93 @@ public class SessionService {
                 .build())
             .allErrors(errorDetails)
             .build();
+    }
+
+    private void notifyRandomSessionIfApplicable(ParagraphSession session) {
+        try {
+            randomSessionService.onParagraphSessionCompleted(
+                session.getId(),
+                session.getAverageAccuracy(),
+                calculateTimeSpent(session),
+                session.getTotalPoints(),
+                session.getTotalCredits()
+            );
+        } catch (Exception e) {
+            log.debug("Session {} is not part of a random session", session.getId());
+        }
+    }
+
+    private Integer calculateTimeSpent(ParagraphSession session) {
+        if (session.getStartedAt() != null && session.getCompletedAt() != null) {
+            return (int) java.time.Duration.between(session.getStartedAt(), session.getCompletedAt()).getSeconds();
+        }
+        return 0;
+    }
+
+    /**
+     * Trigger prefetching for next paragraph during current work
+     * Uses tentative metrics to predict and prefetch next difficulty
+     */
+    private void triggerPrefetchIfNeeded(ParagraphSession session, double currentAccuracy) {
+        try {
+            // Check if this is part of a random session
+            var randomSessionParagraph = session.getRandomSessionParagraph();
+            if (randomSessionParagraph == null) {
+                return;
+            }
+
+            var randomSession = randomSessionParagraph.getRandomSession();
+            Paragraph paragraph = session.getParagraph();
+            int totalSentences = paragraph.getSentences().size();
+            int currentSentence = session.getCurrentSentenceIndex();
+
+            // Trigger prefetch at 50% progress
+            boolean isHalfway = currentSentence >= (totalSentences / 2) && currentSentence < (totalSentences / 2 + 1);
+            
+            if (isHalfway) {
+                // Calculate tentative session accuracy
+                Double tentativeAccuracy = calculateTentativeAccuracy(session);
+                
+                // Get error summary and vocab for personalized prefetch
+                String errorSummary = randomSessionParagraph.getErrorSummaryJson();
+                String vocabSuggestions = randomSessionParagraph.getVocabTargetedJson();
+                
+                log.info("Triggering prefetch for session {} at {}/{} sentences, tentative accuracy: {}",
+                        session.getId(), currentSentence, totalSentences, tentativeAccuracy);
+                
+                paragraphCacheService.prefetchWithTentativeMetrics(
+                    randomSession.getCurrentDifficulty(),
+                    randomSession.getTargetLanguage(),
+                    tentativeAccuracy,
+                    errorSummary,
+                    vocabSuggestions
+                );
+            }
+        } catch (Exception e) {
+            log.debug("Could not trigger prefetch for session {}: {}", session.getId(), e.getMessage());
+        }
+    }
+
+    /**
+     * Calculate tentative accuracy based on current submissions
+     */
+    private Double calculateTentativeAccuracy(ParagraphSession session) {
+        List<SentenceSubmission> submissions =
+            submissionRepository.findBySessionIdOrderBySentenceIndexAsc(session.getId());
+        
+        if (submissions.isEmpty()) {
+            return null;
+        }
+        
+        double totalAccuracy = submissions.stream()
+            .filter(s -> !Boolean.TRUE.equals(s.getSkipped()) && s.getAccuracy() != null)
+            .mapToDouble(SentenceSubmission::getAccuracy)
+            .sum();
+        
+        long validSubmissions = submissions.stream()
+            .filter(s -> !Boolean.TRUE.equals(s.getSkipped()) && s.getAccuracy() != null)
+            .count();
+        
+        return validSubmissions > 0 ? totalAccuracy / validSubmissions : null;
     }
 }

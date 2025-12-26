@@ -68,6 +68,10 @@ function HomePage() {
     navigate({ to: '/session/$paragraphId', params: { paragraphId: String(paragraphId) } });
   };
 
+  const handleStartRandomMode = async () => {
+    navigate({ to: '/random-session' });
+  };
+
   const getDifficultyColor = (
     difficulty: string
   ): { className: string; style?: React.CSSProperties } => {
@@ -132,6 +136,34 @@ function HomePage() {
               >
                 <span>⚡</span> Quick Start
               </h2>
+
+              {/* Random Mode Button */}
+              <button
+                onClick={handleStartRandomMode}
+                className="mb-4 w-full rounded-lg px-4 py-4 font-semibold transition-all hover:scale-[1.02]"
+                style={{
+                  background: 'linear-gradient(135deg, var(--color-primary), var(--color-accent))',
+                  color: 'white',
+                }}
+              >
+                <div className="flex items-center justify-center gap-2">
+                  <span className="text-2xl">🎲</span>
+                  <div className="text-left">
+                    <div className="text-sm font-bold">Adaptive Random Practice</div>
+                    <div className="text-xs opacity-90">
+                      AI-generated paragraphs that adapt to your level
+                    </div>
+                  </div>
+                </div>
+              </button>
+
+              <div
+                className="mb-2 text-center text-xs"
+                style={{ color: 'var(--color-text-muted)' }}
+              >
+                Or choose a difficulty:
+              </div>
+
               <div className="grid grid-cols-3 gap-3">
                 {DIFFICULTIES.map((diff) => (
                   <button

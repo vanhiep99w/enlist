@@ -401,6 +401,7 @@ export function Header() {
                 Practice
               </NavLink>
               <NavLink to="/paragraphs">Paragraphs</NavLink>
+              <NavLink to="/random-history">History</NavLink>
               <NavLink to="/analytics">Analytics</NavLink>
               <NavLink to="/leaderboard">Leaderboard</NavLink>
             </nav>

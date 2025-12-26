@@ -11,6 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ReviewRouteImport } from './routes/review'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as RandomSessionRouteImport } from './routes/random-session'
+import { Route as RandomHistoryRouteImport } from './routes/random-history'
 import { Route as ParagraphsRouteImport } from './routes/paragraphs'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
@@ -18,6 +20,7 @@ import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SessionParagraphIdRouteImport } from './routes/session.$paragraphId'
+import { Route as RandomHistorySessionIdRouteImport } from './routes/random-history.$sessionId'
 
 const ReviewRoute = ReviewRouteImport.update({
   id: '/review',
@@ -27,6 +30,16 @@ const ReviewRoute = ReviewRouteImport.update({
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RandomSessionRoute = RandomSessionRouteImport.update({
+  id: '/random-session',
+  path: '/random-session',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RandomHistoryRoute = RandomHistoryRouteImport.update({
+  id: '/random-history',
+  path: '/random-history',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ParagraphsRoute = ParagraphsRouteImport.update({
@@ -64,6 +77,11 @@ const SessionParagraphIdRoute = SessionParagraphIdRouteImport.update({
   path: '/session/$paragraphId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RandomHistorySessionIdRoute = RandomHistorySessionIdRouteImport.update({
+  id: '/$sessionId',
+  path: '/$sessionId',
+  getParentRoute: () => RandomHistoryRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -72,8 +90,11 @@ export interface FileRoutesByFullPath {
   '/leaderboard': typeof LeaderboardRoute
   '/login': typeof LoginRoute
   '/paragraphs': typeof ParagraphsRoute
+  '/random-history': typeof RandomHistoryRouteWithChildren
+  '/random-session': typeof RandomSessionRoute
   '/register': typeof RegisterRoute
   '/review': typeof ReviewRoute
+  '/random-history/$sessionId': typeof RandomHistorySessionIdRoute
   '/session/$paragraphId': typeof SessionParagraphIdRoute
 }
 export interface FileRoutesByTo {
@@ -83,8 +104,11 @@ export interface FileRoutesByTo {
   '/leaderboard': typeof LeaderboardRoute
   '/login': typeof LoginRoute
   '/paragraphs': typeof ParagraphsRoute
+  '/random-history': typeof RandomHistoryRouteWithChildren
+  '/random-session': typeof RandomSessionRoute
   '/register': typeof RegisterRoute
   '/review': typeof ReviewRoute
+  '/random-history/$sessionId': typeof RandomHistorySessionIdRoute
   '/session/$paragraphId': typeof SessionParagraphIdRoute
 }
 export interface FileRoutesById {
@@ -95,8 +119,11 @@ export interface FileRoutesById {
   '/leaderboard': typeof LeaderboardRoute
   '/login': typeof LoginRoute
   '/paragraphs': typeof ParagraphsRoute
+  '/random-history': typeof RandomHistoryRouteWithChildren
+  '/random-session': typeof RandomSessionRoute
   '/register': typeof RegisterRoute
   '/review': typeof ReviewRoute
+  '/random-history/$sessionId': typeof RandomHistorySessionIdRoute
   '/session/$paragraphId': typeof SessionParagraphIdRoute
 }
 export interface FileRouteTypes {
@@ -108,8 +135,11 @@ export interface FileRouteTypes {
     | '/leaderboard'
     | '/login'
     | '/paragraphs'
+    | '/random-history'
+    | '/random-session'
     | '/register'
     | '/review'
+    | '/random-history/$sessionId'
     | '/session/$paragraphId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -119,8 +149,11 @@ export interface FileRouteTypes {
     | '/leaderboard'
     | '/login'
     | '/paragraphs'
+    | '/random-history'
+    | '/random-session'
     | '/register'
     | '/review'
+    | '/random-history/$sessionId'
     | '/session/$paragraphId'
   id:
     | '__root__'
@@ -130,8 +163,11 @@ export interface FileRouteTypes {
     | '/leaderboard'
     | '/login'
     | '/paragraphs'
+    | '/random-history'
+    | '/random-session'
     | '/register'
     | '/review'
+    | '/random-history/$sessionId'
     | '/session/$paragraphId'
   fileRoutesById: FileRoutesById
 }
@@ -142,6 +178,8 @@ export interface RootRouteChildren {
   LeaderboardRoute: typeof LeaderboardRoute
   LoginRoute: typeof LoginRoute
   ParagraphsRoute: typeof ParagraphsRoute
+  RandomHistoryRoute: typeof RandomHistoryRouteWithChildren
+  RandomSessionRoute: typeof RandomSessionRoute
   RegisterRoute: typeof RegisterRoute
   ReviewRoute: typeof ReviewRoute
   SessionParagraphIdRoute: typeof SessionParagraphIdRoute
@@ -161,6 +199,20 @@ declare module '@tanstack/react-router' {
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/random-session': {
+      id: '/random-session'
+      path: '/random-session'
+      fullPath: '/random-session'
+      preLoaderRoute: typeof RandomSessionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/random-history': {
+      id: '/random-history'
+      path: '/random-history'
+      fullPath: '/random-history'
+      preLoaderRoute: typeof RandomHistoryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/paragraphs': {
@@ -212,8 +264,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SessionParagraphIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/random-history/$sessionId': {
+      id: '/random-history/$sessionId'
+      path: '/$sessionId'
+      fullPath: '/random-history/$sessionId'
+      preLoaderRoute: typeof RandomHistorySessionIdRouteImport
+      parentRoute: typeof RandomHistoryRoute
+    }
   }
 }
+
+interface RandomHistoryRouteChildren {
+  RandomHistorySessionIdRoute: typeof RandomHistorySessionIdRoute
+}
+
+const RandomHistoryRouteChildren: RandomHistoryRouteChildren = {
+  RandomHistorySessionIdRoute: RandomHistorySessionIdRoute,
+}
+
+const RandomHistoryRouteWithChildren = RandomHistoryRoute._addFileChildren(
+  RandomHistoryRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -222,6 +293,8 @@ const rootRouteChildren: RootRouteChildren = {
   LeaderboardRoute: LeaderboardRoute,
   LoginRoute: LoginRoute,
   ParagraphsRoute: ParagraphsRoute,
+  RandomHistoryRoute: RandomHistoryRouteWithChildren,
+  RandomSessionRoute: RandomSessionRoute,
   RegisterRoute: RegisterRoute,
   ReviewRoute: ReviewRoute,
   SessionParagraphIdRoute: SessionParagraphIdRoute,

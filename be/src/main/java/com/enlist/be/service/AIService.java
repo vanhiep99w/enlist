@@ -26,6 +26,7 @@ public class AIService {
 
     private final GroqConfig groqConfig;
     private final WebClient webClient;
+    private final AIMetricsService metricsService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private WebClient groqClient;
@@ -48,7 +49,9 @@ public class AIService {
             return createGibberishFeedback(userTranslation);
         }
         
+        long startTime = System.currentTimeMillis();
         String prompt = buildPrompt(originalText, userTranslation, paragraphContext, previousTranslations);
+        int promptLength = prompt.length();
         
         String normalizedUser = normalizeForComparison(userTranslation);
 
@@ -68,18 +71,47 @@ public class AIService {
                     .bodyToMono(String.class)
                     .block();
 
+            long latencyMs = System.currentTimeMillis() - startTime;
+            int responseLength = response != null ? response.length() : 0;
+
             TranslationFeedback feedback = parseResponse(response);
             
             validateAndFixErrorPositions(feedback, userTranslation);
             
             String normalizedCorrect = normalizeForComparison(feedback.getCorrectTranslation());
             if (normalizedUser.equals(normalizedCorrect)) {
-                return createPerfectScoreFeedback(userTranslation);
+                feedback = createPerfectScoreFeedback(userTranslation);
             }
+            
+            // Log metrics
+            metricsService.logTranslationEvaluation(
+                promptLength, 
+                responseLength, 
+                latencyMs, 
+                true, 
+                null, 
+                (double) feedback.getScores().getOverallScore(),
+                null,
+                null
+            );
             
             return feedback;
         } catch (Exception e) {
+            long latencyMs = System.currentTimeMillis() - startTime;
             log.error("Error calling Groq API: {}", e.getMessage(), e);
+            
+            // Log failure metrics
+            metricsService.logTranslationEvaluation(
+                promptLength, 
+                0, 
+                latencyMs, 
+                false, 
+                e.getMessage(),
+                null,
+                null,
+                null
+            );
+            
             return createDefaultFeedback();
         }
     }
@@ -451,6 +483,8 @@ public class AIService {
     }
 
     public Map<String, String> translateWord(String word, String context) {
+        long startTime = System.currentTimeMillis();
+        
         String contextSection = "";
         if (context != null && !context.isEmpty()) {
             contextSection = String.format("""
@@ -484,6 +518,8 @@ public class AIService {
                 }
                 """, contextSection, word, word);
 
+        int promptLength = prompt.length();
+        
         Map<String, Object> requestBody = Map.of(
                 "model", groqConfig.getWordTranslation().getModel(),
                 "messages", List.of(
@@ -499,6 +535,9 @@ public class AIService {
                     .retrieve()
                     .bodyToMono(String.class)
                     .block();
+
+            long latencyMs = System.currentTimeMillis() - startTime;
+            int responseLength = response != null ? response.length() : 0;
 
             log.info("Groq API response for word '{}': {}", word, response);
 
@@ -520,9 +559,18 @@ public class AIService {
                     "example2Translation", translationNode.path("example2Translation").asText("")
             );
             log.info("Translation result: {}", result);
+            
+            // Log metrics
+            metricsService.logWordTranslation(promptLength, responseLength, latencyMs, true, null);
+            
             return result;
         } catch (Exception e) {
+            long latencyMs = System.currentTimeMillis() - startTime;
             log.error("Error translating word '{}': {}", word, e.getMessage(), e);
+            
+            // Log failure metrics
+            metricsService.logWordTranslation(promptLength, 0, latencyMs, false, e.getMessage());
+            
             return Map.of(
                     "word", word, 
                     "translation", "", 
@@ -533,5 +581,206 @@ public class AIService {
                     "example2Translation", ""
             );
         }
+    }
+
+    public String generateParagraph(Integer difficultyLevel, String targetLanguage, 
+                                    String errorSummary, String vocabSuggestions) {
+        return generateParagraph(difficultyLevel, targetLanguage, errorSummary, vocabSuggestions, null);
+    }
+
+    public String generateParagraph(Integer difficultyLevel, String targetLanguage, 
+                                    String errorSummary, String vocabSuggestions, String previousParagraph) {
+        // Retry up to 3 times if content validation fails
+        int maxRetries = 3;
+        for (int attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                String paragraph = generateParagraphInternal(difficultyLevel, targetLanguage, 
+                                                             errorSummary, vocabSuggestions, previousParagraph);
+                
+                // Validate content safety
+                if (isContentSafe(paragraph)) {
+                    return paragraph;
+                } else {
+                    log.warn("Generated content failed safety check (attempt {}/{})", attempt, maxRetries);
+                    if (attempt == maxRetries) {
+                        throw new RuntimeException("Content validation failed after " + maxRetries + " attempts");
+                    }
+                }
+            } catch (Exception e) {
+                log.error("Error generating paragraph (attempt {}/{}): {}", attempt, maxRetries, e.getMessage());
+                if (attempt == maxRetries) {
+                    throw new RuntimeException("Failed to generate paragraph after " + maxRetries + " attempts", e);
+                }
+            }
+        }
+        throw new RuntimeException("Failed to generate safe content");
+    }
+
+    private String generateParagraphInternal(Integer difficultyLevel, String targetLanguage,
+                                             String errorSummary, String vocabSuggestions, String previousParagraph) {
+        long startTime = System.currentTimeMillis();
+        String prompt = buildParagraphGenerationPrompt(difficultyLevel, targetLanguage, 
+                                                        errorSummary, vocabSuggestions, previousParagraph);
+        int promptLength = prompt.length();
+
+        Map<String, Object> requestBody = Map.of(
+                "model", groqConfig.getModel(),
+                "messages", List.of(
+                        Map.of("role", "system", "content", "You are a language learning content generator."),
+                        Map.of("role", "user", "content", prompt)
+                ),
+                "max_tokens", groqConfig.getMaxTokens(),
+                "temperature", groqConfig.getTemperature()
+        );
+
+        try {
+            String response = groqClient.post()
+                    .bodyValue(requestBody)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
+
+            long latencyMs = System.currentTimeMillis() - startTime;
+            int responseLength = response != null ? response.length() : 0;
+            String paragraph = extractParagraphFromResponse(response);
+            
+            // Log metrics
+            metricsService.logParagraphGeneration(promptLength, responseLength, latencyMs, true, null, difficultyLevel);
+            
+            return paragraph;
+        } catch (Exception e) {
+            long latencyMs = System.currentTimeMillis() - startTime;
+            log.error("Error generating paragraph: {}", e.getMessage(), e);
+            
+            // Log failure metrics
+            metricsService.logParagraphGeneration(promptLength, 0, latencyMs, false, e.getMessage(), difficultyLevel);
+            
+            throw new RuntimeException("Failed to generate paragraph", e);
+        }
+    }
+
+    private boolean isContentSafe(String content) {
+        if (content == null || content.trim().isEmpty()) {
+            return false;
+        }
+
+        String lowerContent = content.toLowerCase();
+        
+        // List of inappropriate keywords/patterns
+        String[] inappropriateKeywords = {
+            "violence", "weapon", "kill", "death", "die",
+            "hate", "racist", "discrimination",
+            "sexual", "porn", "nude",
+            "drug", "cocaine", "heroin",
+            "suicide", "self-harm",
+            "offensive", "profanity"
+        };
+
+        for (String keyword : inappropriateKeywords) {
+            if (lowerContent.contains(keyword)) {
+                log.warn("Content contains inappropriate keyword: {}", keyword);
+                return false;
+            }
+        }
+
+        // Check for excessive length (should be 4-6 sentences, roughly 50-300 words)
+        String[] words = content.split("\\s+");
+        if (words.length < 20 || words.length > 400) {
+            log.warn("Content length out of bounds: {} words", words.length);
+            return false;
+        }
+
+        // Check for valid Vietnamese characters and structure
+        if (!content.matches(".*[a-zA-ZÀ-ỹ].*")) {
+            log.warn("Content doesn't contain valid characters");
+            return false;
+        }
+
+        return true;
+    }
+
+    private String buildParagraphGenerationPrompt(Integer difficultyLevel, String targetLanguage,
+                                                   String errorSummary, String vocabSuggestions, 
+                                                   String previousParagraph) {
+        String difficultyDescription = getDifficultyDescription(difficultyLevel);
+        
+        StringBuilder prompt = new StringBuilder();
+        prompt.append("Generate a Vietnamese paragraph for English language learners.\n\n");
+        prompt.append("Requirements:\n");
+        prompt.append("- Difficulty: ").append(difficultyDescription).append(" (Level ").append(difficultyLevel).append("/10)\n");
+        prompt.append("- Length: 4-6 sentences\n");
+        prompt.append("- Topic: Daily life, culture, or current events\n");
+        prompt.append("- Target language: ").append(targetLanguage != null ? targetLanguage : "English").append("\n\n");
+        
+        // Add progressive difficulty instruction
+        prompt.append("IMPORTANT - Progressive Difficulty:\n");
+        if (difficultyLevel > 1) {
+            prompt.append("- Use SLIGHTLY MORE COMPLEX grammar than level ").append(difficultyLevel - 1).append("\n");
+            prompt.append("- Include longer sentences (add 1-2 more words per sentence)\n");
+            prompt.append("- Use more advanced verb tenses (");
+            if (difficultyLevel <= 3) {
+                prompt.append("present continuous, simple past");
+            } else if (difficultyLevel <= 5) {
+                prompt.append("past continuous, present perfect");
+            } else if (difficultyLevel <= 7) {
+                prompt.append("past perfect, conditional");
+            } else {
+                prompt.append("subjunctive, passive voice, relative clauses");
+            }
+            prompt.append(")\n");
+            prompt.append("- Introduce 2-3 new vocabulary words slightly above previous level\n\n");
+        }
+        
+        if (previousParagraph != null && !previousParagraph.isEmpty()) {
+            prompt.append("CONTEXT - Previous paragraph the learner practiced:\n");
+            prompt.append("\"").append(previousParagraph).append("\"\n");
+            prompt.append("→ Build upon this context with a related but slightly harder topic\n");
+            prompt.append("→ Avoid repeating the same sentences or exact vocabulary\n\n");
+        }
+        
+        if (errorSummary != null && !errorSummary.isEmpty()) {
+            prompt.append("LEARNER'S WEAKNESSES (focus on these areas):\n");
+            prompt.append(errorSummary).append("\n");
+            prompt.append("→ Create sentences that specifically practice these weak points\n\n");
+        }
+        
+        if (vocabSuggestions != null && !vocabSuggestions.isEmpty()) {
+            prompt.append("VOCABULARY WORDS TO INCLUDE:\n");
+            prompt.append(vocabSuggestions).append("\n");
+            prompt.append("→ Naturally incorporate these saved vocabulary words\n\n");
+        }
+        
+        prompt.append("Return ONLY the Vietnamese paragraph text, no explanations or additional formatting.");
+        
+        return prompt.toString();
+    }
+
+    private String getDifficultyDescription(Integer level) {
+        if (level <= 2) {
+            return "Very Easy - Simple present tense, basic vocabulary (A1)";
+        } else if (level <= 4) {
+            return "Easy - Basic tenses, common phrases (A2)";
+        } else if (level <= 6) {
+            return "Medium - Multiple tenses, everyday topics (B1)";
+        } else if (level <= 8) {
+            return "Hard - Complex grammar, abstract concepts (B2)";
+        } else {
+            return "Very Hard - Advanced structures, idiomatic expressions (C1)";
+        }
+    }
+
+    private String extractParagraphFromResponse(String response) throws JsonProcessingException {
+        JsonNode root = objectMapper.readTree(response);
+        JsonNode choices = root.get("choices");
+        
+        if (choices != null && choices.isArray() && choices.size() > 0) {
+            JsonNode message = choices.get(0).get("message");
+            if (message != null) {
+                String content = message.get("content").asText();
+                return content.trim();
+            }
+        }
+        
+        throw new RuntimeException("Invalid AI response format");
     }
 }

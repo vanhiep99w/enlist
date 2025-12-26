@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import { BookOpen, History } from 'lucide-react';
+import { BookOpen, History, LogOut, Trophy, Clock, Target } from 'lucide-react';
 import { toast } from 'sonner';
 import { ScoreBreakdown } from './ScoreBreakdown';
 import { FeedbackPanel } from './FeedbackPanel';
@@ -23,20 +23,30 @@ import {
   useSession,
   useSubmitSentenceTranslation,
   useSkipSentence,
+  useRandomSession,
+  useEndRandomSession,
 } from '../hooks/useSession';
+import { generateNextParagraph } from '../api/sessionApi';
 import type { SentenceSubmissionResponse, CompletedSentenceData } from '../types/session';
 import type { Achievement } from '../types/user';
 
 const SIDEBAR_COLLAPSED_KEY = 'sidebarCollapsed';
 
 interface Props {
-  paragraphId: number;
+  paragraphId?: number;
+  sessionId?: number;
+  randomSessionId?: number;
 }
 
-export function ParagraphSession({ paragraphId }: Props) {
+export function ParagraphSession({
+  paragraphId,
+  sessionId: providedSessionId,
+  randomSessionId,
+}: Props) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const textareaRef = useRef<AutoResizeTextareaRef>(null);
+  const isRandomMode = !!randomSessionId;
 
   // React Query hooks
   const createSessionMutation = useCreateSession();
@@ -49,6 +59,10 @@ export function ParagraphSession({ paragraphId }: Props) {
   } = useSession(sessionId || 0);
   const submitTranslationMutation = useSubmitSentenceTranslation();
   const skipSentenceMutation = useSkipSentence();
+
+  // Random session hooks
+  const { data: randomSession } = useRandomSession(randomSessionId || 0);
+  const endRandomSessionMutation = useEndRandomSession();
 
   // Local state
   const [userTranslation, setUserTranslation] = useState('');
@@ -76,6 +90,87 @@ export function ParagraphSession({ paragraphId }: Props) {
     return false;
   });
 
+  // Random Mode state
+  const [isGeneratingNext, setIsGeneratingNext] = useState(false);
+  const [nextGenError, setNextGenError] = useState<string | null>(null);
+  const [sessionStartTime] = useState(Date.now());
+  const isMountedRef = useRef(true);
+  const generationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Handle page refresh - persist state to sessionStorage
+  useEffect(() => {
+    if (!isRandomMode || !randomSessionId) return;
+
+    const storageKey = `random-session-${randomSessionId}`;
+
+    // Restore state on mount
+    const savedState = sessionStorage.getItem(storageKey);
+    if (savedState) {
+      try {
+        const { timestamp } = JSON.parse(savedState);
+        // Clear stale state (older than 1 hour)
+        if (Date.now() - timestamp > 3600000) {
+          sessionStorage.removeItem(storageKey);
+        }
+      } catch {
+        sessionStorage.removeItem(storageKey);
+      }
+    }
+
+    // Save state on unmount/refresh
+    const handleBeforeUnload = () => {
+      sessionStorage.setItem(
+        storageKey,
+        JSON.stringify({
+          timestamp: Date.now(),
+          paragraphId,
+        })
+      );
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [isRandomMode, randomSessionId, paragraphId]);
+
+  // Detect multiple tabs
+  useEffect(() => {
+    if (!isRandomMode || !randomSessionId) return;
+
+    const channelKey = `random-session-channel-${randomSessionId}`;
+    const channel = new BroadcastChannel(channelKey);
+
+    // Announce this tab's presence
+    channel.postMessage({ type: 'ping', tabId: sessionStartTime });
+
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data.type === 'ping' && event.data.tabId !== sessionStartTime) {
+        toast.warning('Multiple Tabs Detected', {
+          description: 'This session is open in another tab. Progress may conflict.',
+        });
+      }
+    };
+
+    channel.addEventListener('message', handleMessage);
+
+    return () => {
+      channel.close();
+    };
+  }, [isRandomMode, randomSessionId, sessionStartTime]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+
+      // Clear any pending generation timeout
+      if (generationTimeoutRef.current) {
+        clearTimeout(generationTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const error = sessionError?.message || null;
   const isSubmitting = submitTranslationMutation.isPending || skipSentenceMutation.isPending;
 
@@ -89,6 +184,15 @@ export function ParagraphSession({ paragraphId }: Props) {
 
   // Initialize session
   useEffect(() => {
+    // If sessionId is provided (random session), use it directly
+    if (providedSessionId) {
+      setSessionId(providedSessionId);
+      return;
+    }
+
+    // Otherwise create a new session
+    if (!paragraphId) return;
+
     const initSession = async () => {
       try {
         const newSession = await createSessionMutation.mutateAsync(paragraphId);
@@ -106,13 +210,51 @@ export function ParagraphSession({ paragraphId }: Props) {
     };
 
     initSession();
-  }, [paragraphId]);
+  }, [paragraphId, providedSessionId]);
 
   useEffect(() => {
     if (session && !isLoading && session.status !== 'COMPLETED') {
       textareaRef.current?.focus();
     }
   }, [isLoading, session?.status]);
+
+  // Auto-generate next paragraph in random mode when session completes
+  useEffect(() => {
+    if (isRandomMode && session?.status === 'COMPLETED' && randomSessionId && !isGeneratingNext) {
+      const autoGenerateNext = async () => {
+        setIsGeneratingNext(true);
+        try {
+          console.log('🎲 Generating next paragraph for random session:', randomSessionId);
+          const updatedSession = await generateNextParagraph(randomSessionId);
+          console.log('✅ Generated session:', updatedSession);
+          console.log('📝 Current paragraph:', updatedSession.currentParagraph);
+
+          if (updatedSession.currentParagraph?.paragraphSessionId) {
+            const newSessionId = updatedSession.currentParagraph.paragraphSessionId;
+            console.log('➡️ Navigating to new paragraph session:', newSessionId);
+
+            // Navigate to the new paragraph session
+            navigate({
+              to: '/session/$paragraphId',
+              params: { paragraphId: String(newSessionId) },
+              search: { randomSessionId },
+            });
+          } else {
+            console.error('❌ No paragraphSessionId in current paragraph');
+          }
+        } catch (err) {
+          console.error('Failed to generate next paragraph:', err);
+          toast.error('Failed to load next paragraph');
+        } finally {
+          setIsGeneratingNext(false);
+        }
+      };
+
+      // Small delay to show completion animation
+      const timeout = setTimeout(autoGenerateNext, 1500);
+      return () => clearTimeout(timeout);
+    }
+  }, [session?.status, isRandomMode, randomSessionId, isGeneratingNext, navigate]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -249,6 +391,92 @@ export function ParagraphSession({ paragraphId }: Props) {
       }
     } catch (err) {
       toast.error('Failed to submit translation', {
+        description: err instanceof Error ? err.message : 'Unknown error',
+      });
+    }
+  };
+
+  const handleGenerateNextParagraph = async () => {
+    if (!isRandomMode || !randomSessionId) return;
+    if (isGeneratingNext) return;
+
+    try {
+      setIsGeneratingNext(true);
+      setNextGenError(null);
+
+      // Set timeout to prevent stuck loading (30 seconds)
+      generationTimeoutRef.current = setTimeout(() => {
+        if (isMountedRef.current && isGeneratingNext) {
+          setNextGenError('Generation timeout');
+          setIsGeneratingNext(false);
+          toast.error('Generation Timeout', {
+            description: 'Taking too long. Please try again.',
+          });
+        }
+      }, 30000);
+
+      const nextSession = await generateNextParagraph(randomSessionId);
+
+      // Clear timeout on success
+      if (generationTimeoutRef.current) {
+        clearTimeout(generationTimeoutRef.current);
+        generationTimeoutRef.current = null;
+      }
+
+      if (!isMountedRef.current) return;
+
+      if (nextSession.currentParagraph?.paragraphSessionId) {
+        // Check if using fallback content
+        const isFallback =
+          nextSession.currentParagraph.paragraphTitle?.includes('AI Generated') === false;
+        if (isFallback) {
+          toast.info('Using Curated Content', {
+            description: 'AI generation unavailable, selected from our paragraph library',
+          });
+        }
+
+        navigate({
+          to: '/session/$paragraphId',
+          params: { paragraphId: String(nextSession.currentParagraph.paragraphSessionId) },
+          search: { randomSessionId },
+        });
+      } else {
+        throw new Error('No next paragraph available');
+      }
+    } catch (err) {
+      // Clear timeout on error
+      if (generationTimeoutRef.current) {
+        clearTimeout(generationTimeoutRef.current);
+        generationTimeoutRef.current = null;
+      }
+
+      if (!isMountedRef.current) return;
+
+      const errorMessage = err instanceof Error ? err.message : 'Failed to generate next paragraph';
+      setNextGenError(errorMessage);
+
+      // Suggest trying again or returning to practice mode
+      toast.error('Generation Failed', {
+        description: `${errorMessage}. Please try again or return to practice mode.`,
+      });
+    } finally {
+      if (isMountedRef.current) {
+        setIsGeneratingNext(false);
+      }
+    }
+  };
+
+  const handleEndRandomSession = async () => {
+    if (!randomSessionId) return;
+
+    try {
+      await endRandomSessionMutation.mutateAsync(randomSessionId);
+      toast.success('Session Ended', {
+        description: 'Your progress has been saved',
+      });
+      navigate({ to: '/random-session' });
+    } catch (err) {
+      toast.error('Failed to end session', {
         description: err instanceof Error ? err.message : 'Unknown error',
       });
     }
@@ -604,6 +832,60 @@ export function ParagraphSession({ paragraphId }: Props) {
           onComplete={() => setShowSuccessAnimation(false)}
         />
 
+        {/* Random Mode Header */}
+        {isRandomMode && randomSession && (
+          <div
+            className="sticky top-0 z-40 border-b"
+            style={{
+              backgroundColor: 'var(--color-surface)',
+              borderColor: 'var(--color-border)',
+            }}
+          >
+            <div className="mx-auto max-w-7xl px-4 py-3">
+              <div className="flex items-center justify-between gap-4">
+                {/* Left: Session stats */}
+                <div className="flex items-center gap-4 text-sm">
+                  <div className="flex items-center gap-2">
+                    <Target className="h-4 w-4" style={{ color: 'var(--color-primary)' }} />
+                    <span style={{ color: 'var(--color-text-secondary)' }}>Difficulty:</span>
+                    <span className="font-bold" style={{ color: 'var(--color-primary)' }}>
+                      {randomSession.currentDifficulty}/10
+                    </span>
+                  </div>
+                  <div className="hidden items-center gap-2 sm:flex">
+                    <Trophy className="h-4 w-4" style={{ color: 'var(--color-accent)' }} />
+                    <span style={{ color: 'var(--color-text-secondary)' }}>Completed:</span>
+                    <span className="font-bold" style={{ color: 'var(--color-accent)' }}>
+                      {randomSession.totalParagraphsCompleted}
+                    </span>
+                  </div>
+                  <div className="hidden items-center gap-2 md:flex">
+                    <Clock className="h-4 w-4" style={{ color: 'var(--color-success)' }} />
+                    <span style={{ color: 'var(--color-text-secondary)' }}>Time:</span>
+                    <span className="font-bold" style={{ color: 'var(--color-success)' }}>
+                      {Math.floor((Date.now() - sessionStartTime) / 60000)}m
+                    </span>
+                  </div>
+                </div>
+
+                {/* Right: End Session button */}
+                <button
+                  onClick={handleEndRandomSession}
+                  disabled={endRandomSessionMutation.isPending}
+                  className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all hover:opacity-80 disabled:opacity-50"
+                  style={{
+                    backgroundColor: 'var(--color-error)',
+                    color: 'white',
+                  }}
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span className="hidden sm:inline">End Session</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Compact Header */}
         <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--color-border)' }}>
           <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
@@ -677,44 +959,91 @@ export function ParagraphSession({ paragraphId }: Props) {
         {/* Main Content */}
         <div className="mx-auto max-w-7xl px-4 py-2">
           {session.status === 'COMPLETED' ? (
-            <div
-              className="rounded-lg p-8 text-center"
-              style={{ backgroundColor: 'var(--color-surface)' }}
-            >
-              <div className="mb-4 text-6xl">🎉</div>
-              <h2
-                className="mb-2 text-2xl font-bold"
-                style={{ color: 'var(--color-text-primary)' }}
+            isRandomMode ? (
+              // Random mode: Show loading state for next paragraph
+              <div
+                className="rounded-lg p-8 text-center"
+                style={{ backgroundColor: 'var(--color-surface)' }}
               >
-                Session Complete!
-              </h2>
-              <p className="mb-6" style={{ color: 'var(--color-text-secondary)' }}>
-                You've completed all {session.totalSentences} sentences
-              </p>
-              <div className="mb-6 flex justify-center gap-8">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-yellow-400">{session.totalPoints}</div>
-                  <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                    Total Points
+                <div className="mb-4 text-6xl">🎉</div>
+                <h2
+                  className="mb-2 text-2xl font-bold"
+                  style={{ color: 'var(--color-text-primary)' }}
+                >
+                  Great Job!
+                </h2>
+                <p className="mb-6" style={{ color: 'var(--color-text-secondary)' }}>
+                  Preparing your next challenge...
+                </p>
+                <div className="mb-6 flex justify-center gap-8">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-yellow-400">{session.totalPoints}</div>
+                    <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                      Total Points
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-green-400">
+                      {session.averageAccuracy.toFixed(1)}%
+                    </div>
+                    <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                      Average Accuracy
+                    </div>
                   </div>
                 </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-green-400">
-                    {session.averageAccuracy.toFixed(1)}%
-                  </div>
-                  <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                    Average Accuracy
-                  </div>
+                <div className="flex items-center justify-center gap-2">
+                  <div className="h-2 w-2 animate-bounce rounded-full bg-blue-500"></div>
+                  <div
+                    className="h-2 w-2 animate-bounce rounded-full bg-blue-500"
+                    style={{ animationDelay: '0.2s' }}
+                  ></div>
+                  <div
+                    className="h-2 w-2 animate-bounce rounded-full bg-blue-500"
+                    style={{ animationDelay: '0.4s' }}
+                  ></div>
                 </div>
               </div>
-              <button
-                onClick={() => navigate({ to: '/paragraphs' })}
-                className="rounded-lg bg-blue-600 px-6 py-3 font-medium hover:bg-blue-700"
-                style={{ color: 'var(--color-text-primary)' }}
+            ) : (
+              // Normal mode: Show completion screen
+              <div
+                className="rounded-lg p-8 text-center"
+                style={{ backgroundColor: 'var(--color-surface)' }}
               >
-                Back to Paragraphs
-              </button>
-            </div>
+                <div className="mb-4 text-6xl">🎉</div>
+                <h2
+                  className="mb-2 text-2xl font-bold"
+                  style={{ color: 'var(--color-text-primary)' }}
+                >
+                  Session Complete!
+                </h2>
+                <p className="mb-6" style={{ color: 'var(--color-text-secondary)' }}>
+                  You've completed all {session.totalSentences} sentences
+                </p>
+                <div className="mb-6 flex justify-center gap-8">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-yellow-400">{session.totalPoints}</div>
+                    <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                      Total Points
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-green-400">
+                      {session.averageAccuracy.toFixed(1)}%
+                    </div>
+                    <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                      Average Accuracy
+                    </div>
+                  </div>
+                </div>
+                <button
+                  onClick={() => navigate({ to: '/paragraphs' })}
+                  className="rounded-lg bg-blue-600 px-6 py-3 font-medium hover:bg-blue-700"
+                  style={{ color: 'var(--color-text-primary)' }}
+                >
+                  Back to Paragraphs
+                </button>
+              </div>
+            )
           ) : (
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               {/* Left Column - Exercise (Redesigned for long content) */}
@@ -1422,6 +1751,10 @@ export function ParagraphSession({ paragraphId }: Props) {
             sessionId={sessionId}
             isOpen={showSummary}
             onClose={() => setShowSummary(false)}
+            onContinue={isRandomMode ? handleGenerateNextParagraph : undefined}
+            isProcessingNext={isRandomMode && isGeneratingNext}
+            processingLabel="Generating next paragraph..."
+            errorMessage={isRandomMode ? nextGenError : null}
           />
         )}
 

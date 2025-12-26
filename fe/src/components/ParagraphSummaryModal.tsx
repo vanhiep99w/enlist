@@ -1,14 +1,35 @@
 import { useEffect, useState } from 'react';
 import { X, CheckCircle2, AlertTriangle, Zap, TrendingUp, Award } from 'lucide-react';
 import { useSessionSummary } from '../hooks/useSession';
+import { AdaptationFeedback } from './AdaptationFeedback';
 
 interface Props {
   sessionId: number;
   isOpen: boolean;
   onClose: () => void;
+  onContinue?: () => void;
+  isProcessingNext?: boolean;
+  processingLabel?: string;
+  errorMessage?: string | null;
+  adaptationData?: {
+    previousDifficulty: number;
+    currentDifficulty: number;
+    previousAccuracy: number;
+    errorSummary?: string;
+    vocabTargeted?: string;
+  };
 }
 
-export function ParagraphSummaryModal({ sessionId, isOpen, onClose }: Props) {
+export function ParagraphSummaryModal({
+  sessionId,
+  isOpen,
+  onClose,
+  onContinue,
+  isProcessingNext = false,
+  processingLabel = 'Generating next paragraph...',
+  errorMessage,
+  adaptationData,
+}: Props) {
   const [isVisible, setIsVisible] = useState(false);
   const { data: summary, isLoading, error } = useSessionSummary(sessionId);
 
@@ -338,11 +359,30 @@ export function ParagraphSummaryModal({ sessionId, isOpen, onClose }: Props) {
             </div>
           )}
 
+          {/* Adaptation Feedback for Random Mode */}
+          {adaptationData && onContinue && (
+            <div className="mb-6">
+              <AdaptationFeedback
+                previousDifficulty={adaptationData.previousDifficulty}
+                currentDifficulty={adaptationData.currentDifficulty}
+                previousAccuracy={adaptationData.previousAccuracy}
+                errorSummary={adaptationData.errorSummary}
+                vocabTargeted={adaptationData.vocabTargeted}
+              />
+            </div>
+          )}
+
           {/* Action button */}
-          <div className="mt-6 flex justify-center">
+          <div className="mt-6 flex flex-col items-center gap-3">
+            {errorMessage && (
+              <p className="text-sm" style={{ color: 'var(--color-error)' }}>
+                {errorMessage}
+              </p>
+            )}
             <button
-              onClick={handleClose}
-              className="group relative overflow-hidden rounded-xl px-8 py-3 font-bold text-white transition-all hover:scale-105"
+              onClick={() => (onContinue ? onContinue() : handleClose())}
+              disabled={isProcessingNext}
+              className="group relative overflow-hidden rounded-xl px-8 py-3 font-bold text-white transition-all hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
               style={{
                 background: `linear-gradient(135deg, ${grade.color} 0%, ${grade.color}dd 100%)`,
               }}
@@ -350,7 +390,7 @@ export function ParagraphSummaryModal({ sessionId, isOpen, onClose }: Props) {
               <div className="absolute inset-0 -translate-x-full bg-white/20 transition-transform group-hover:translate-x-full" />
               <span className="relative flex items-center gap-2">
                 <Zap className="h-4 w-4" />
-                Continue
+                {isProcessingNext ? processingLabel : 'Continue'}
               </span>
             </button>
           </div>

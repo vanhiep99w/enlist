@@ -12,6 +12,8 @@ public interface SentenceSubmissionRepository extends JpaRepository<SentenceSubm
 
     List<SentenceSubmission> findBySessionId(Long sessionId);
 
+    List<SentenceSubmission> findBySessionIdOrderBySentenceIndexAsc(Long sessionId);
+
     List<SentenceSubmission> findBySessionIdAndSentenceIndex(Long sessionId, Integer sentenceIndex);
 
     Optional<SentenceSubmission> findTopBySessionIdAndSentenceIndexOrderBySubmittedAtDesc(Long sessionId, Integer sentenceIndex);
